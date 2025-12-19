@@ -78,7 +78,7 @@
         <input type="text" id="loginUser" placeholder="Username">
         <div id="regArea" class="hidden"><input type="email" id="regEmail" placeholder="Email Address"></div>
         <input type="password" id="authPass" placeholder="Password">
-        <button id="authBtn" onclick="handleAuth()">Enter Game</button>
+        <button onclick="handleAuth()">Enter Game</button>
         <p style="text-align:center; margin-top:20px;"><a href="javascript:void(0)" onclick="toggleAuthMode()" style="color:#6366f1; font-weight:800;">Switch Login/Register</a></p>
     </div>
 
@@ -137,8 +137,7 @@
             <div class="chest-card">
                 <div class="chest-icon">📦</div>
                 <h3>MYSTERY CHEST</h3>
-                <p style="font-size: 16px; font-weight:700; opacity: 0.9; margin-bottom: 5px;" id="chestCounter">Unlocked: 0/10</p>
-                <p style="font-size: 14px; opacity: 0.8; margin-bottom: 15px;">Get a random orb earning $1-$500 every 5s</p>
+                <p style="font-size: 16px; font-weight:700; opacity: 0.9; margin-bottom: 15px;">Unlock a random orb earning $1-$500 every 5s</p>
                 <button onclick="buyChest()" id="chestBtn" style="background: #fbbf24; color: #1e293b; border: none; font-size: 20px;">BUY CHEST ($100)</button>
             </div>
             <h3 style="text-align:center; color:#f59e0b; margin-bottom:15px;">💎 HYPER RARE MARKET</h3>
@@ -221,29 +220,13 @@
 
     const updateUI = () => {
         if (!userData) return;
-        const chestCount = userData.mysteryOrbs ? userData.mysteryOrbs.length : 0;
-        
         document.getElementById('userBal').innerText = Math.floor(userData.balance || 0).toLocaleString();
         document.getElementById('userDisplay').innerText = "@" + userData.username;
         document.getElementById('userPfp').src = `https://api.dicebear.com/7.x/identicon/svg?seed=${userData.pfpSeed || userData.username}`;
         document.getElementById('clickPowerVal').innerText = getPower(userData.clickLevel || 1).toLocaleString();
         document.getElementById('clickCost').innerText = ((userData.clickLevel || 1) * 200).toLocaleString();
         document.getElementById('upgradeClickBtn').className = (userData.balance >= (userData.clickLevel * 200)) ? "btn-available" : "btn-locked";
-        
-        const cBtn = document.getElementById('chestBtn');
-        const cCountEl = document.getElementById('chestCounter');
-        cCountEl.innerText = `Unlocked: ${chestCount}/10`;
-        
-        if(chestCount >= 10) {
-            cBtn.innerText = "LIMIT REACHED";
-            cBtn.className = "buy-btn btn-locked";
-            cBtn.style.opacity = "1";
-        } else {
-            cBtn.innerText = "BUY CHEST ($100)";
-            cBtn.className = "buy-btn";
-            cBtn.style.background = "#fbbf24";
-            cBtn.style.opacity = (userData.balance >= 100) ? "1" : "0.5";
-        }
+        document.getElementById('chestBtn').style.opacity = (userData.balance >= 100) ? "1" : "0.5";
     };
 
     const getPower = (lvl) => [1, 5, 25, 50, 100, 250, 500, 1000, 2500, 5000][lvl-1] || lvl * 500;
@@ -254,13 +237,14 @@
         const grid = document.getElementById(gridId);
         grid.innerHTML = '';
 
+        // RENDERING MYSTERY ORBS FIRST (NEWEST TO OLDEST)
         if (gridId === 'marketOrbGrid' && userData.mysteryOrbs) {
-            [...userData.mysteryOrbs].reverse().forEach((mOrb) => {
+            [...userData.mysteryOrbs].reverse().forEach((mOrb, reverseIdx) => {
+                // Find actual index for progress bar sync
                 const actualIdx = userData.mysteryOrbs.indexOf(mOrb);
                 const div = document.createElement('div');
                 div.className = 'orb-item';
                 div.innerHTML = `
-                    <div class="orb-stats-top"><button onclick="sellMystery(${actualIdx})" class="sell-btn">SELL $50</button></div>
                     <div class="orb-visual" style="color:${mOrb.color || '#fbbf24'}; background:currentColor"></div>
                     <b style="font-size:18px;">${mOrb.name}</b>
                     <div style="font-size:14px; margin:8px 0; font-weight:800; color:#10b981">+$${mOrb.inc}/5s</div>
@@ -317,37 +301,15 @@
     }
 
     window.buyChest = async () => {
-        if(!userData) return;
-        if(userData.mysteryOrbs && userData.mysteryOrbs.length >= 10) return alert("LIMIT REACHED!");
-        if(userData.balance < 100) return alert("NOT ENOUGH CASH!");
-        
+        if(!userData || userData.balance < 100) return alert("NOT ENOUGH CASH!");
         const adjectives = ["Ancient", "Pulsing", "Radiant", "Shadow", "Mystic", "Cursed", "Solar", "Lunar", "Glitch", "Frozen", "Neon", "Blazing"];
         const elements = ["Lava", "Water", "Earth", "Air", "Cosmic", "Void", "Storm", "Spirit", "Metal", "Venom", "Plasma", "Crystal"];
         const colors = ["#ef4444", "#3b82f6", "#10b981", "#f59e0b", "#8b5cf6", "#ec4899", "#06b6d4", "#f8fafc", "#475569", "#fbbf24"];
         const randName = adjectives[Math.floor(Math.random()*adjectives.length)] + " " + elements[Math.floor(Math.random()*elements.length)] + " Orb";
         const randColor = colors[Math.floor(Math.random()*colors.length)];
         const randInc = Math.floor(Math.random() * 500) + 1;
-        
         await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-100), mysteryOrbs: arrayUnion({ name: randName, inc: randInc, color: randColor, lastClaim: Date.now() }) });
         alert(`UNBOXED: ${randName} (+$${randInc}/5s)`);
-    };
-
-    window.sellMystery = async (index) => {
-        if(!userData || !userData.mysteryOrbs) return;
-        if(!confirm("Sell this orb for $50?")) return;
-        
-        const updatedOrbs = [...userData.mysteryOrbs];
-        updatedOrbs.splice(index, 1);
-        
-        if(window['mystery_'+index+'_timer']) {
-            clearInterval(window['mystery_'+index+'_timer']);
-            delete window['mystery_'+index+'_timer'];
-        }
-
-        await updateDoc(doc(db, "users", auth.currentUser.uid), { 
-            balance: increment(50), 
-            mysteryOrbs: updatedOrbs 
-        });
     };
 
     window.buyOrb = async (id, cost) => { if(userData && (userData.orbs?.[id] || 0) < 100 && userData.balance >= cost) await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-cost), [`orbs.${id}`]: increment(1) }); };
@@ -363,73 +325,34 @@
         document.body.appendChild(pop); setTimeout(() => pop.remove(), 1200);
     });
 
-    // FIXED AUTH FUNCTION
     window.handleAuth = async () => {
         const userNm = document.getElementById('loginUser').value.trim().toLowerCase();
         const pass = document.getElementById('authPass').value;
-        const btn = document.getElementById('authBtn');
-        btn.innerText = "Processing...";
-        
         try {
             if(isReg) {
-                const email = document.getElementById('regEmail').value.trim();
+                const email = document.getElementById('regEmail').value;
                 const res = await createUserWithEmailAndPassword(auth, email, pass);
-                await setDoc(doc(db, "users", res.user.uid), { 
-                    username: userNm, email, balance: 1000, orbs: {}, 
-                    clickLevel: 1, totalClicks: 0, pfpSeed: userNm, mysteryOrbs: [] 
-                });
+                await setDoc(doc(db, "users", res.user.uid), { username: userNm, email, balance: 1000, orbs: {}, clickLevel: 1, totalClicks: 0, pfpSeed: userNm, mysteryOrbs: [] });
             } else {
-                // Perform user lookup by fetching ALL usernames to find the email
-                // Note: In production, consider a cloud function for better security
-                const usersCol = collection(db, "users");
-                const q = query(usersCol, where("username", "==", userNm));
-                const snapshot = await getDocs(q);
-                
-                if(snapshot.empty) throw new Error("USER NOT FOUND");
-                
-                const targetEmail = snapshot.docs[0].data().email;
-                await signInWithEmailAndPassword(auth, targetEmail, pass);
+                const s = await getDocs(query(collection(db, "users"), where("username", "==", userNm)));
+                if(s.empty) throw new Error("USER NOT FOUND");
+                await signInWithEmailAndPassword(auth, s.docs[0].data().email, pass);
             }
-        } catch (e) { 
-            alert(e.message); 
-            btn.innerText = "Enter Game";
-        }
+        } catch (e) { alert(e.message); }
     };
 
-    // FIXED SEND FUNCTION
     window.sendAction = async (type) => {
-        const toInput = type === 'text' ? 'msgTo' : 'payTo';
-        const rawTo = document.getElementById(toInput).value.trim();
-        const to = rawTo.startsWith('@') ? rawTo.slice(1).toLowerCase() : rawTo.toLowerCase();
+        const to = document.getElementById(type === 'text' ? 'msgTo' : 'payTo').value.trim().toLowerCase();
         const amt = type === 'money' ? parseFloat(document.getElementById('payAmt').value || 0) : 0;
-        
-        if(!to) return alert("Enter a username");
-
-        try {
-            const s = await getDocs(query(collection(db, "users"), where("username", "==", to)));
-            if(s.empty) return alert("USER NOT FOUND");
-            
-            const targetId = s.docs[0].id;
-
-            if(type === 'money') {
-                if(userData.balance < amt || amt <= 0) return alert("INVALID AMOUNT");
-                await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-amt) });
-                await updateDoc(doc(db, "users", targetId), { balance: increment(amt) });
-            }
-
-            await addDoc(collection(db, "messages"), { 
-                to, 
-                from: userData.username, 
-                body: type === 'money' ? `Sent you $${amt.toLocaleString()}` : document.getElementById('msgBody').value, 
-                date: Date.now() 
-            });
-
-            alert("SENT!");
-            document.getElementById(toInput).value = "";
-            if(type === 'text') document.getElementById('msgBody').value = "";
-            if(type === 'money') document.getElementById('payAmt').value = "";
-            
-        } catch (e) { alert("Error: " + e.message); }
+        const s = await getDocs(query(collection(db, "users"), where("username", "==", to)));
+        if(s.empty) return alert("USER NOT FOUND");
+        if(type === 'money') {
+            if(userData.balance < amt) return alert("NO CASH");
+            await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-amt) });
+            await updateDoc(doc(db, "users", s.docs[0].id), { balance: increment(amt) });
+        }
+        await addDoc(collection(db, "messages"), { to, from: userData.username, body: type === 'money' ? `Sent $${amt}` : document.getElementById('msgBody').value, date: Date.now() });
+        alert("SENT!");
     };
 
     window.showTab = (t) => {
@@ -441,28 +364,13 @@
     };
 
     const loadInbox = () => {
-        const qLatest = query(collection(db, "messages"), where("to", "==", userData.username), orderBy("date", "desc"), limit(1));
-        onSnapshot(qLatest, s => {
+        onSnapshot(query(collection(db, "messages"), where("to", "==", userData.username), orderBy("date", "desc"), limit(1)), s => {
             if (initialMailLoad) { initialMailLoad = false; return; }
-            if (!s.empty) { 
-                const b = document.getElementById('notifBanner'); 
-                document.getElementById('notifText').innerText = `@${s.docs[0].data().from} sent mail!`; 
-                b.classList.add('active'); 
-                setTimeout(() => b.classList.remove('active'), 5000); 
-            }
+            if (!s.empty) { const b = document.getElementById('notifBanner'); document.getElementById('notifText').innerText = `@${s.docs[0].data().from} sent mail!`; b.classList.add('active'); setTimeout(() => b.classList.remove('active'), 5000); }
         });
-        
-        const qAll = query(collection(db, "messages"), where("to", "==", userData.username), orderBy("date", "desc"));
-        onSnapshot(qAll, s => {
+        onSnapshot(query(collection(db, "messages"), where("to", "==", userData.username), orderBy("date", "desc")), s => {
             document.getElementById('mailBox').innerHTML = s.docs.map(d => `<div class="msg-card"><b>@${d.data().from}</b><p>${d.data().body}</p></div>`).join('') || "NO MESSAGES.";
         });
-    };
-
-    window.clearInbox = async () => {
-        if(!confirm("Clear all mail?")) return;
-        const q = query(collection(db, "messages"), where("to", "==", userData.username));
-        const s = await getDocs(q);
-        s.forEach(async (d) => await deleteDoc(doc(db, "messages", d.id)));
     };
 
     setInterval(() => {
@@ -481,12 +389,7 @@
             userData.mysteryOrbs.forEach((mOrb, idx) => {
                 if(!window['mystery_'+idx+'_timer']) {
                     window['mystery_'+idx+'_start'] = Date.now();
-                    window['mystery_'+idx+'_timer'] = setInterval(() => { 
-                        if(userData.mysteryOrbs[idx]) {
-                           updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(userData.mysteryOrbs[idx].inc) }); 
-                           window['mystery_'+idx+'_start'] = Date.now(); 
-                        }
-                    }, 5000);
+                    window['mystery_'+idx+'_timer'] = setInterval(() => { updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(mOrb.inc) }); window['mystery_'+idx+'_start'] = Date.now(); }, 5000);
                 }
                 const bar = document.getElementById(`bar-mystery-${idx}`);
                 if(bar) bar.style.width = Math.min(((Date.now() - window['mystery_'+idx+'_start']) / 5000) * 100, 100) + "%";
