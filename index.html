@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MailCash | Gaming & Finance</title>
+    <title>MailCash | Username Access</title>
     <style>
+        /* --- RESTORING YOUR ORIGINAL CSS --- */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', -apple-system, sans-serif; background: #0f172a; color: #f8fafc; padding: 20px; }
         .container { max-width: 600px; margin: 0 auto; }
@@ -16,9 +17,7 @@
         .card { background: #1e293b; border-radius: 16px; padding: 25px; border: 1px solid #334155; margin-bottom: 20px; }
         .hidden { display: none !important; }
         input, textarea { width: 100%; padding: 14px; background: #0f172a; border: 1px solid #334155; border-radius: 10px; color: white; margin-bottom: 12px; outline: none; font-size: 16px; }
-        button { width: 100%; padding: 14px; background: #6366f1; color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; transition: 0.2s; }
-        button:active { transform: scale(0.98); }
-        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        button { width: 100%; padding: 14px; background: #6366f1; color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; }
         
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
         .balance-pill { background: #064e3b; color: #34d399; padding: 12px 24px; border-radius: 50px; font-weight: 800; border: 1px solid #059669; }
@@ -28,18 +27,14 @@
         .tab { flex: 1; text-align: center; padding: 12px; cursor: pointer; border-radius: 10px; color: #94a3b8; font-weight: 700; }
         .tab.active { background: #334155; color: white; }
 
-        /* CASINO STYLES */
-        .game-area { text-align: center; padding: 20px; background: #0f172a; border-radius: 12px; margin-bottom: 15px; border: 1px solid #334155; position: relative; overflow: hidden; }
-        
-        /* Coin Flip */
-        .coin { width: 60px; height: 60px; background: gold; border-radius: 50%; margin: 0 auto; display: flex; align-items: center; justify-content: center; color: #b45309; font-weight: 900; border: 4px solid #f59e0b; transition: 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .msg-card { background: #1e293b; padding: 18px; border-radius: 14px; margin-bottom: 12px; border: 1px solid #334155; border-left: 5px solid #6366f1; }
+        .cash-tag { display: inline-block; background: #064e3b; color: #34d399; padding: 4px 10px; border-radius: 6px; font-size: 12px; margin-top: 10px; font-weight: 800; }
+
+        /* --- CASINO ANIMATION STYLES --- */
+        .game-area { text-align: center; padding: 20px; background: #0f172a; border-radius: 12px; margin-bottom: 15px; border: 1px solid #334155; }
+        .coin { width: 60px; height: 60px; background: gold; border-radius: 50%; margin: 0 auto; display: flex; align-items: center; justify-content: center; color: #b45309; font-weight: 900; border: 4px solid #f59e0b; }
         .flipping { animation: flip-anim 0.2s infinite; }
         @keyframes flip-anim { 0% { transform: rotateX(0deg); } 100% { transform: rotateX(180deg); } }
-
-        /* Roulette */
-        .wheel { width: 100px; height: 100px; border-radius: 50%; border: 8px solid #334155; margin: 0 auto; transition: transform 3s cubic-bezier(0.1, 0, 0.1, 1); background: conic-gradient(red 0% 45%, black 45% 90%, #10b981 90% 100%); }
-
-        /* Blackjack */
         .hand { display: flex; gap: 5px; justify-content: center; margin-top: 10px; min-height: 80px; }
         .playing-card { width: 50px; height: 75px; background: white; border-radius: 5px; color: black; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 2px solid #cbd5e1; animation: deal-in 0.3s ease-out; }
         @keyframes deal-in { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -53,30 +48,47 @@
     <div id="authScreen" class="card">
         <h2 id="authTitle" style="margin-bottom: 20px;">MailCash Login</h2>
         <input type="text" id="loginUser" placeholder="Username">
-        <div id="regArea" class="hidden"><input type="email" id="regEmail" placeholder="Email Address"></div>
+        <div id="regArea" class="hidden">
+            <input type="email" id="regEmail" placeholder="Email Address (Required for recovery)">
+        </div>
         <input type="password" id="authPass" placeholder="Password">
         <button id="authBtn" onclick="handleAuth()">Sign In</button>
-        <p style="text-align: center; margin-top: 18px; font-size: 14px;"><a href="javascript:void(0)" onclick="toggleAuth()" id="toggleLink" style="color:#818cf8; text-decoration: none;">New here? Create an account</a></p>
+        <p style="text-align: center; margin-top: 18px; font-size: 14px;">
+            <a href="javascript:void(0)" onclick="toggleAuth()" id="toggleLink" style="color:#818cf8; text-decoration: none;">New here? Create an account</a>
+        </p>
     </div>
 
     <div id="appScreen" class="hidden">
         <div class="header">
-            <div><p id="userDisplay" style="color:#fff; font-weight: 900; font-size: 1.4rem;">@loading...</p><button class="logout-btn" onclick="logout()">LOGOUT</button></div>
+            <div>
+                <p id="userDisplay" style="color:#fff; font-weight: 900; font-size: 1.4rem;">@loading...</p>
+                <button class="logout-btn" onclick="logout()">LOGOUT</button>
+            </div>
             <div class="balance-pill">$<span id="userBal">0.00</span></div>
         </div>
 
         <div class="tabs">
-            <div id="tIn" class="tab active" onclick="showTab('inbox')">Mail</div>
-            <div id="tPay" class="tab" onclick="showTab('transfer')">Send</div>
-            <div id="tPlay" class="tab" onclick="showTab('casino')">Casino</div>
+            <div id="tIn" class="tab active" onclick="showTab('inbox')">Inbox</div>
+            <div id="tMsg" class="tab" onclick="showTab('message')">Message</div>
+            <div id="tPay" class="tab" onclick="showTab('transfer')">Transfer</div>
+            <div id="tCasino" class="tab" onclick="showTab('casino')">Casino</div>
         </div>
 
         <div id="inboxView" class="tab-view"><div id="mailBox">Loading...</div></div>
 
+        <div id="messageView" class="tab-view hidden card">
+            <h3>New Message</h3>
+            <input type="text" id="msgTo" placeholder="Recipient @username">
+            <input type="text" id="msgSub" placeholder="Subject">
+            <textarea id="msgBody" rows="5" placeholder="Message..."></textarea>
+            <button onclick="sendAction('text')">Send Message</button>
+        </div>
+
         <div id="transferView" class="tab-view hidden card">
-            <h3>Transfer</h3>
+            <h3>Execute Transfer</h3>
             <input type="text" id="payTo" placeholder="Recipient @username">
             <input type="number" id="payAmt" placeholder="Amount ($)">
+            <input type="text" id="payNote" placeholder="Note (Optional)">
             <button onclick="sendAction('money')" style="background: #10b981;">Send Funds</button>
         </div>
 
@@ -86,13 +98,13 @@
                 <div class="game-area">
                     <div id="dealerHand" class="hand"></div>
                     <div id="playerHand" class="hand" style="margin-top:20px;"></div>
-                    <p id="bjStatus" style="margin-top:10px; font-weight:bold; color:#818cf8;">Place your bet to start</p>
+                    <p id="bjStatus" style="margin-top:10px; font-weight:bold; color:#818cf8;">Enter bet to play</p>
                 </div>
                 <input type="number" id="bjBet" placeholder="Bet Amount ($)">
                 <div style="display:flex; gap:10px;">
-                    <button id="bjDeal" onclick="playBJ('deal')">Deal</button>
-                    <button id="bjHit" class="hidden" onclick="playBJ('hit')">Hit</button>
-                    <button id="bjStand" class="hidden" onclick="playBJ('stand')" style="background:#475569;">Stand</button>
+                    <button id="bjDealBtn" onclick="playBJ('deal')">Deal</button>
+                    <button id="bjHitBtn" class="hidden" onclick="playBJ('hit')">Hit</button>
+                    <button id="bjStandBtn" class="hidden" onclick="playBJ('stand')" style="background:#475569;">Stand</button>
                 </div>
             </div>
 
@@ -129,131 +141,60 @@
     let userData = null;
     let isReg = false;
 
-    // BJ State
-    let deck = [], pHand = [], dHand = [], currentBet = 0;
+    // Blackjack State
+    let pHand = [], dHand = [], currentBJBet = 0;
 
+    // --- ORIGINAL CORE FUNCTIONS ---
     function notify(msg, type = 'ok') {
         const n = document.getElementById('notifier');
         n.innerText = msg; n.className = type === 'ok' ? 'ntf-ok' : 'ntf-err';
         n.style.opacity = '1'; setTimeout(() => n.style.opacity = '0', 3000);
     }
 
-    // --- GAMES LOGIC ---
-
-    // 1. Coin Flip
-    window.playFlip = async (choice) => {
-        const bet = parseFloat(document.getElementById('coinBet').value);
-        if(!bet || bet > userData.balance) return notify("Invalid Bet", "err");
-
-        const coin = document.getElementById('coin');
-        coin.classList.add('flipping');
-        
-        const win = Math.random() > 0.5;
-        const result = win ? choice : (choice === 'heads' ? 'tails' : 'heads');
-
-        await runTransaction(db, async (t) => {
-            const ref = doc(db, "users", auth.currentUser.uid);
-            const d = await t.get(ref);
-            t.update(ref, { balance: d.data().balance + (win ? bet : -bet) });
-        });
-
-        setTimeout(() => {
-            coin.classList.remove('flipping');
-            coin.innerText = result[0].toUpperCase();
-            notify(win ? "You Won!" : "You Lost", win ? "ok" : "err");
-        }, 1000);
+    window.toggleAuth = () => {
+        isReg = !isReg;
+        document.getElementById('authTitle').innerText = isReg ? "Create Account" : "MailCash Login";
+        document.getElementById('regArea').classList.toggle('hidden');
+        document.getElementById('loginUser').placeholder = isReg ? "Choose Username" : "Username";
+        document.getElementById('authBtn').innerText = isReg ? "Register" : "Sign In";
+        document.getElementById('toggleLink').innerText = isReg ? "Already have an account? Login" : "New here? Create an account";
     };
 
-    // 2. Blackjack
-    const getCard = () => {
-        const suits = ['♠','♥','♦','♣'];
-        const vals = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
-        return { val: vals[Math.floor(Math.random()*vals.length)], suit: suits[Math.floor(Math.random()*suits.length)] };
-    };
-
-    const calc = (h) => {
-        let s = 0, a = 0;
-        h.forEach(c => {
-            if(c.val === 'A') a++;
-            else if(['J','Q','K'].includes(c.val)) s += 10;
-            else s += parseInt(c.val);
-        });
-        for(let i=0; i<a; i++) s += (s + 11 > 21) ? 1 : 11;
-        return s;
-    };
-
-    const renderBJ = (hideDealer = true) => {
-        document.getElementById('playerHand').innerHTML = pHand.map(c => `<div class="playing-card">${c.val}${c.suit}</div>`).join('');
-        document.getElementById('dealerHand').innerHTML = dHand.map((c, i) => `<div class="playing-card">${(i===0 && hideDealer) ? '?' : c.val+c.suit}</div>`).join('');
-    };
-
-    window.playBJ = async (action) => {
-        const status = document.getElementById('bjStatus');
-        if(action === 'deal') {
-            currentBet = parseFloat(document.getElementById('bjBet').value);
-            if(!currentBet || currentBet > userData.balance) return notify("Invalid Bet", "err");
-            
-            pHand = [getCard(), getCard()]; dHand = [getCard(), getCard()];
-            renderBJ();
-            document.getElementById('bjDeal').classList.add('hidden');
-            document.getElementById('bjHit').classList.remove('hidden');
-            document.getElementById('bjStand').classList.remove('hidden');
-            status.innerText = "Your turn...";
-        } 
-        else if(action === 'hit') {
-            pHand.push(getCard());
-            renderBJ();
-            if(calc(pHand) > 21) endBJ('lose');
-        }
-        else if(action === 'stand') {
-            while(calc(dHand) < 17) dHand.push(getCard());
-            renderBJ(false);
-            const ps = calc(pHand), ds = calc(dHand);
-            if(ds > 21 || ps > ds) endBJ('win');
-            else if(ps === ds) endBJ('draw');
-            else endBJ('lose');
-        }
-    };
-
-    async function endBJ(res) {
-        let mult = res === 'win' ? 1 : (res === 'draw' ? 0 : -1);
-        await runTransaction(db, async (t) => {
-            const ref = doc(db, "users", auth.currentUser.uid);
-            const d = await t.get(ref);
-            t.update(ref, { balance: d.data().balance + (currentBet * mult) });
-        });
-        document.getElementById('bjStatus').innerText = res.toUpperCase();
-        document.getElementById('bjDeal').classList.remove('hidden');
-        document.getElementById('bjHit').classList.add('hidden');
-        document.getElementById('bjStand').classList.add('hidden');
-    }
-
-    // --- CORE APP LOGIC ---
     window.handleAuth = async () => {
-        const user = document.getElementById('loginUser').value.trim().toLowerCase();
+        const userInput = document.getElementById('loginUser').value.trim().toLowerCase();
         const pass = document.getElementById('authPass').value;
         try {
             if (isReg) {
-                const email = document.getElementById('regEmail').value;
-                const res = await createUserWithEmailAndPassword(auth, email, pass);
-                await setDoc(doc(db, "users", res.user.uid), { username: user, email: email, balance: 1000 });
-            } else {
-                const q = query(collection(db, "users"), where("username", "==", user));
+                const email = document.getElementById('regEmail').value.trim();
+                const q = query(collection(db, "users"), where("username", "==", userInput));
                 const s = await getDocs(q);
-                await signInWithEmailAndPassword(auth, s.docs[0].data().email, pass);
+                if (!s.empty) throw new Error("Username taken");
+                const res = await createUserWithEmailAndPassword(auth, email, pass);
+                await setDoc(doc(db, "users", res.user.uid), { username: userInput, email: email, balance: 1000 });
+            } else {
+                let finalEmail = userInput;
+                if (!userInput.includes('@')) {
+                    const q = query(collection(db, "users"), where("username", "==", userInput));
+                    const s = await getDocs(q);
+                    if (s.empty) throw new Error("Username not found");
+                    finalEmail = s.docs[0].data().email;
+                }
+                await signInWithEmailAndPassword(auth, finalEmail, pass);
             }
-        } catch (e) { notify(e.message, 'err'); }
+        } catch (err) { notify(err.message, 'err'); }
     };
 
     onAuthStateChanged(auth, u => {
         if(u) {
             onSnapshot(doc(db, "users", u.uid), d => {
-                userData = d.data();
-                document.getElementById('userDisplay').innerText = "@" + userData.username;
-                document.getElementById('userBal').innerText = userData.balance.toFixed(2);
-                document.getElementById('authScreen').classList.add('hidden');
-                document.getElementById('appScreen').classList.remove('hidden');
-                loadInbox();
+                if(d.exists()) {
+                    userData = d.data();
+                    document.getElementById('userDisplay').innerText = "@" + userData.username;
+                    document.getElementById('userBal').innerText = (userData.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2});
+                    document.getElementById('authScreen').classList.add('hidden');
+                    document.getElementById('appScreen').classList.remove('hidden');
+                    loadInbox();
+                }
             });
         } else {
             document.getElementById('appScreen').classList.add('hidden');
@@ -261,15 +202,126 @@
         }
     });
 
+    function loadInbox() {
+        if (!userData) return;
+        const q = query(collection(db, "messages"), where("to", "==", userData.username), orderBy("date", "desc"));
+        onSnapshot(q, s => {
+            const box = document.getElementById('mailBox');
+            if(s.empty) { box.innerHTML = "<p style='text-align:center;color:#64748b;margin-top:20px;'>Inbox Empty</p>"; return; }
+            box.innerHTML = s.docs.map(d => {
+                const m = d.data();
+                return `<div class="msg-card"><b style="color:#818cf8; font-size:12px;">FROM: @${m.from}</b><h4 style="margin:5px 0;">${m.subject}</h4><p style="color:#cbd5e1; font-size:14px;">${m.body}</p>${m.cash > 0 ? `<span class="cash-tag">+$${m.cash.toFixed(2)} RECEIVED</span>` : ''}</div>`;
+            }).join('');
+        });
+    }
+
+    window.sendAction = async (type) => {
+        const to = (type === 'text' ? document.getElementById('msgTo') : document.getElementById('payTo')).value.trim().toLowerCase();
+        const amt = type === 'money' ? (parseFloat(document.getElementById('payAmt').value) || 0) : 0;
+        const sub = type === 'text' ? document.getElementById('msgSub').value : "Payment";
+        const body = type === 'text' ? document.getElementById('msgBody').value : document.getElementById('payNote').value;
+        try {
+            const q = query(collection(db, "users"), where("username", "==", to));
+            const snap = await getDocs(q);
+            if (snap.empty) throw new Error("Recipient not found");
+            const recId = snap.docs[0].id;
+            if (amt > 0) {
+                if (userData.balance < amt) throw new Error("Low balance");
+                await runTransaction(db, async t => {
+                    const myRef = doc(db, "users", auth.currentUser.uid);
+                    const theirRef = doc(db, "users", recId);
+                    t.update(myRef, { balance: (await t.get(myRef)).data().balance - amt });
+                    t.update(theirRef, { balance: (await t.get(theirRef)).data().balance + amt });
+                });
+            }
+            await addDoc(collection(db, "messages"), { to, from: userData.username, subject: sub || "No Subject", body: body || "", cash: amt, date: new Date() });
+            notify("Sent!");
+            showTab('inbox');
+        } catch (e) { notify(e.message, 'err'); }
+    };
+
+    // --- CASINO LOGIC (Blackjack & Flip) ---
+    const getCard = () => {
+        const vals = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
+        const suits = ['♠','♥','♦','♣'];
+        return { v: vals[Math.floor(Math.random()*vals.length)], s: suits[Math.floor(Math.random()*suits.length)] };
+    };
+
+    const calc = (h) => {
+        let s = 0, a = 0;
+        h.forEach(c => {
+            if(c.v === 'A') a++; else if(['J','Q','K'].includes(c.v)) s += 10; else s += parseInt(c.v);
+        });
+        for(let i=0; i<a; i++) s += (s + 11 > 21) ? 1 : 11;
+        return s;
+    };
+
+    window.playBJ = async (act) => {
+        const status = document.getElementById('bjStatus');
+        if(act === 'deal') {
+            currentBJBet = parseFloat(document.getElementById('bjBet').value);
+            if(!currentBJBet || currentBJBet > userData.balance) return notify("Invalid Bet", "err");
+            pHand = [getCard(), getCard()]; dHand = [getCard(), getCard()];
+            renderBJ(true);
+            document.getElementById('bjDealBtn').classList.add('hidden');
+            document.getElementById('bjHitBtn').classList.remove('hidden');
+            document.getElementById('bjStandBtn').classList.remove('hidden');
+            status.innerText = "Playing...";
+        } else if(act === 'hit') {
+            pHand.push(getCard()); renderBJ(true);
+            if(calc(pHand) > 21) endBJ('lose');
+        } else if(act === 'stand') {
+            while(calc(dHand) < 17) dHand.push(getCard());
+            renderBJ(false);
+            const ps = calc(pHand), ds = calc(dHand);
+            if(ds > 21 || ps > ds) endBJ('win'); else if(ps === ds) endBJ('draw'); else endBJ('lose');
+        }
+    };
+
+    const renderBJ = (hide) => {
+        document.getElementById('playerHand').innerHTML = pHand.map(c => `<div class="playing-card">${c.v}${c.s}</div>`).join('');
+        document.getElementById('dealerHand').innerHTML = dHand.map((c, i) => `<div class="playing-card">${(i===0 && hide) ? '?' : c.v+c.s}</div>`).join('');
+    };
+
+    async function endBJ(res) {
+        let mult = res === 'win' ? 1 : (res === 'draw' ? 0 : -1);
+        await runTransaction(db, async (t) => {
+            const ref = doc(db, "users", auth.currentUser.uid);
+            t.update(ref, { balance: (await t.get(ref)).data().balance + (currentBJBet * mult) });
+        });
+        document.getElementById('bjStatus').innerText = res.toUpperCase();
+        document.getElementById('bjDealBtn').classList.remove('hidden');
+        document.getElementById('bjHitBtn').classList.add('hidden');
+        document.getElementById('bjStandBtn').classList.add('hidden');
+    }
+
+    window.playFlip = async (choice) => {
+        const bet = parseFloat(document.getElementById('coinBet').value);
+        if(!bet || bet > userData.balance) return notify("Invalid Bet", "err");
+        const coin = document.getElementById('coin');
+        coin.classList.add('flipping');
+        const win = Math.random() > 0.5;
+        const result = win ? choice : (choice === 'heads' ? 'tails' : 'heads');
+        await runTransaction(db, async (t) => {
+            const ref = doc(db, "users", auth.currentUser.uid);
+            t.update(ref, { balance: (await t.get(ref)).data().balance + (win ? bet : -bet) });
+        });
+        setTimeout(() => {
+            coin.classList.remove('flipping');
+            coin.innerText = result[0].toUpperCase();
+            notify(win ? "Won!" : "Lost", win ? "ok" : "err");
+        }, 8000);
+    };
+
+    // Navigation
     window.showTab = (t) => {
         document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
-        document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab').forEach(btn => btn.classList.remove('active'));
         document.getElementById(t + 'View').classList.remove('hidden');
-        event.currentTarget.classList.add('active');
+        document.getElementById('t' + t.charAt(0).toUpperCase() + t.slice(1)).classList.add('active');
     };
-    
+
     window.logout = () => signOut(auth);
-    window.toggleAuth = () => { isReg = !isReg; document.getElementById('regArea').classList.toggle('hidden'); };
 </script>
 </body>
 </html>
