@@ -3,45 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MailCash | Marketplace Edition</title>
+    <title>MailCash | Auth Fix</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background: #0f172a; color: #f8fafc; padding: 20px; overflow-x: hidden; }
         .container { max-width: 600px; margin: 0 auto; position: relative; }
-        
         .card { background: #1e293b; border-radius: 16px; padding: 25px; border: 1px solid #334155; margin-bottom: 20px; }
         .hidden { display: none !important; }
         input, textarea { width: 100%; padding: 14px; background: #0f172a; border: 1px solid #334155; border-radius: 10px; color: white; margin-bottom: 12px; outline: none; font-size: 16px; }
         button { width: 100%; padding: 14px; background: #6366f1; color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; transition: 0.2s; }
-        
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; position: relative; }
         .balance-pill { background: #064e3b; color: #34d399; padding: 10px 20px; border-radius: 50px; font-weight: 800; border: 1px solid #059669; }
         .pfp-circle { width: 44px; height: 44px; border-radius: 50%; border: 2px solid #6366f1; background: #334155; cursor: pointer; }
-        
         #settingsMenu { position: absolute; right: 0; top: 60px; width: 280px; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #475569; }
-
         .tabs { display: flex; gap: 5px; margin-bottom: 20px; background: #0f172a; padding: 6px; border-radius: 14px; overflow-x: auto; }
         .tab { flex: 1; text-align: center; padding: 10px; cursor: pointer; border-radius: 10px; color: #94a3b8; font-weight: 700; font-size: 12px; white-space: nowrap; }
         .tab.active { background: #334155; color: white; }
-
-        /* Generator Layout Styles */
         .hr-top-row { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; overflow-x: auto; padding: 10px; }
         .hr-mini-card { min-width: 80px; height: 80px; background: #1e293b; border: 2px solid #334155; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-        
         .gen-container { display: flex; flex-direction: column; gap: 12px; }
         .gen-row { display: flex; align-items: center; background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 12px; gap: 15px; }
         .gen-main-orb { width: 50px; height: 50px; border-radius: 50%; border: 3px solid #f59e0b; flex-shrink: 0; }
         .gen-info { flex-grow: 1; }
         .gen-produced-orbs { display: flex; gap: 4px; flex-wrap: wrap; max-width: 120px; }
         .mini-produced-orb { width: 12px; height: 12px; border-radius: 50%; background: #6366f1; box-shadow: 0 0 5px #6366f1; }
-
         .orb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
         .orb-item { background: #0f172a; border: 1px solid #334155; padding: 15px; border-radius: 12px; position: relative; text-align: center; min-height: 200px; display: flex; flex-direction: column; }
         .orb-visual { width: 50px; height: 50px; border-radius: 50%; margin: 0 auto 10px; box-shadow: 0 0 15px currentColor; filter: brightness(1.2); }
-        
-        .blur-lock { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10; border-radius: 12px; }
-        .lock-q { font-size: 32px; font-weight: 900; color: #f8fafc; }
-
         .clicker-btn { width: 110px; height: 110px; border-radius: 50%; background: radial-gradient(circle, #6366f1, #4338ca); border: 8px solid #312e81; font-size: 35px; margin: 0 auto 10px; display: block; cursor: pointer; transition: transform 0.1s; }
         .popup-anim { position: absolute; color: #34d399; font-weight: 900; animation: floatUp 1.2s ease-out forwards; pointer-events: none; z-index: 10000; font-size: 18px; }
         @keyframes floatUp { 0% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -70px); } }
@@ -98,7 +86,6 @@
 
         <div id="marketplaceView" class="tab-view hidden">
             <div class="hr-top-row" id="hrMarketRow"></div>
-
             <h3 style="margin: 10px 0; color: #ef4444;">Orb Generators</h3>
             <div class="gen-container" id="generatorList"></div>
             <p id="totalGenIncome" style="margin-top:15px; color:#94a3b8; font-size:12px; text-align:center;"></p>
@@ -135,8 +122,7 @@
         { id: 'orb1', name: 'Blue Orb', baseCost: 350, baseInc: 15, time: 5000, color: '#3b82f6' },
         { id: 'orb2', name: 'Red Orb', baseCost: 3000, baseInc: 200, time: 7000, color: '#ef4444' },
         { id: 'orb3', name: 'Green Orb', baseCost: 15000, baseInc: 850, time: 6000, color: '#10b981' },
-        { id: 'orb4', name: 'Gold Orb', baseCost: 50000, baseInc: 3500, time: 4000, color: '#f59e0b' },
-        { id: 'orb10', name: 'Solar Orb', baseCost: 80000000, baseInc: 15000000, time: 15000, color: '#fbbf24' }
+        { id: 'orb4', name: 'Gold Orb', baseCost: 50000, baseInc: 3500, time: 4000, color: '#f59e0b' }
     ];
 
     const HR_ORBS = [
@@ -150,13 +136,6 @@
     const GEN_DATA = [
         { rank: 'Wood', cost: 250, min: 5, max: 15, color: '#78350f' },
         { rank: 'Bronze', cost: 500, min: 10, max: 25, color: '#92400e' },
-        { rank: 'Silver', cost: 5000, min: 100, max: 250, color: '#94a3b8' },
-        { rank: 'Gold', cost: 50000, min: 1000, max: 2500, color: '#f59e0b' },
-        { rank: 'Diamond', cost: 1000000, min: 25000, max: 50000, color: '#cbd5e1' },
-        { rank: 'Platinum', cost: 50000000, min: 1000000, max: 2000000, color: '#94a3b8' },
-        { rank: 'Emerald', cost: 500000000, min: 10000000, max: 25000000, color: '#10b981' },
-        { rank: 'Master', cost: 10000000000, min: 250000000, max: 500000000, color: '#8b5cf6' },
-        { rank: 'Legend', cost: 1000000000000, min: 25000000000, max: 50000000000, color: '#ef4444' },
         { rank: 'Champion', cost: 20000000000000, min: 500000000000, max: 1000000000000, color: '#facc15' }
     ];
 
@@ -165,10 +144,7 @@
             onSnapshot(doc(db, "users", u.uid), d => {
                 if(d.exists()) {
                     userData = d.data();
-                    updateUI();
-                    renderEarnOrbs();
-                    renderMarketplace();
-                    loadInbox();
+                    updateUI(); renderEarnOrbs(); renderMarketplace(); loadInbox();
                     document.getElementById('authScreen').classList.add('hidden');
                     document.getElementById('appScreen').classList.remove('hidden');
                 }
@@ -179,13 +155,42 @@
         }
     });
 
+    window.handleAuth = async () => {
+        const userNm = document.getElementById('loginUser').value.trim().toLowerCase();
+        const pass = document.getElementById('authPass').value;
+        const regEmail = document.getElementById('regEmail').value.trim();
+
+        if(!userNm || !pass) return alert("Fill in all fields");
+
+        try {
+            if(isReg) {
+                if(!regEmail) return alert("Email required for registration");
+                const res = await createUserWithEmailAndPassword(auth, regEmail, pass);
+                await setDoc(doc(db, "users", res.user.uid), { 
+                    username: userNm, email: regEmail, balance: 1000, orbs: {}, genOrbs: {}, genIncome: 0, clickLevel: 1 
+                });
+            } else {
+                // LOGIN: Find the email linked to the username first
+                const s = await getDocs(query(collection(db, "users"), where("username", "==", userNm)));
+                if(s.empty) throw new Error("Username not found");
+                const email = s.docs[0].data().email;
+                await signInWithEmailAndPassword(auth, email, pass);
+            }
+        } catch (e) { alert(e.message); }
+    };
+
+    window.logout = async () => {
+        await signOut(auth);
+        location.reload(); 
+    };
+
     function updateUI() {
         document.getElementById('userBal').innerText = Math.floor(userData.balance || 0).toLocaleString();
         document.getElementById('userDisplay').innerText = "@" + userData.username;
         document.getElementById('userPfp').src = `https://api.dicebear.com/7.x/identicon/svg?seed=${userData.username}`;
         document.getElementById('clickPowerVal').innerText = (userData.clickLevel || 1).toLocaleString();
         document.getElementById('clickCost').innerText = ((userData.clickLevel || 1) * 200).toLocaleString();
-        document.getElementById('totalGenIncome').innerText = `Generator Payout: +$${(userData.genIncome || 0).toLocaleString()} / 10s`;
+        document.getElementById('totalGenIncome').innerText = `Gen Payout: +$${(userData.genIncome || 0).toLocaleString()} / 10s`;
     }
 
     function renderEarnOrbs() {
@@ -203,46 +208,36 @@
     }
 
     function renderMarketplace() {
-        // Top 5 Hyper Rares
         document.getElementById('hrMarketRow').innerHTML = HR_ORBS.map(orb => `
             <div class="hr-mini-card" onclick="buyOrb('${orb.id}', ${orb.cost})">
                 <div style="width:20px; height:20px; border-radius:50%; background:${orb.color}; margin-bottom:5px;"></div>
                 <b style="font-size:10px;">${orb.name}</b>
-                <div style="font-size:8px; color:#10b981">$${(orb.cost/1000000).toFixed(0)}M</div>
             </div>
         `).join('');
 
-        // 10 Generators
         document.getElementById('generatorList').innerHTML = GEN_DATA.map(g => {
             const ownedOrbs = userData.genOrbs?.[g.rank] || 0;
-            return `
-            <div class="gen-row">
+            return `<div class="gen-row">
                 <div class="gen-main-orb" style="background:${g.color}"></div>
                 <div class="gen-info">
-                    <b style="font-size:14px;">${g.rank}</b>
-                    <p style="font-size:10px; color:#94a3b8">$${g.min}-$${g.max} per orb</p>
+                    <b>${g.rank}</b>
                     <div class="gen-produced-orbs">${'<div class="mini-produced-orb"></div>'.repeat(ownedOrbs)}</div>
                 </div>
-                <button onclick="buyGen('${g.rank}', ${g.cost})" style="width:auto; padding:8px 15px; font-size:12px;">Generate $${g.cost >= 1e12 ? (g.cost/1e12).toFixed(1)+'T' : g.cost.toLocaleString()}</button>
+                <button onclick="buyGen('${g.rank}', ${g.cost})" style="width:auto; padding:8px 15px;">Gen $${g.cost.toLocaleString()}</button>
             </div>`;
         }).join('');
     }
 
+    window.buyOrb = async (id, cost) => {
+        if(userData.balance >= cost) await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-cost), [`orbs.${id}`]: increment(1) });
+    };
+
     window.buyGen = async (rank, cost) => {
-        if(userData.balance < cost) return alert("Insufficient funds");
+        if(userData.balance < cost) return alert("No cash!");
         const g = GEN_DATA.find(x => x.rank === rank);
         const count = Math.floor(Math.random() * 10) + 1;
         const income = count * (Math.floor(Math.random() * (g.max - g.min + 1)) + g.min);
-        
-        await updateDoc(doc(db, "users", auth.currentUser.uid), {
-            balance: increment(-cost),
-            [`genOrbs.${rank}`]: increment(count),
-            genIncome: increment(income)
-        });
-    };
-
-    window.buyOrb = async (id, cost) => {
-        if(userData.balance >= cost) await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-cost), [`orbs.${id}`]: increment(1) });
+        await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-cost), [`genOrbs.${rank}`]: increment(count), genIncome: increment(income) });
     };
 
     window.upgradeClicker = async () => {
@@ -256,32 +251,7 @@
         const p = document.createElement('div'); p.className='popup-anim'; p.innerText=`+$${pwr}`; p.style.left=e.clientX+'px'; p.style.top=e.clientY+'px'; p.style.position='fixed'; document.body.appendChild(p); setTimeout(()=>p.remove(),1200);
     });
 
-    // Auto Income (Generators)
-    setInterval(() => {
-        if(userData && userData.genIncome > 0) {
-            updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(userData.genIncome) });
-        }
-    }, 10000);
-
-    window.logout = async () => {
-        await signOut(auth);
-        location.reload();
-    };
-
-    window.handleAuth = async () => {
-        const userNm = document.getElementById('loginUser').value.trim().toLowerCase();
-        const pass = document.getElementById('authPass').value;
-        try {
-            if(isReg) {
-                const res = await createUserWithEmailAndPassword(auth, document.getElementById('regEmail').value, pass);
-                await setDoc(doc(db, "users", res.user.uid), { username: userNm, email: document.getElementById('regEmail').value, balance: 1000, orbs: {}, genOrbs: {}, genIncome: 0, clickLevel: 1 });
-            } else {
-                const s = await getDocs(query(collection(db, "users"), where("username", "==", userNm)));
-                if(s.empty) throw new Error("User not found");
-                await signInWithEmailAndPassword(auth, s.docs[0].data().email, pass);
-            }
-        } catch (e) { alert(e.message); }
-    };
+    setInterval(() => { if(userData?.genIncome > 0) updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(userData.genIncome) }); }, 10000);
 
     window.showTab = (t) => {
         document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
@@ -291,6 +261,21 @@
         document.getElementById(map[t]).classList.add('active');
     };
 
+    window.sendAction = async (type) => {
+        const to = document.getElementById(type === 'text' ? 'msgTo' : 'payTo').value.trim().toLowerCase();
+        const amt = type === 'money' ? parseFloat(document.getElementById('payAmt').value || 0) : 0;
+        const s = await getDocs(query(collection(db, "users"), where("username", "==", to)));
+        if(s.empty) return alert("User not found");
+        if(type === 'money') {
+            if(userData.balance < amt) return alert("No funds");
+            await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-amt) });
+            await updateDoc(doc(db, "users", s.docs[0].id), { balance: increment(amt) });
+        }
+        await addDoc(collection(db, "messages"), { to, from: userData.username, body: type === 'money' ? `Sent $${amt}` : document.getElementById('msgBody').value, date: Date.now() });
+        alert("Sent!");
+    };
+
+    const loadInbox = () => { onSnapshot(query(collection(db, "messages"), where("to", "==", userData.username), orderBy("date", "desc")), s => { document.getElementById('mailBox').innerHTML = s.docs.map(d => `<div class="msg-card"><b>@${d.data().from}</b><p>${d.data().body}</p></div>`).join('') || "No mail."; }); };
     window.toggleSettings = () => document.getElementById('settingsMenu').classList.toggle('hidden');
     window.toggleAuthMode = () => { isReg = !isReg; document.getElementById('regArea').classList.toggle('hidden', !isReg); };
 </script>
