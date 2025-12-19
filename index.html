@@ -61,8 +61,17 @@
         }
         .notif-banner.active { left: 25px; }
 
-        .chest-card { background: linear-gradient(135deg, #4338ca, #6366f1); padding: 30px; border-radius: 20px; text-align: center; border: 3px solid #818cf8; margin-bottom: 30px; box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4); }
-        .chest-icon { font-size: 55px; margin-bottom: 12px; }
+        .chest-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 30px; }
+        .chest-card { padding: 20px; border-radius: 20px; text-align: center; border: 3px solid #818cf8; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .chest-bronze { background: linear-gradient(135deg, #78350f, #92400e); border-color: #b45309; }
+        .chest-silver { background: linear-gradient(135deg, #475569, #64748b); border-color: #94a3b8; }
+        .chest-gold { background: linear-gradient(135deg, #b45309, #d97706); border-color: #fbbf24; }
+        .chest-icon { font-size: 40px; margin-bottom: 8px; }
+        .chest-card h3 { font-size: 18px; margin-bottom: 5px; }
+        .chest-card p { font-size: 12px; font-weight: 700; margin-bottom: 10px; }
+        .chest-card button { padding: 10px; font-size: 14px; }
+        
+        .section-header { width: 100%; padding: 10px; background: #334155; border-radius: 8px; margin: 20px 0 10px; font-weight: 900; text-align: center; font-size: 14px; letter-spacing: 1px; color: #f8fafc; }
         h3 { font-size: 26px; font-weight: 900; }
         h4 { font-size: 22px; font-weight: 900; }
         b { font-weight: 900; }
@@ -130,18 +139,32 @@
         <div id="collectionView" class="tab-view hidden">
             <h3 style="text-align:center; color:#6366f1; margin-bottom:25px; font-size:28px;">YOUR COLLECTION</h3>
             <div id="clickerBadgeSection"></div>
-            <div class="orb-grid" id="collectionGrid"></div>
+            <div id="collectionContent"></div>
         </div>
 
         <div id="marketplaceView" class="tab-view hidden">
-            <div class="chest-card">
-                <div class="chest-icon">📦</div>
-                <h3>MYSTERY CHEST</h3>
-                <p style="font-size: 16px; font-weight:700; opacity: 0.9; margin-bottom: 15px;">Unlock a random orb earning $1-$500 every 5s</p>
-                <button onclick="buyChest()" id="chestBtn" style="background: #fbbf24; color: #1e293b; border: none; font-size: 20px;">BUY CHEST ($100)</button>
+            <div class="chest-row">
+                <div class="chest-card chest-bronze">
+                    <div class="chest-icon">📦</div>
+                    <h3>BRONZE</h3>
+                    <p>$0-$100 (25s)</p>
+                    <button onclick="buyChest('bronze')" id="btn-bronze">BUY $1,000</button>
+                </div>
+                <div class="chest-card chest-silver">
+                    <div class="chest-icon">🥈</div>
+                    <h3>SILVER</h3>
+                    <p>$100-$500 (25s)</p>
+                    <button onclick="buyChest('silver')" id="btn-silver">BUY $5,000</button>
+                </div>
+                <div class="chest-card chest-gold">
+                    <div class="chest-icon">🥇</div>
+                    <h3>GOLD</h3>
+                    <p>$500-$1000 (25s)</p>
+                    <button onclick="buyChest('gold')" id="btn-gold">BUY $20,000</button>
+                </div>
             </div>
             <h3 style="text-align:center; color:#f59e0b; margin-bottom:15px;">💎 HYPER RARE MARKET</h3>
-            <div class="orb-grid" id="marketOrbGrid"></div>
+            <div id="marketContent"></div>
         </div>
 
         <div id="inboxView" class="tab-view hidden">
@@ -208,7 +231,7 @@
                     userData = d.data();
                     updateUI();
                     renderOrbs('orbGrid', ORB_DATA);
-                    renderOrbs('marketOrbGrid', MARKET_ORB_DATA);
+                    renderMarket();
                     renderCollection();
                     loadInbox();
                     document.getElementById('authScreen').classList.add('hidden');
@@ -226,7 +249,11 @@
         document.getElementById('clickPowerVal').innerText = getPower(userData.clickLevel || 1).toLocaleString();
         document.getElementById('clickCost').innerText = ((userData.clickLevel || 1) * 200).toLocaleString();
         document.getElementById('upgradeClickBtn').className = (userData.balance >= (userData.clickLevel * 200)) ? "btn-available" : "btn-locked";
-        document.getElementById('chestBtn').style.opacity = (userData.balance >= 100) ? "1" : "0.5";
+        
+        const chests = { bronze: 1000, silver: 5000, gold: 20000 };
+        for (let key in chests) {
+            document.getElementById(`btn-${key}`).style.opacity = (userData.balance >= chests[key]) ? "1" : "0.5";
+        }
     };
 
     const getPower = (lvl) => [1, 5, 25, 50, 100, 250, 500, 1000, 2500, 5000][lvl-1] || lvl * 500;
@@ -236,25 +263,6 @@
         if (!userData) return;
         const grid = document.getElementById(gridId);
         grid.innerHTML = '';
-
-        // RENDERING MYSTERY ORBS FIRST (NEWEST TO OLDEST)
-        if (gridId === 'marketOrbGrid' && userData.mysteryOrbs) {
-            [...userData.mysteryOrbs].reverse().forEach((mOrb, reverseIdx) => {
-                // Find actual index for progress bar sync
-                const actualIdx = userData.mysteryOrbs.indexOf(mOrb);
-                const div = document.createElement('div');
-                div.className = 'orb-item';
-                div.innerHTML = `
-                    <div class="orb-visual" style="color:${mOrb.color || '#fbbf24'}; background:currentColor"></div>
-                    <b style="font-size:18px;">${mOrb.name}</b>
-                    <div style="font-size:14px; margin:8px 0; font-weight:800; color:#10b981">+$${mOrb.inc}/5s</div>
-                    <div class="progress-bg"><div class="progress-fill" id="bar-mystery-${actualIdx}"></div></div>
-                    <button class="buy-btn btn-locked">CHEST FIND</button>
-                `;
-                grid.appendChild(div);
-            });
-        }
-
         dataList.forEach((orb, index) => {
             const owned = userData.orbs?.[orb.id] || 0;
             const isUnlocked = index === 0 || (userData.orbs?.[dataList[index-1].id] > 0);
@@ -273,10 +281,32 @@
         });
     }
 
+    function renderMarket() {
+        const cont = document.getElementById('marketContent');
+        cont.innerHTML = '';
+        const tiers = ['bronze', 'silver', 'gold'];
+        tiers.forEach(tier => {
+            const orbs = (userData.mysteryOrbs || []).filter(o => o.tier === tier);
+            if(orbs.length > 0) {
+                cont.innerHTML += `<div class="section-header">${tier.toUpperCase()} LOOT</div><div class="orb-grid" id="market-${tier}"></div>`;
+                const grid = document.getElementById(`market-${tier}`);
+                orbs.reverse().forEach(mOrb => {
+                    const actualIdx = userData.mysteryOrbs.indexOf(mOrb);
+                    const div = document.createElement('div');
+                    div.className = 'orb-item';
+                    div.innerHTML = `<div class="orb-visual" style="color:${mOrb.color}; background:currentColor"></div><b style="font-size:18px;">${mOrb.name}</b><div style="font-size:14px; margin:8px 0; font-weight:800; color:#10b981">+$${mOrb.inc}/25s</div><div class="progress-bg"><div class="progress-fill" id="bar-mystery-${actualIdx}"></div></div><button class="buy-btn btn-locked">CHEST FIND</button>`;
+                    grid.appendChild(div);
+                });
+            }
+        });
+        cont.innerHTML += `<div class="section-header">MARKET ORBS</div><div class="orb-grid" id="marketOrbGrid"></div>`;
+        renderOrbs('marketOrbGrid', MARKET_ORB_DATA);
+    }
+
     function renderCollection() {
         if (!userData) return;
-        const grid = document.getElementById('collectionGrid');
-        grid.innerHTML = '';
+        const cont = document.getElementById('collectionContent');
+        cont.innerHTML = '';
         const clicks = userData.totalClicks || 0;
         let b = { name: "Bronze", icon: "🥉", color: "#b45309" };
         if (clicks >= 10000) b = { name: "Champion", icon: "🏆", color: "#f8fafc" };
@@ -286,30 +316,49 @@
         else if (clicks >= 50) b = { name: "Silver", icon: "🥈", color: "#94a3b8" };
         document.getElementById('clickerBadgeSection').innerHTML = `<div class="badge-card" style="border-left: 8px solid ${b.color}"><div class="badge-icon">${b.icon}</div><div class="badge-info"><h4>${b.name} Clicker</h4><p>LIFETIME CLICKS: ${clicks.toLocaleString()}</p></div></div>`;
         
-        if(userData.mysteryOrbs) {
-            [...userData.mysteryOrbs].reverse().forEach(mOrb => {
-               const div = document.createElement('div'); div.className = 'orb-item';
-               div.innerHTML = `<div class="orb-visual" style="color:${mOrb.color || '#fbbf24'}; background:currentColor"></div><b style="font-size:18px;">${mOrb.name}</b><div style="font-size:14px; margin-top:10px; color:#6366f1; font-weight:900;">LOOT</div>`;
-               grid.appendChild(div);
-            });
-        }
+        ['bronze', 'silver', 'gold'].forEach(tier => {
+            const orbs = (userData.mysteryOrbs || []).filter(o => o.tier === tier);
+            if(orbs.length > 0) {
+                cont.innerHTML += `<div class="section-header">${tier.toUpperCase()} COLLECTION</div><div class="orb-grid" id="coll-${tier}"></div>`;
+                const grid = document.getElementById(`coll-${tier}`);
+                orbs.forEach(mOrb => {
+                    const div = document.createElement('div'); div.className = 'orb-item';
+                    div.innerHTML = `<div class="orb-visual" style="color:${mOrb.color}; background:currentColor"></div><b style="font-size:18px;">${mOrb.name}</b><div style="font-size:14px; margin-top:10px; color:#6366f1; font-weight:900;">LOOT</div>`;
+                    grid.appendChild(div);
+                });
+            }
+        });
+        cont.innerHTML += `<div class="section-header">STANDARD COLLECTION</div><div class="orb-grid" id="coll-std"></div>`;
+        const stdGrid = document.getElementById('coll-std');
         [...ORB_DATA, ...MARKET_ORB_DATA].filter(o => userData.orbs?.[o.id] > 0).forEach(o => {
             const div = document.createElement('div'); div.className = 'orb-item';
             div.innerHTML = `<div class="orb-visual" style="color:${o.color}; background:currentColor"></div><b style="font-size:18px;">${o.name}</b><div style="font-size:14px; margin-top:10px; color:#6366f1; font-weight:900;">COLLECTED</div>`;
-            grid.appendChild(div);
+            stdGrid.appendChild(div);
         });
     }
 
-    window.buyChest = async () => {
-        if(!userData || userData.balance < 100) return alert("NOT ENOUGH CASH!");
+    window.buyChest = async (tier) => {
+        const prices = { bronze: 1000, silver: 5000, gold: 20000 };
+        const price = prices[tier];
+        if(!userData || userData.balance < price) return alert("NOT ENOUGH CASH!");
+        
         const adjectives = ["Ancient", "Pulsing", "Radiant", "Shadow", "Mystic", "Cursed", "Solar", "Lunar", "Glitch", "Frozen", "Neon", "Blazing"];
         const elements = ["Lava", "Water", "Earth", "Air", "Cosmic", "Void", "Storm", "Spirit", "Metal", "Venom", "Plasma", "Crystal"];
         const colors = ["#ef4444", "#3b82f6", "#10b981", "#f59e0b", "#8b5cf6", "#ec4899", "#06b6d4", "#f8fafc", "#475569", "#fbbf24"];
+        
         const randName = adjectives[Math.floor(Math.random()*adjectives.length)] + " " + elements[Math.floor(Math.random()*elements.length)] + " Orb";
         const randColor = colors[Math.floor(Math.random()*colors.length)];
-        const randInc = Math.floor(Math.random() * 500) + 1;
-        await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-100), mysteryOrbs: arrayUnion({ name: randName, inc: randInc, color: randColor, lastClaim: Date.now() }) });
-        alert(`UNBOXED: ${randName} (+$${randInc}/5s)`);
+        
+        let randInc = 0;
+        if(tier === 'bronze') randInc = Math.floor(Math.random() * 101);
+        if(tier === 'silver') randInc = Math.floor(Math.random() * 401) + 100;
+        if(tier === 'gold') randInc = Math.floor(Math.random() * 501) + 500;
+
+        await updateDoc(doc(db, "users", auth.currentUser.uid), { 
+            balance: increment(-price), 
+            mysteryOrbs: arrayUnion({ name: randName, inc: randInc, color: randColor, tier: tier, lastClaim: Date.now() }) 
+        });
+        alert(`UNBOXED ${tier.toUpperCase()}: ${randName} (+$${randInc}/25s)`);
     };
 
     window.buyOrb = async (id, cost) => { if(userData && (userData.orbs?.[id] || 0) < 100 && userData.balance >= cost) await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-cost), [`orbs.${id}`]: increment(1) }); };
@@ -389,10 +438,10 @@
             userData.mysteryOrbs.forEach((mOrb, idx) => {
                 if(!window['mystery_'+idx+'_timer']) {
                     window['mystery_'+idx+'_start'] = Date.now();
-                    window['mystery_'+idx+'_timer'] = setInterval(() => { updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(mOrb.inc) }); window['mystery_'+idx+'_start'] = Date.now(); }, 5000);
+                    window['mystery_'+idx+'_timer'] = setInterval(() => { updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(mOrb.inc) }); window['mystery_'+idx+'_start'] = Date.now(); }, 25000);
                 }
                 const bar = document.getElementById(`bar-mystery-${idx}`);
-                if(bar) bar.style.width = Math.min(((Date.now() - window['mystery_'+idx+'_start']) / 5000) * 100, 100) + "%";
+                if(bar) bar.style.width = Math.min(((Date.now() - window['mystery_'+idx+'_start']) / 25000) * 100, 100) + "%";
             });
         }
     }, 100);
