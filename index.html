@@ -191,8 +191,7 @@
         });
 
         // Listen for incoming emails
-        const msgQuery = query(collection(db, "messages"), where("to", "==", email), orderBy("date", "desc"));
-        onSnapshot(msgQuery, (snapshot) => {
+const msgQuery = query(collection(db, "messages"), where("to", "==", email));        onSnapshot(msgQuery, (snapshot) => {
             const container = document.getElementById('inboxMessages');
             if (snapshot.empty) { container.innerHTML = '<div class="empty-state">No messages</div>'; return; }
             container.innerHTML = snapshot.docs.map(d => `
