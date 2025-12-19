@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MailCash | Gaming & Finance</title>
+    <title>MailCash | Lite Economy</title>
     <style>
         /* --- CORE BRAND STYLES --- */
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -23,23 +23,23 @@
         .balance-pill { background: #064e3b; color: #34d399; padding: 12px 24px; border-radius: 50px; font-weight: 800; border: 1px solid #059669; }
 
         .tabs { display: flex; gap: 8px; margin-bottom: 20px; background: #0f172a; padding: 6px; border-radius: 14px; }
-        .tab { flex: 1; text-align: center; padding: 12px; cursor: pointer; border-radius: 10px; color: #94a3b8; font-weight: 700; }
+        .tab { flex: 1; text-align: center; padding: 12px; cursor: pointer; border-radius: 10px; color: #94a3b8; font-weight: 700; font-size: 14px; }
         .tab.active { background: #334155; color: white; }
 
         /* EARN & ORBS */
-        .clicker-btn { width: 140px; height: 140px; border-radius: 50%; background: radial-gradient(circle, #6366f1, #4338ca); border: 8px solid #312e81; font-size: 40px; margin: 10px auto; display: block; }
+        .clicker-btn { width: 140px; height: 140px; border-radius: 50%; background: radial-gradient(circle, #6366f1, #4338ca); border: 8px solid #312e81; font-size: 40px; margin: 10px auto; display: block; box-shadow: 0 0 20px rgba(99, 102, 241, 0.4); }
         .clicker-btn:active { transform: scale(0.95); }
         
         .orb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
         .orb-item { background: #0f172a; border: 1px solid #334155; padding: 15px; border-radius: 12px; position: relative; text-align: center; }
-        .orb-visual { width: 50px; height: 50px; border-radius: 50%; margin: 0 auto 10px; box-shadow: 0 0 15px currentColor; filter: brightness(1.2); transition: 0.3s; }
+        .orb-visual { width: 50px; height: 50px; border-radius: 50%; margin: 0 auto 10px; box-shadow: 0 0 15px currentColor; filter: brightness(1.2); }
         
-        .buy-btn { margin-top: 10px; padding: 8px; font-size: 13px; }
+        .buy-btn { margin-top: 10px; padding: 8px; font-size: 12px; }
         .btn-locked { background: #475569 !important; color: #94a3b8 !important; cursor: not-allowed; }
         .btn-available { background: #10b981 !important; color: white !important; }
 
         .popup-anim { position: absolute; top: 10%; left: 50%; transform: translateX(-50%); color: #34d399; font-weight: 900; animation: floatUpOrb 1.2s ease-out forwards; pointer-events: none; z-index: 10; }
-        @keyframes floatUpOrb { 0% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -50px); } }
+        @keyframes floatUpOrb { 0% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -60px); } }
 
         .pfp-circle { width: 44px; height: 44px; border-radius: 50%; border: 2px solid #6366f1; background: #334155; }
     </style>
@@ -93,11 +93,12 @@
                 <p style="color:#94a3b8">Click Power: $<span id="clickPowerText">1</span></p>
                 <button class="clicker-btn" id="mainClicker">💰</button>
                 <div id="upgradeArea" style="margin-top:10px;">
-                    <button id="upgradeBtn" onclick="buyUpgrade()" class="btn-locked" style="width:200px">Upgrade Clicker</button>
+                    <p id="nextClickText" style="font-size:12px; color:#94a3b8">Next: $5/click</p>
+                    <button id="upgradeBtn" onclick="buyUpgrade()" class="btn-locked" style="width:200px; margin-top:5px;">Upgrade Clicker</button>
                 </div>
             </div>
 
-            <h3 style="margin: 30px 0 10px; border-bottom: 1px solid #334155; padding-bottom: 5px;">Orb Market (Auto-Income)</h3>
+            <h3 style="margin: 30px 0 10px; border-bottom: 1px solid #334155; padding-bottom: 5px;">Orb Market (50% OFF Sale)</h3>
             <div class="orb-grid" id="orbGrid"></div>
         </div>
     </div>
@@ -124,17 +125,26 @@
     let userData = null;
     let isReg = false;
 
+    // 50% CHEAPER PRICES
+    const UPGRADES = [
+        { power: 1, cost: 0 }, 
+        { power: 5, cost: 1000 }, 
+        { power: 15, cost: 2500 },
+        { power: 25, cost: 5000 }, 
+        { power: 50, cost: 7500 }
+    ];
+
     const ORB_DATA = [
-        { id: 'orb1', name: 'Blue Orb', cost: 1000, income: 10, time: 5000, color: '#3b82f6' },
-        { id: 'orb2', name: 'Red Orb', cost: 10000, income: 150, time: 7000, color: '#ef4444' },
-        { id: 'orb3', name: 'Green Orb', cost: 15000, income: 300, time: 6000, color: '#10b981' },
-        { id: 'orb4', name: 'Gold Orb', cost: 35000, income: 1000, time: 1000, color: '#f59e0b' },
-        { id: 'orb5', name: 'Purple Orb', cost: 75000, income: 2500, time: 3000, color: '#8b5cf6' },
-        { id: 'orb6', name: 'Cyan Orb', cost: 150000, income: 6000, time: 5000, color: '#06b6d4' },
-        { id: 'orb7', name: 'Pink Orb', cost: 300000, income: 15000, time: 8000, color: '#ec4899' },
-        { id: 'orb8', name: 'White Orb', cost: 750000, income: 40000, time: 10000, color: '#f8fafc' },
-        { id: 'orb9', name: 'Void Orb', cost: 1500000, income: 100000, time: 12000, color: '#475569' },
-        { id: 'orb10', name: 'Solar Orb', cost: 5000000, income: 500000, time: 15000, color: '#fbbf24' }
+        { id: 'orb1', name: 'Blue Orb', cost: 500, income: 10, time: 5000, color: '#3b82f6' },
+        { id: 'orb2', name: 'Red Orb', cost: 5000, income: 150, time: 7000, color: '#ef4444' },
+        { id: 'orb3', name: 'Green Orb', cost: 7500, income: 300, time: 6000, color: '#10b981' },
+        { id: 'orb4', name: 'Gold Orb', cost: 17500, income: 1000, time: 1000, color: '#f59e0b' },
+        { id: 'orb5', name: 'Purple Orb', cost: 37500, income: 2500, time: 3000, color: '#8b5cf6' },
+        { id: 'orb6', name: 'Cyan Orb', cost: 75000, income: 6000, time: 5000, color: '#06b6d4' },
+        { id: 'orb7', name: 'Pink Orb', cost: 150000, income: 15000, time: 8000, color: '#ec4899' },
+        { id: 'orb8', name: 'White Orb', cost: 375000, income: 40000, time: 10000, color: '#f8fafc' },
+        { id: 'orb9', name: 'Void Orb', cost: 750000, income: 100000, time: 12000, color: '#475569' },
+        { id: 'orb10', name: 'Solar Orb', cost: 2500000, income: 500000, time: 15000, color: '#fbbf24' }
     ];
 
     onAuthStateChanged(auth, u => {
@@ -155,14 +165,40 @@
         document.getElementById('userDisplay').innerText = "@" + userData.username;
         document.getElementById('clickPowerText').innerText = userData.clickPower || 1;
         document.getElementById('userPfp').src = `https://api.dicebear.com/7.x/identicon/svg?seed=${userData.username}`;
+        
+        // Update Clicker Upgrade UI
+        const currentPower = userData.clickPower || 1;
+        const nextIdx = UPGRADES.findIndex(u => u.power === currentPower) + 1;
+        const upBtn = document.getElementById('upgradeBtn');
+        if (nextIdx < UPGRADES.length) {
+            const next = UPGRADES[nextIdx];
+            document.getElementById('nextClickText').innerText = `Next: $${next.power}/click (Cost: $${next.cost})`;
+            upBtn.className = userData.balance >= next.cost ? 'btn-available' : 'btn-locked';
+            upBtn.innerText = "Upgrade Clicker";
+        } else {
+            document.getElementById('nextClickText').innerText = "Max Level Reached";
+            upBtn.classList.add('hidden');
+        }
     }
 
-    // MAIN CLICKER
     document.getElementById('mainClicker').addEventListener('click', (e) => {
         const p = userData.clickPower || 1;
         spawnPop(e.clientX, e.clientY, `+$${p}`, true);
         updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(p) });
     });
+
+    window.buyUpgrade = async () => {
+        const currentPower = userData.clickPower || 1;
+        const nextIdx = UPGRADES.findIndex(u => u.power === currentPower) + 1;
+        if (nextIdx >= UPGRADES.length) return;
+        const next = UPGRADES[nextIdx];
+        if (userData.balance < next.cost) return;
+
+        await updateDoc(doc(db, "users", auth.currentUser.uid), {
+            balance: increment(-next.cost),
+            clickPower: next.power
+        });
+    };
 
     function renderOrbs() {
         const grid = document.getElementById('orbGrid');
@@ -196,24 +232,22 @@
         });
     };
 
-    // IDLE INCOME ENGINE
+    // Income engine
     setInterval(() => {
         if(!userData || !userData.orbs) return;
         ORB_DATA.forEach(orb => {
             const count = userData.orbs[orb.id] || 0;
-            if(count > 0) {
-                // We track local timers for animation
-                if(!window[orb.id+'_timer']) {
-                    window[orb.id+'_timer'] = setInterval(() => {
-                        const totalIncome = orb.income * (userData.orbs[orb.id] || 0);
-                        const el = document.getElementById(`container-${orb.id}`);
-                        if(el && document.getElementById('tEar').classList.contains('active')) {
-                            const rect = el.getBoundingClientRect();
-                            spawnPop(rect.left + rect.width/2, rect.top + 20, `+$${totalIncome.toLocaleString()}`);
-                        }
-                        updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(totalIncome) });
-                    }, orb.time);
-                }
+            if(count > 0 && !window[orb.id+'_timer']) {
+                window[orb.id+'_timer'] = setInterval(() => {
+                    const countNow = userData.orbs[orb.id] || 0;
+                    const totalIncome = orb.income * countNow;
+                    const el = document.getElementById(`container-${orb.id}`);
+                    if(el && document.getElementById('tEar').classList.contains('active')) {
+                        const rect = el.getBoundingClientRect();
+                        spawnPop(rect.left + rect.width/2, rect.top + 20, `+$${totalIncome}`);
+                    }
+                    updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(totalIncome) });
+                }, orb.time);
             }
         });
     }, 1000);
@@ -222,11 +256,7 @@
         const p = document.createElement('div');
         p.className = 'popup-anim';
         p.innerText = text;
-        if(isFixed) {
-            p.style.position = 'fixed';
-            p.style.left = x + 'px';
-            p.style.top = y + 'px';
-        }
+        if(isFixed) { p.style.position = 'fixed'; p.style.left = x + 'px'; p.style.top = y + 'px'; }
         document.body.appendChild(p);
         setTimeout(() => p.remove(), 1200);
     }
@@ -244,7 +274,7 @@
         if(isReg) {
             const e = document.getElementById('regEmail').value;
             const res = await createUserWithEmailAndPassword(auth, e, p);
-            await setDoc(doc(db, "users", res.user.uid), { username: u, email: e, balance: 1000, clickPower: 10, orbs: {} });
+            await setDoc(doc(db, "users", res.user.uid), { username: u, email: e, balance: 1000, clickPower: 1, orbs: {} });
         } else {
             const s = await getDocs(query(collection(db, "users"), where("username", "==", u)));
             await signInWithEmailAndPassword(auth, s.docs[0].data().email, p);
