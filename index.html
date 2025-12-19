@@ -223,17 +223,39 @@
         });
     }
 
-    window.listToMarket = async (index) => {
-        const orb = userData.mysteryOrbs[index];
-        const price = parseInt(prompt(`Sell ${orb.name} for?`, "1000"));
-        if(!price || price <= 0) return;
-        try {
-            await addDoc(collection(db, "global_market"), { ...orb, price, seller: userData.username, sellerUid: auth.currentUser.uid, date: Date.now() });
-            await updateDoc(doc(db, "users", auth.currentUser.uid), { mysteryOrbs: arrayRemove(orb) });
-            showTab('markV2');
-        } catch (e) { alert(e.message); }
-    };
+window.listToMarket = async (index) => {
+    const orb = userData.mysteryOrbs[index];
+    const price = parseInt(prompt(`Sell ${orb.name} for?`, "1000"));
+    
+    if(!price || price <= 0) return;
 
+    try {
+        // 1. First, create the listing in the global market
+        const marketRef = await addDoc(collection(db, "global_market"), { 
+            name: orb.name,
+            inc: orb.inc,
+            color: orb.color,
+            tier: orb.tier,
+            instanceId: orb.instanceId || Math.random(), // Keep the unique ID
+            price: price, 
+            seller: userData.username, 
+            sellerUid: auth.currentUser.uid, 
+            date: Date.now() 
+        });
+
+        // 2. ONLY if the market listing worked, remove it from the user's inventory
+        if (marketRef.id) {
+            await updateDoc(doc(db, "users", auth.currentUser.uid), { 
+                mysteryOrbs: arrayRemove(orb) 
+            });
+            alert("Orb listed successfully!");
+            showTab('markV2');
+        }
+    } catch (e) { 
+        console.error(e);
+        alert("Error listing orb: " + e.message); 
+    }
+};
     window.buyFromMarket = async (listingId) => {
         try {
             await runTransaction(db, async (transaction) => {
