@@ -390,35 +390,43 @@
         } catch (e) { alert(e.message); }
     };
 
+    // FIXED SEND LOGIC
     window.sendAction = async (type) => {
-        const toInput = document.getElementById(type === 'text' ? 'msgTo' : 'payTo');
-        const to = toInput.value.trim().toLowerCase();
-        const amtInput = document.getElementById('payAmt');
-        const amt = type === 'money' ? parseFloat(amtInput.value || 0) : 0;
-        const bodyInput = document.getElementById('msgBody');
+        const toVal = document.getElementById(type === 'text' ? 'msgTo' : 'payTo').value.trim().toLowerCase();
+        const bodyVal = type === 'text' ? document.getElementById('msgBody').value : '';
+        const amtVal = type === 'money' ? parseFloat(document.getElementById('payAmt').value || 0) : 0;
         
-        if (!to) return alert("ENTER USERNAME");
+        if (!toVal) return alert("ENTER USERNAME");
+        if (type === 'text' && !bodyVal) return alert("ENTER MESSAGE");
+        if (type === 'money' && amtVal <= 0) return alert("ENTER VALID AMOUNT");
 
-        const s = await getDocs(query(collection(db, "users"), where("username", "==", to)));
-        if(s.empty) return alert("USER NOT FOUND");
-        
-        if(type === 'money') {
-            if(userData.balance < amt) return alert("NO CASH");
-            await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-amt) });
-            await updateDoc(doc(db, "users", s.docs[0].id), { balance: increment(amt) });
+        try {
+            const s = await getDocs(query(collection(db, "users"), where("username", "==", toVal)));
+            if(s.empty) return alert("USER NOT FOUND");
+            const recipientUid = s.docs[0].id;
+            
+            if(type === 'money') {
+                if(userData.balance < amtVal) return alert("NO CASH");
+                await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-amtVal) });
+                await updateDoc(doc(db, "users", recipientUid), { balance: increment(amtVal) });
+            }
+            
+            await addDoc(collection(db, "messages"), { 
+                to: toVal, 
+                from: userData.username, 
+                body: type === 'money' ? `Sent $${amtVal}` : bodyVal, 
+                date: Date.now() 
+            });
+            
+            alert("SENT SUCCESS!");
+            document.getElementById(type === 'text' ? 'msgTo' : 'payTo').value = "";
+            if(type === 'text') document.getElementById('msgBody').value = "";
+            if(type === 'money') document.getElementById('payAmt').value = "";
+
+        } catch (err) {
+            console.error(err);
+            alert("Error sending: " + err.message);
         }
-        
-        await addDoc(collection(db, "messages"), { 
-            to, 
-            from: userData.username, 
-            body: type === 'money' ? `Sent $${amt}` : bodyInput.value, 
-            date: Date.now() 
-        });
-        
-        alert("SENT!");
-        toInput.value = "";
-        if(amtInput) amtInput.value = "";
-        if(bodyInput) bodyInput.value = "";
     };
 
     window.showTab = (t) => {
