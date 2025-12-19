@@ -134,6 +134,10 @@
                 </div>
             </div>
             <div class="orb-grid" id="orbGrid"></div>
+            <div id="hyperEarnSection" style="margin-top: 40px;">
+                <h3 style="text-align:center; color:#f59e0b; margin-bottom:15px;">💎 HYPER RARE MARKET</h3>
+                <div id="marketOrbGrid" class="orb-grid"></div>
+            </div>
         </div>
 
         <div id="collectionView" class="tab-view hidden">
@@ -163,7 +167,6 @@
                     <button onclick="buyChest('gold')" id="btn-gold">BUY $20,000</button>
                 </div>
             </div>
-            <h3 style="text-align:center; color:#f59e0b; margin-bottom:15px;">💎 HYPER RARE MARKET</h3>
             <div id="marketContent"></div>
         </div>
 
@@ -231,6 +234,7 @@
                     userData = d.data();
                     updateUI();
                     renderOrbs('orbGrid', ORB_DATA);
+                    renderOrbs('marketOrbGrid', MARKET_ORB_DATA);
                     renderMarket();
                     renderCollection();
                     loadInbox();
@@ -299,8 +303,6 @@
                 });
             }
         });
-        cont.innerHTML += `<div class="section-header">MARKET ORBS</div><div class="orb-grid" id="marketOrbGrid"></div>`;
-        renderOrbs('marketOrbGrid', MARKET_ORB_DATA);
     }
 
     function renderCollection() {
@@ -390,23 +392,19 @@
         } catch (e) { alert(e.message); }
     };
 
-    // ABSOLUTE FIX FOR SEND LOGIC
     window.sendAction = async (type) => {
         const toVal = document.getElementById(type === 'text' ? 'msgTo' : 'payTo').value.trim().toLowerCase().replace('@', '');
         const bodyVal = type === 'text' ? document.getElementById('msgBody').value : '';
         const amtVal = type === 'money' ? parseFloat(document.getElementById('payAmt').value || 0) : 0;
         
         if (!toVal) return alert("ENTER USERNAME");
-        
         console.log("Searching for user:", toVal);
 
         try {
-            // Find user by their custom username field
             const userQuery = query(collection(db, "users"), where("username", "==", toVal));
             const querySnapshot = await getDocs(userQuery);
-            
             if (querySnapshot.empty) {
-                console.error("No user found with username:", toVal);
+                console.error("No user found:", toVal);
                 return alert(`USER NOT FOUND: @${toVal}`);
             }
 
@@ -417,14 +415,10 @@
             if (type === 'money') {
                 if (userData.balance < amtVal) return alert("INSUFFICIENT FUNDS");
                 if (amtVal <= 0) return alert("INVALID AMOUNT");
-                
-                // Process Transfer
                 await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-amtVal) });
                 await updateDoc(doc(db, "users", recipientUid), { balance: increment(amtVal) });
-                console.log("Money Transfer Complete");
             }
 
-            // Always add a record to the messages collection
             await addDoc(collection(db, "messages"), { 
                 to: recipientName, 
                 from: userData.username, 
@@ -433,8 +427,6 @@
             });
 
             alert("SUCCESSFULLY SENT!");
-            
-            // Clear inputs
             document.getElementById(type === 'text' ? 'msgTo' : 'payTo').value = "";
             if (type === 'text') document.getElementById('msgBody').value = "";
             if (type === 'money') document.getElementById('payAmt').value = "";
