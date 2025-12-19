@@ -76,7 +76,6 @@
         .notif-dot { width: 10px; height: 10px; background: #10b981; border-radius: 50%; animation: pulse 1s infinite; }
         @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.5); opacity: 0.5; } 100% { transform: scale(1); opacity: 1; } }
 
-        /* Chest Styling */
         .chest-card { background: linear-gradient(135deg, #4338ca, #6366f1); padding: 20px; border-radius: 16px; text-align: center; border: 2px solid #818cf8; margin-bottom: 25px; }
         .chest-icon { font-size: 40px; margin-bottom: 10px; }
     </style>
@@ -277,7 +276,7 @@
         document.getElementById('userPfp').src = `https://api.dicebear.com/7.x/identicon/svg?seed=${userData.pfpSeed || userData.username}`;
         document.getElementById('clickPowerVal').innerText = getPower(userData.clickLevel || 1).toLocaleString();
         document.getElementById('clickCost').innerText = ((userData.clickLevel || 1) * 200).toLocaleString();
-        document.getElementById('upgradeClickBtn').className = (bal >= (userData.clickLevel * 200)) ? "btn-available" : "btn-locked";
+        document.getElementById('upgradeClickBtn').className = (bal >= ((userData.clickLevel || 1) * 200)) ? "btn-available" : "btn-locked";
         document.getElementById('chestBtn').style.opacity = (bal >= 100) ? "1" : "0.5";
     }
 
@@ -288,14 +287,13 @@
         const grid = document.getElementById(gridId);
         grid.innerHTML = '';
 
-        // Render Chest Orbs if in Marketplace
         if (gridId === 'marketOrbGrid' && userData.mysteryOrbs) {
             userData.mysteryOrbs.forEach((mOrb, idx) => {
                 const div = document.createElement('div');
                 div.className = 'orb-item';
                 div.innerHTML = `
                     <div class="orb-visual" style="color:#fbbf24; background:currentColor"></div>
-                    <b>Mystery Orb #${idx+1}</b>
+                    <b>${mOrb.name}</b>
                     <div style="font-size:10px; margin:5px 0;"><span style="color:#10b981">+$${mOrb.inc}/5s</span></div>
                     <div class="progress-bg"><div class="progress-fill" id="bar-mystery-${idx}"></div></div>
                     <button class="buy-btn btn-locked">CHEST EXCLUSIVE</button>
@@ -348,6 +346,17 @@
         badgeSec.innerHTML = `<div class="badge-card" style="border-left: 5px solid ${b.color}"><div class="badge-icon">${b.icon}</div><div class="badge-info"><h4>${b.name} Clicker</h4><p>Total Lifetime Clicks: ${clicks.toLocaleString()}</p></div></div>`;
         const grid = document.getElementById('collectionGrid');
         grid.innerHTML = '';
+        
+        // Mystery Orbs in collection
+        if(userData.mysteryOrbs) {
+            userData.mysteryOrbs.forEach(mOrb => {
+               const div = document.createElement('div');
+               div.className = 'orb-item';
+               div.innerHTML = `<div class="orb-visual" style="color:#fbbf24; background:currentColor"></div><b>${mOrb.name}</b><div style="font-size:10px; margin-top:10px; color:#6366f1; font-weight:700;">CHEST LOOT</div>`;
+               grid.appendChild(div);
+            });
+        }
+
         const ownedList = [...ORB_DATA, ...MARKET_ORB_DATA].filter(o => userData.orbs?.[o.id] > 0);
         ownedList.forEach(o => {
             const div = document.createElement('div');
@@ -359,12 +368,17 @@
 
     window.buyChest = async () => {
         if(!userData || userData.balance < 100) return alert("Need $100!");
+        
+        const adjectives = ["Ancient", "Pulsing", "Radiant", "Shadow", "Mystic", "Cursed", "Solar", "Lunar", "Glitch", "Frozen"];
+        const elements = ["Lava", "Water", "Earth", "Air", "Cosmic", "Void", "Storm", "Spirit", "Metal", "Venom"];
+        const randName = adjectives[Math.floor(Math.random()*adjectives.length)] + " " + elements[Math.floor(Math.random()*elements.length)] + " Orb";
+        
         const randInc = Math.floor(Math.random() * 500) + 1;
         await updateDoc(doc(db, "users", auth.currentUser.uid), {
             balance: increment(-100),
-            mysteryOrbs: arrayUnion({ inc: randInc, lastClaim: Date.now() })
+            mysteryOrbs: arrayUnion({ name: randName, inc: randInc, lastClaim: Date.now() })
         });
-        alert(`You got a Mystery Orb earning $${randInc}/5s!`);
+        alert(`You unboxed a ${randName} earning $${randInc}/5s!`);
     };
 
     window.buyOrb = async (id, cost) => {
@@ -432,7 +446,6 @@
     setInterval(() => {
         if(!userData) return;
         
-        // standard orbs
         [...ORB_DATA, ...MARKET_ORB_DATA].forEach(orb => {
             if((userData.orbs?.[orb.id] || 0) > 0) {
                 if(!window[orb.id+'_timer']) {
@@ -447,7 +460,6 @@
             }
         });
 
-        // mystery orbs claim logic
         if (userData.mysteryOrbs) {
             userData.mysteryOrbs.forEach((mOrb, idx) => {
                 if(!window['mystery_'+idx+'_timer']) {
