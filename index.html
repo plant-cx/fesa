@@ -390,42 +390,58 @@
         } catch (e) { alert(e.message); }
     };
 
-    // FIXED SEND LOGIC
+    // ABSOLUTE FIX FOR SEND LOGIC
     window.sendAction = async (type) => {
-        const toVal = document.getElementById(type === 'text' ? 'msgTo' : 'payTo').value.trim().toLowerCase();
+        const toVal = document.getElementById(type === 'text' ? 'msgTo' : 'payTo').value.trim().toLowerCase().replace('@', '');
         const bodyVal = type === 'text' ? document.getElementById('msgBody').value : '';
         const amtVal = type === 'money' ? parseFloat(document.getElementById('payAmt').value || 0) : 0;
         
         if (!toVal) return alert("ENTER USERNAME");
-        if (type === 'text' && !bodyVal) return alert("ENTER MESSAGE");
-        if (type === 'money' && amtVal <= 0) return alert("ENTER VALID AMOUNT");
+        
+        console.log("Searching for user:", toVal);
 
         try {
-            const s = await getDocs(query(collection(db, "users"), where("username", "==", toVal)));
-            if(s.empty) return alert("USER NOT FOUND");
-            const recipientUid = s.docs[0].id;
+            // Find user by their custom username field
+            const userQuery = query(collection(db, "users"), where("username", "==", toVal));
+            const querySnapshot = await getDocs(userQuery);
             
-            if(type === 'money') {
-                if(userData.balance < amtVal) return alert("NO CASH");
+            if (querySnapshot.empty) {
+                console.error("No user found with username:", toVal);
+                return alert(`USER NOT FOUND: @${toVal}`);
+            }
+
+            const recipientDoc = querySnapshot.docs[0];
+            const recipientUid = recipientDoc.id;
+            const recipientName = recipientDoc.data().username;
+
+            if (type === 'money') {
+                if (userData.balance < amtVal) return alert("INSUFFICIENT FUNDS");
+                if (amtVal <= 0) return alert("INVALID AMOUNT");
+                
+                // Process Transfer
                 await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-amtVal) });
                 await updateDoc(doc(db, "users", recipientUid), { balance: increment(amtVal) });
+                console.log("Money Transfer Complete");
             }
-            
+
+            // Always add a record to the messages collection
             await addDoc(collection(db, "messages"), { 
-                to: toVal, 
+                to: recipientName, 
                 from: userData.username, 
-                body: type === 'money' ? `Sent $${amtVal}` : bodyVal, 
+                body: type === 'money' ? `Sent you $${amtVal.toLocaleString()}` : bodyVal, 
                 date: Date.now() 
             });
+
+            alert("SUCCESSFULLY SENT!");
             
-            alert("SENT SUCCESS!");
+            // Clear inputs
             document.getElementById(type === 'text' ? 'msgTo' : 'payTo').value = "";
-            if(type === 'text') document.getElementById('msgBody').value = "";
-            if(type === 'money') document.getElementById('payAmt').value = "";
+            if (type === 'text') document.getElementById('msgBody').value = "";
+            if (type === 'money') document.getElementById('payAmt').value = "";
 
         } catch (err) {
-            console.error(err);
-            alert("Error sending: " + err.message);
+            console.error("Send Action Error:", err);
+            alert("SYSTEM ERROR: " + err.message);
         }
     };
 
