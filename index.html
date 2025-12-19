@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MailCash | Marketplace Generators</title>
+    <title>MailCash | Marketplace Edition</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background: #0f172a; color: #f8fafc; padding: 20px; overflow-x: hidden; }
-        .container { max-width: 650px; margin: 0 auto; position: relative; }
+        .container { max-width: 600px; margin: 0 auto; position: relative; }
         
         .card { background: #1e293b; border-radius: 16px; padding: 25px; border: 1px solid #334155; margin-bottom: 20px; }
         .hidden { display: none !important; }
@@ -24,19 +24,16 @@
         .tab { flex: 1; text-align: center; padding: 10px; cursor: pointer; border-radius: 10px; color: #94a3b8; font-weight: 700; font-size: 12px; white-space: nowrap; }
         .tab.active { background: #334155; color: white; }
 
-        /* MARKETPLACE SPECIFIC */
-        .hyper-rare-row { display: flex; gap: 10px; justify-content: center; margin-bottom: 30px; overflow-x: auto; padding-bottom: 10px; }
-        .hr-orb { min-width: 80px; height: 80px; background: #0f172a; border: 2px solid #334155; border-radius: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
-        .hr-orb.locked { filter: blur(3px); opacity: 0.5; }
-        .hr-count { font-size: 18px; font-weight: 900; color: #f59e0b; }
-
-        .gen-list { background: #111827; border-radius: 12px; border: 1px solid #334155; padding: 10px; }
-        .gen-item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #1e293b; gap: 15px; }
-        .gen-icon { width: 50px; height: 50px; border-radius: 10px; border: 2px solid #ef4444; background: #1e293b; display: flex; align-items: center; justify-content: center; font-size: 20px; }
-        .gen-info { flex: 1; }
-        .gen-title { font-weight: 800; font-size: 16px; display: block; }
-        .gen-desc { font-size: 11px; color: #94a3b8; }
-        .gen-btn { width: 100px; padding: 8px; font-size: 12px; }
+        /* Generator Layout Styles */
+        .hr-top-row { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; overflow-x: auto; padding: 10px; }
+        .hr-mini-card { min-width: 80px; height: 80px; background: #1e293b; border: 2px solid #334155; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        
+        .gen-container { display: flex; flex-direction: column; gap: 12px; }
+        .gen-row { display: flex; align-items: center; background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 12px; gap: 15px; }
+        .gen-main-orb { width: 50px; height: 50px; border-radius: 50%; border: 3px solid #f59e0b; flex-shrink: 0; }
+        .gen-info { flex-grow: 1; }
+        .gen-produced-orbs { display: flex; gap: 4px; flex-wrap: wrap; max-width: 120px; }
+        .mini-produced-orb { width: 12px; height: 12px; border-radius: 50%; background: #6366f1; box-shadow: 0 0 5px #6366f1; }
 
         .orb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
         .orb-item { background: #0f172a; border: 1px solid #334155; padding: 15px; border-radius: 12px; position: relative; text-align: center; min-height: 200px; display: flex; flex-direction: column; }
@@ -44,9 +41,6 @@
         
         .blur-lock { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10; border-radius: 12px; }
         .lock-q { font-size: 32px; font-weight: 900; color: #f8fafc; }
-
-        .progress-bg { width: 100%; height: 4px; background: #1e293b; border-radius: 10px; margin-top: 10px; overflow: hidden; }
-        .progress-fill { height: 100%; background: #6366f1; width: 0%; transition: width 0.1s linear; }
 
         .clicker-btn { width: 110px; height: 110px; border-radius: 50%; background: radial-gradient(circle, #6366f1, #4338ca); border: 8px solid #312e81; font-size: 35px; margin: 0 auto 10px; display: block; cursor: pointer; transition: transform 0.1s; }
         .popup-anim { position: absolute; color: #34d399; font-weight: 900; animation: floatUp 1.2s ease-out forwards; pointer-events: none; z-index: 10000; font-size: 18px; }
@@ -78,7 +72,7 @@
             <div id="settingsMenu" class="card hidden">
                 <h3 style="margin-bottom:15px;">Settings</h3>
                 <input type="text" id="setNewUser" placeholder="New Username">
-                <button onclick="updateProfile()" style="background:#10b981; margin-bottom:15px;">Update</button>
+                <button onclick="updateProfile()" style="background:#10b981; margin-bottom:15px;">Update Profile</button>
                 <button onclick="logout()" style="background:#ef4444;">Logout</button>
             </div>
         </div>
@@ -94,8 +88,8 @@
         <div id="earnView" class="tab-view">
             <div style="text-align:center">
                 <button class="clicker-btn" id="mainClicker">💰</button>
-                <div class="card" style="margin-top:15px;">
-                    <span id="clickPowerVal">1</span> Click Power | Upgrade: $<span id="clickCost">100</span>
+                <div class="card" style="margin-top:15px; padding:15px;">
+                    <span id="clickPowerVal">1</span> Power | $<span id="clickCost">100</span>
                     <button id="upgradeClickBtn" onclick="upgradeClicker()" style="margin-top:10px;">Upgrade</button>
                 </div>
             </div>
@@ -103,25 +97,19 @@
         </div>
 
         <div id="marketplaceView" class="tab-view hidden">
-            <div class="hyper-rare-row" id="hrRow"></div>
+            <div class="hr-top-row" id="hrMarketRow"></div>
 
-            <h3 style="border-bottom: 2px solid #ef4444; display: inline-block; margin-bottom: 15px;">Orb Generators</h3>
-            
-            <div class="gen-list" id="genList"></div>
-            
-            <p id="totalGenIncome" style="margin-top: 15px; font-weight: 900; color: #94a3b8;"></p>
+            <h3 style="margin: 10px 0; color: #ef4444;">Orb Generators</h3>
+            <div class="gen-container" id="generatorList"></div>
+            <p id="totalGenIncome" style="margin-top:15px; color:#94a3b8; font-size:12px; text-align:center;"></p>
         </div>
 
-        <div id="inboxView" class="tab-view hidden">
-            <div id="mailBox">Loading...</div>
-        </div>
-
+        <div id="inboxView" class="tab-view hidden"><div id="mailBox">Loading...</div></div>
         <div id="messageView" class="tab-view hidden card">
             <input type="text" id="msgTo" placeholder="To @username">
             <textarea id="msgBody" rows="4" placeholder="Message..."></textarea>
             <button onclick="sendAction('text')">Send</button>
         </div>
-
         <div id="transferView" class="tab-view hidden card">
             <input type="text" id="payTo" placeholder="Recipient">
             <input type="number" id="payAmt" placeholder="Amount">
@@ -148,33 +136,28 @@
         { id: 'orb2', name: 'Red Orb', baseCost: 3000, baseInc: 200, time: 7000, color: '#ef4444' },
         { id: 'orb3', name: 'Green Orb', baseCost: 15000, baseInc: 850, time: 6000, color: '#10b981' },
         { id: 'orb4', name: 'Gold Orb', baseCost: 50000, baseInc: 3500, time: 4000, color: '#f59e0b' },
-        { id: 'orb5', name: 'Purple Orb', baseCost: 150000, baseInc: 12000, time: 5000, color: '#8b5cf6' },
-        { id: 'orb6', name: 'Cyan Orb', baseCost: 400000, baseInc: 40000, time: 5000, color: '#06b6d4' },
-        { id: 'orb7', name: 'Pink Orb', baseCost: 1000000, baseInc: 120000, time: 8000, color: '#ec4899' },
-        { id: 'orb8', name: 'White Orb', baseCost: 4000000, baseInc: 500000, time: 10000, color: '#f8fafc' },
-        { id: 'orb9', name: 'Void Orb', baseCost: 20000000, baseInc: 3000000, time: 12000, color: '#475569' },
         { id: 'orb10', name: 'Solar Orb', baseCost: 80000000, baseInc: 15000000, time: 15000, color: '#fbbf24' }
     ];
 
     const HR_ORBS = [
-        { id: 'h_orb1', name: 'Diamond Orb', cost: 100000000, inc: 50000000, color: '#e2e8f0' },
-        { id: 'h_orb2', name: 'Emerald Orb', cost: 500000000, inc: 250000000, color: '#10b981' },
-        { id: 'h_orb3', name: 'Ruby Orb', cost: 2500000000, inc: 1000000000, color: '#dc2626' },
-        { id: 'h_orb4', name: 'Obsidian Orb', cost: 10000000000, inc: 5000000000, color: '#1e293b' },
-        { id: 'h_orb5', name: 'Cosmic Orb', cost: 100000000000, inc: 25000000000, color: '#6366f1' }
+        { id: 'h_orb1', name: 'Diamond', cost: 100000000, color: '#e2e8f0' },
+        { id: 'h_orb2', name: 'Emerald', cost: 500000000, color: '#10b981' },
+        { id: 'h_orb3', name: 'Ruby', cost: 2500000000, color: '#dc2626' },
+        { id: 'h_orb4', name: 'Obsidian', cost: 10000000000, color: '#1e293b' },
+        { id: 'h_orb5', name: 'Cosmic', cost: 100000000000, color: '#6366f1' }
     ];
 
-    const GENERATORS = [
-        { rank: 'Wood', cost: 250, min: 5, max: 15 },
-        { rank: 'Bronze', cost: 500, min: 10, max: 25 },
-        { rank: 'Silver', cost: 5000, min: 100, max: 250 },
-        { rank: 'Gold', cost: 50000, min: 1000, max: 2500 },
-        { rank: 'Platinum', cost: 500000, min: 10000, max: 25000 },
-        { rank: 'Diamond', cost: 5000000, min: 100000, max: 250000 },
-        { rank: 'Master', cost: 50000000, min: 1000000, max: 2500000 },
-        { rank: 'Grandmaster', cost: 1000000000, min: 25000000, max: 50000000 },
-        { rank: 'Legend', cost: 50000000000, min: 1000000000, max: 2500000000 },
-        { rank: 'Champion', cost: 20000000000000, min: 500000000000, max: 1000000000000 }
+    const GEN_DATA = [
+        { rank: 'Wood', cost: 250, min: 5, max: 15, color: '#78350f' },
+        { rank: 'Bronze', cost: 500, min: 10, max: 25, color: '#92400e' },
+        { rank: 'Silver', cost: 5000, min: 100, max: 250, color: '#94a3b8' },
+        { rank: 'Gold', cost: 50000, min: 1000, max: 2500, color: '#f59e0b' },
+        { rank: 'Diamond', cost: 1000000, min: 25000, max: 50000, color: '#cbd5e1' },
+        { rank: 'Platinum', cost: 50000000, min: 1000000, max: 2000000, color: '#94a3b8' },
+        { rank: 'Emerald', cost: 500000000, min: 10000000, max: 25000000, color: '#10b981' },
+        { rank: 'Master', cost: 10000000000, min: 250000000, max: 500000000, color: '#8b5cf6' },
+        { rank: 'Legend', cost: 1000000000000, min: 25000000000, max: 50000000000, color: '#ef4444' },
+        { rank: 'Champion', cost: 20000000000000, min: 500000000000, max: 1000000000000, color: '#facc15' }
     ];
 
     onAuthStateChanged(auth, u => {
@@ -183,88 +166,80 @@
                 if(d.exists()) {
                     userData = d.data();
                     updateUI();
-                    renderStandardOrbs();
+                    renderEarnOrbs();
                     renderMarketplace();
                     loadInbox();
                     document.getElementById('authScreen').classList.add('hidden');
                     document.getElementById('appScreen').classList.remove('hidden');
                 }
             });
+        } else {
+            document.getElementById('appScreen').classList.add('hidden');
+            document.getElementById('authScreen').classList.remove('hidden');
         }
     });
 
-    function renderMarketplace() {
-        // Render Top HR Row
-        const hrRow = document.getElementById('hrRow');
-        hrRow.innerHTML = HR_ORBS.map((orb, i) => {
+    function updateUI() {
+        document.getElementById('userBal').innerText = Math.floor(userData.balance || 0).toLocaleString();
+        document.getElementById('userDisplay').innerText = "@" + userData.username;
+        document.getElementById('userPfp').src = `https://api.dicebear.com/7.x/identicon/svg?seed=${userData.username}`;
+        document.getElementById('clickPowerVal').innerText = (userData.clickLevel || 1).toLocaleString();
+        document.getElementById('clickCost').innerText = ((userData.clickLevel || 1) * 200).toLocaleString();
+        document.getElementById('totalGenIncome').innerText = `Generator Payout: +$${(userData.genIncome || 0).toLocaleString()} / 10s`;
+    }
+
+    function renderEarnOrbs() {
+        const grid = document.getElementById('orbGrid');
+        grid.innerHTML = ORB_DATA.map((orb, i) => {
             const owned = userData.orbs?.[orb.id] || 0;
-            const locked = i > 0 && !(userData.orbs?.[HR_ORBS[i-1].id] > 0);
-            return `<div class="hr-orb ${locked ? 'locked' : ''}" onclick="buyOrb('${orb.id}', ${orb.cost})">
-                <div class="hr-count">${owned}</div>
-                <div style="font-size:8px; color:#94a3b8">${orb.name}</div>
+            const cost = Math.floor(orb.baseCost * Math.pow(1.3, owned));
+            const unlocked = i === 0 || (userData.orbs?.[ORB_DATA[i-1].id] > 0);
+            return `<div class="orb-item">
+                <div class="orb-visual" style="color:${orb.color}; background:currentColor"></div>
+                <b>${orb.name}</b>
+                <button onclick="buyOrb('${orb.id}', ${cost})" class="buy-btn ${unlocked ? 'btn-available' : 'btn-locked'}">${unlocked ? 'Upgrade' : 'Locked'}</button>
             </div>`;
         }).join('');
+    }
 
-        // Render Generators
-        const genList = document.getElementById('genList');
-        genList.innerHTML = GENERATORS.map(g => {
-            const owned = userData.generators?.[g.rank] || 0;
-            return `<div class="gen-item">
-                <div class="gen-icon">⚙️</div>
+    function renderMarketplace() {
+        // Top 5 Hyper Rares
+        document.getElementById('hrMarketRow').innerHTML = HR_ORBS.map(orb => `
+            <div class="hr-mini-card" onclick="buyOrb('${orb.id}', ${orb.cost})">
+                <div style="width:20px; height:20px; border-radius:50%; background:${orb.color}; margin-bottom:5px;"></div>
+                <b style="font-size:10px;">${orb.name}</b>
+                <div style="font-size:8px; color:#10b981">$${(orb.cost/1000000).toFixed(0)}M</div>
+            </div>
+        `).join('');
+
+        // 10 Generators
+        document.getElementById('generatorList').innerHTML = GEN_DATA.map(g => {
+            const ownedOrbs = userData.genOrbs?.[g.rank] || 0;
+            return `
+            <div class="gen-row">
+                <div class="gen-main-orb" style="background:${g.color}"></div>
                 <div class="gen-info">
-                    <span class="gen-title">${g.rank}</span>
-                    <span class="gen-desc">$${g.min.toLocaleString()} - $${g.max.toLocaleString()} per orb (Every 10s)</span>
+                    <b style="font-size:14px;">${g.rank}</b>
+                    <p style="font-size:10px; color:#94a3b8">$${g.min}-$${g.max} per orb</p>
+                    <div class="gen-produced-orbs">${'<div class="mini-produced-orb"></div>'.repeat(ownedOrbs)}</div>
                 </div>
-                <div style="text-align:right">
-                    <div style="font-size:12px; font-weight:bold; color:#10b981">$${g.cost.toLocaleString()}</div>
-                    <button class="gen-btn" onclick="buyGen('${g.rank}', ${g.cost})">Generate</button>
-                </div>
+                <button onclick="buyGen('${g.rank}', ${g.cost})" style="width:auto; padding:8px 15px; font-size:12px;">Generate $${g.cost >= 1e12 ? (g.cost/1e12).toFixed(1)+'T' : g.cost.toLocaleString()}</button>
             </div>`;
         }).join('');
     }
 
     window.buyGen = async (rank, cost) => {
-        if (userData.balance < cost) return alert("Not enough cash!");
-        const count = Math.floor(Math.random() * 10) + 1; // 1 to 10 orbs
-        const genData = GENERATORS.find(g => g.rank === rank);
-        const incomePer10s = count * (Math.floor(Math.random() * (genData.max - genData.min + 1)) + genData.min);
+        if(userData.balance < cost) return alert("Insufficient funds");
+        const g = GEN_DATA.find(x => x.rank === rank);
+        const count = Math.floor(Math.random() * 10) + 1;
+        const income = count * (Math.floor(Math.random() * (g.max - g.min + 1)) + g.min);
         
         await updateDoc(doc(db, "users", auth.currentUser.uid), {
             balance: increment(-cost),
-            [`genIncome`]: increment(incomePer10s)
+            [`genOrbs.${rank}`]: increment(count),
+            genIncome: increment(income)
         });
-        alert(`Generated ${count} ${rank} orbs! Yield: +$${incomePer10s.toLocaleString()} every 10s`);
     };
-
-    // Standard game logic (preserved)
-    const getPower = (lvl) => [1, 5, 25, 50, 100, 250, 500, 1000, 2500, 5000][lvl-1] || lvl*500;
-    function updateUI() {
-        const bal = userData.balance || 0;
-        const lvl = userData.clickLevel || 1;
-        document.getElementById('userBal').innerText = Math.floor(bal).toLocaleString();
-        document.getElementById('userDisplay').innerText = "@" + userData.username;
-        document.getElementById('userPfp').src = `https://api.dicebear.com/7.x/identicon/svg?seed=${userData.pfpSeed || userData.username}`;
-        document.getElementById('clickPowerVal').innerText = getPower(lvl).toLocaleString();
-        document.getElementById('clickCost').innerText = (lvl * 200).toLocaleString();
-        document.getElementById('totalGenIncome').innerText = `Generator Income: +$${(userData.genIncome || 0).toLocaleString()} / 10s`;
-    }
-
-    function renderStandardOrbs() {
-        const grid = document.getElementById('orbGrid');
-        grid.innerHTML = ORB_DATA.map((orb, i) => {
-            const owned = userData.orbs?.[orb.id] || 0;
-            const unlocked = i === 0 || (userData.orbs?.[ORB_DATA[i-1].id] > 0);
-            const cost = Math.floor(orb.baseCost * Math.pow(1.3, owned));
-            return `<div class="orb-item">
-                <div class="orb-visual" style="color:${orb.color}; background:currentColor"></div>
-                <b>${orb.name}</b>
-                ${unlocked ? `<div class="progress-bg"><div class="progress-fill" id="bar-${orb.id}"></div></div>` : '<div class="blur-lock"><div class="lock-q">?</div></div>'}
-                <button onclick="buyOrb('${orb.id}', ${cost})" class="buy-btn ${unlocked && userData.balance >= cost ? 'btn-available' : 'btn-locked'}" style="margin-top:auto">
-                    ${unlocked ? `Upgrade $${cost.toLocaleString()}` : 'LOCKED'}
-                </button>
-            </div>`;
-        }).join('');
-    }
 
     window.buyOrb = async (id, cost) => {
         if(userData.balance >= cost) await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-cost), [`orbs.${id}`]: increment(1) });
@@ -276,38 +251,37 @@
     };
 
     document.getElementById('mainClicker').addEventListener('click', (e) => {
-        const power = getPower(userData.clickLevel || 1);
-        updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(power) });
-        const p = document.createElement('div'); p.className='popup-anim'; p.innerText=`+$${power}`; p.style.left=e.clientX+'px'; p.style.top=e.clientY+'px'; p.style.position='fixed'; document.body.appendChild(p); setTimeout(()=>p.remove(),1200);
+        const pwr = userData.clickLevel || 1;
+        updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(pwr) });
+        const p = document.createElement('div'); p.className='popup-anim'; p.innerText=`+$${pwr}`; p.style.left=e.clientX+'px'; p.style.top=e.clientY+'px'; p.style.position='fixed'; document.body.appendChild(p); setTimeout(()=>p.remove(),1200);
     });
 
-    // Income Loops
-    setInterval(() => {
-        if(!userData) return;
-        [...ORB_DATA, ...HR_ORBS].forEach(orb => {
-            const owned = userData.orbs?.[orb.id] || 0;
-            if(owned > 0) {
-                const time = orb.time || 10000;
-                if(!window[orb.id+'_t']) {
-                    window[orb.id+'_s'] = Date.now();
-                    window[orb.id+'_t'] = setInterval(() => {
-                        const inc = orb.inc || Math.floor(orb.baseInc * (Math.pow(2.0, userData.orbs[orb.id]) - 1));
-                        updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(inc) });
-                        window[orb.id+'_s'] = Date.now();
-                    }, time);
-                }
-                const bar = document.getElementById(`bar-${orb.id}`);
-                if(bar) bar.style.width = Math.min(((Date.now()-window[orb.id+'_s'])/time)*100, 100) + "%";
-            }
-        });
-    }, 100);
-
-    // Generator Income (Every 10s)
+    // Auto Income (Generators)
     setInterval(() => {
         if(userData && userData.genIncome > 0) {
             updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(userData.genIncome) });
         }
     }, 10000);
+
+    window.logout = async () => {
+        await signOut(auth);
+        location.reload();
+    };
+
+    window.handleAuth = async () => {
+        const userNm = document.getElementById('loginUser').value.trim().toLowerCase();
+        const pass = document.getElementById('authPass').value;
+        try {
+            if(isReg) {
+                const res = await createUserWithEmailAndPassword(auth, document.getElementById('regEmail').value, pass);
+                await setDoc(doc(db, "users", res.user.uid), { username: userNm, email: document.getElementById('regEmail').value, balance: 1000, orbs: {}, genOrbs: {}, genIncome: 0, clickLevel: 1 });
+            } else {
+                const s = await getDocs(query(collection(db, "users"), where("username", "==", userNm)));
+                if(s.empty) throw new Error("User not found");
+                await signInWithEmailAndPassword(auth, s.docs[0].data().email, pass);
+            }
+        } catch (e) { alert(e.message); }
+    };
 
     window.showTab = (t) => {
         document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
@@ -317,46 +291,8 @@
         document.getElementById(map[t]).classList.add('active');
     };
 
-    window.handleAuth = async () => {
-        const userNm = document.getElementById('loginUser').value.trim().toLowerCase();
-        const pass = document.getElementById('authPass').value;
-        try {
-            if(isReg) {
-                const email = document.getElementById('regEmail').value;
-                const res = await createUserWithEmailAndPassword(auth, email, pass);
-                await setDoc(doc(db, "users", res.user.uid), { username: userNm, email: email, balance: 1000, orbs: {}, generators: {}, genIncome: 0, clickLevel: 1, pfpSeed: userNm });
-            } else {
-                const s = await getDocs(query(collection(db, "users"), where("username", "==", userNm)));
-                if(s.empty) throw new Error("No user found");
-                await signInWithEmailAndPassword(auth, s.docs[0].data().email, pass);
-            }
-        } catch (e) { alert(e.message); }
-    };
-
-    window.sendAction = async (type) => {
-        const to = document.getElementById(type === 'text' ? 'msgTo' : 'payTo').value.trim().toLowerCase();
-        const amt = type === 'money' ? parseFloat(document.getElementById('payAmt').value || 0) : 0;
-        const s = await getDocs(query(collection(db, "users"), where("username", "==", to)));
-        if(s.empty) return alert("User not found");
-        if(type === 'money') {
-            if(userData.balance < amt) return alert("Insufficient funds");
-            await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-amt) });
-            await updateDoc(doc(db, "users", s.docs[0].id), { balance: increment(amt) });
-        }
-        await addDoc(collection(db, "messages"), { to, from: userData.username, body: type === 'money' ? `Sent $${amt}` : document.getElementById('msgBody').value, date: Date.now() });
-        alert("Sent!");
-    };
-
-    const loadInbox = () => {
-        onSnapshot(query(collection(db, "messages"), where("to", "==", userData.username), orderBy("date", "desc")), s => {
-            document.getElementById('mailBox').innerHTML = s.docs.map(d => `<div class="msg-card"><b>@${d.data().from}</b><p>${d.data().body}</p></div>`).join('') || "No mail.";
-        });
-    };
-
     window.toggleSettings = () => document.getElementById('settingsMenu').classList.toggle('hidden');
     window.toggleAuthMode = () => { isReg = !isReg; document.getElementById('regArea').classList.toggle('hidden', !isReg); };
-    window.updateProfile = async () => { const n = document.getElementById('setNewUser').value.trim(); if(n) await updateDoc(doc(db, "users", auth.currentUser.uid), { username: n, pfpSeed: n }); };
-    window.logout = () => signOut(auth);
 </script>
 </body>
 </html>
