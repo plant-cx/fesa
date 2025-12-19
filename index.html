@@ -41,7 +41,6 @@
         .btn-locked { background: #475569 !important; color: #94a3b8 !important; cursor: not-allowed; }
         .btn-available { background: #10b981 !important; color: white !important; }
 
-        /* New Sell UI styles */
         .orb-stats-top { position: absolute; top: 8px; left: 8px; display: flex; gap: 5px; align-items: center; z-index: 5; }
         .sell-btn { background: #ef4444; color: white; border: none; border-radius: 4px; padding: 2px 6px; font-size: 9px; font-weight: 800; cursor: pointer; }
         .owned-badge { background: #334155; color: #94a3b8; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 700; border: 1px solid #475569; }
@@ -84,6 +83,7 @@
 
         <div class="tabs">
             <div id="tEar" class="tab active" onclick="showTab('earn')">Earn</div>
+            <div id="tCol" class="tab" onclick="showTab('collection')">Collection</div>
             <div id="tMkt" class="tab" onclick="showTab('marketplace')">Marketplace</div>
             <div id="tIn" class="tab" onclick="showTab('inbox')">Inbox</div>
             <div id="tMsg" class="tab" onclick="showTab('message')">Mail</div>
@@ -106,6 +106,12 @@
                 </div>
             </div>
             <div class="orb-grid" id="orbGrid"></div>
+        </div>
+
+        <div id="collectionView" class="tab-view hidden">
+            <h3 style="text-align:center; color:#6366f1; margin-bottom:10px;">Your Collection</h3>
+            <p style="text-align:center; font-size:11px; color:#94a3b8; margin-bottom:20px;">Unique orbs currently in your possession.</p>
+            <div class="orb-grid" id="collectionGrid"></div>
         </div>
 
         <div id="marketplaceView" class="tab-view hidden">
@@ -186,6 +192,7 @@
                     updateUI();
                     renderOrbs('orbGrid', ORB_DATA);
                     renderOrbs('marketOrbGrid', MARKET_ORB_DATA);
+                    renderCollection();
                     loadInbox();
                     document.getElementById('authScreen').classList.add('hidden');
                     document.getElementById('appScreen').classList.remove('hidden');
@@ -236,7 +243,7 @@
             const owned = userData.orbs?.[orb.id] || 0;
             const isUnlocked = index === 0 || (userData.orbs?.[dataList[index-1].id] > 0);
             const cost = Math.floor(orb.baseCost * Math.pow(1.3, owned));
-            const sellPrice = Math.floor(cost * 0.7); // 70% refund of current cost
+            const sellPrice = Math.floor(cost * 0.7);
             
             const div = document.createElement('div');
             div.className = 'orb-item';
@@ -272,21 +279,44 @@
         });
     }
 
+    function renderCollection() {
+        if (!userData) return;
+        const grid = document.getElementById('collectionGrid');
+        grid.innerHTML = '';
+        
+        const allPossibleOrbs = [...ORB_DATA, ...MARKET_ORB_DATA];
+        const ownedList = allPossibleOrbs.filter(orb => userData.orbs?.[orb.id] > 0);
+        
+        // Ascending order by base cost
+        ownedList.sort((a, b) => a.baseCost - b.baseCost);
+
+        if (ownedList.length === 0) {
+            grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#94a3b8; padding:20px;">Your collection is empty.</p>';
+            return;
+        }
+
+        ownedList.forEach(orb => {
+            const div = document.createElement('div');
+            div.className = 'orb-item';
+            div.innerHTML = `
+                <div class="orb-visual" style="color:${orb.color}; background:currentColor"></div>
+                <b>${orb.name}</b>
+                <div style="font-size:10px; margin-top:10px; color:#6366f1; font-weight:700;">COLLECTED</div>
+            `;
+            grid.appendChild(div);
+        });
+    }
+
     window.buyOrb = async (id, cost) => {
         if(!userData || userData.balance < cost) return;
         await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-cost), [`orbs.${id}`]: increment(1) });
     };
 
-    // New Sell Logic
-    // New Sell Logic - Verification Removed
     window.sellOrb = async (id, refund) => {
         if(!userData || !userData.orbs?.[id] || userData.orbs[id] <= 0) return;
-        // The confirm() check has been removed for instant selling
-        await updateDoc(doc(db, "users", auth.currentUser.uid), { 
-            balance: increment(refund), 
-            [`orbs.${id}`]: increment(-1) 
-        });
+        await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(refund), [`orbs.${id}`]: increment(-1) });
     };
+
     window.upgradeClicker = async () => {
         const lvl = userData.clickLevel || 1;
         const cost = lvl * 200;
@@ -368,7 +398,6 @@
                     bar.style.width = Math.min((elapsed / orb.time) * 100, 100) + "%";
                 }
             } else {
-                // Clear timer if orb sold to 0
                 if(window[orb.id+'_timer']) {
                     clearInterval(window[orb.id+'_timer']);
                     window[orb.id+'_timer'] = null;
@@ -381,7 +410,7 @@
         document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
         document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
         document.getElementById(t + 'View').classList.remove('hidden');
-        const map = {earn:'tEar', marketplace:'tMkt', inbox:'tIn', message:'tMsg', transfer:'tPay'};
+        const map = {earn:'tEar', collection:'tCol', marketplace:'tMkt', inbox:'tIn', message:'tMsg', transfer:'tPay'};
         document.getElementById(map[t]).classList.add('active');
     };
 
