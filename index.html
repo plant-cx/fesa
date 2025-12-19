@@ -18,10 +18,6 @@
         .balance-pill { background: #064e3b; color: #34d399; padding: 10px 20px; border-radius: 50px; font-weight: 800; border: 1px solid #059669; }
         .pfp-circle { width: 44px; height: 44px; border-radius: 50%; border: 2px solid #6366f1; background: #334155; cursor: pointer; }
         
-        /* New Styles for Sell and Counter */
-        .sell-pill { background: #450a0a; color: #f87171; padding: 10px 15px; border-radius: 50px; font-weight: 800; border: 1px solid #991b1b; cursor: pointer; font-size: 12px; }
-        .count-pill { background: #1e293b; color: #94a3b8; padding: 10px 15px; border-radius: 50px; font-weight: 800; border: 1px solid #334155; font-size: 12px; }
-
         #settingsMenu { position: absolute; right: 0; top: 60px; width: 280px; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #475569; }
 
         .tabs { display: flex; gap: 5px; margin-bottom: 20px; background: #0f172a; padding: 6px; border-radius: 14px; overflow-x: auto; }
@@ -44,6 +40,11 @@
         .buy-btn { font-size: 12px; padding: 8px; margin-top: auto; }
         .btn-locked { background: #475569 !important; color: #94a3b8 !important; cursor: not-allowed; }
         .btn-available { background: #10b981 !important; color: white !important; }
+
+        /* New Sell UI styles */
+        .orb-stats-top { position: absolute; top: 8px; left: 8px; display: flex; gap: 5px; align-items: center; z-index: 5; }
+        .sell-btn { background: #ef4444; color: white; border: none; border-radius: 4px; padding: 2px 6px; font-size: 9px; font-weight: 800; cursor: pointer; }
+        .owned-badge { background: #334155; color: #94a3b8; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 700; border: 1px solid #475569; }
         
         .clicker-btn { width: 110px; height: 110px; border-radius: 50%; background: radial-gradient(circle, #6366f1, #4338ca); border: 8px solid #312e81; font-size: 35px; margin: 0 auto 10px; display: block; cursor: pointer; transition: transform 0.1s; }
         .clicker-btn:active { transform: scale(0.95); }
@@ -65,16 +66,14 @@
 
     <div id="appScreen" class="hidden">
         <div class="header">
-            <div style="display:flex; align-items:center; gap:8px;">
-                <div class="sell-pill" onclick="sellTopOrb()">Sell 1 Orb</div>
-                <div class="count-pill">Orbs: <span id="orbCount">0</span></div>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <img id="userPfp" class="pfp-circle" src="" onclick="toggleSettings()">
+                <b id="userDisplay">@user</b>
             </div>
-
             <div style="display:flex; align-items:center; gap:10px;">
                 <div class="balance-pill">$<span id="userBal">0</span></div>
-                <img id="userPfp" class="pfp-circle" src="" onclick="toggleSettings()">
+                <button onclick="toggleSettings()" style="width:40px; height:40px; padding:0; background:#334155;">⚙️</button>
             </div>
-
             <div id="settingsMenu" class="card hidden">
                 <h3 style="margin-bottom:15px;">Settings</h3>
                 <input type="text" id="setNewUser" placeholder="New Username">
@@ -214,6 +213,7 @@
         const cost = lvl * 200;
 
         document.getElementById('userBal').innerText = Math.floor(bal).toLocaleString();
+        document.getElementById('userDisplay').innerText = "@" + (userData.username || "User");
         document.getElementById('userPfp').src = `https://api.dicebear.com/7.x/identicon/svg?seed=${userData.pfpSeed || userData.username}`;
         
         document.getElementById('clickPowerVal').innerText = power.toLocaleString();
@@ -221,13 +221,6 @@
         
         const upBtn = document.getElementById('upgradeClickBtn');
         upBtn.className = (bal >= cost) ? "btn-available" : "btn-locked";
-
-        // Update total orb count
-        let totalOrbs = 0;
-        if(userData.orbs) {
-            Object.values(userData.orbs).forEach(qty => totalOrbs += qty);
-        }
-        document.getElementById('orbCount').innerText = totalOrbs;
     }
 
     const calcIncome = (orb, owned) => {
@@ -243,17 +236,24 @@
             const owned = userData.orbs?.[orb.id] || 0;
             const isUnlocked = index === 0 || (userData.orbs?.[dataList[index-1].id] > 0);
             const cost = Math.floor(orb.baseCost * Math.pow(1.3, owned));
+            const sellPrice = Math.floor(cost * 0.7); // 70% refund of current cost
+            
             const div = document.createElement('div');
             div.className = 'orb-item';
             
             div.innerHTML = `
+                ${isUnlocked ? `
+                <div class="orb-stats-top">
+                    ${owned > 0 ? `<button onclick="sellOrb('${orb.id}', ${sellPrice})" class="sell-btn">SELL</button>` : ''}
+                    <div class="owned-badge">x${owned}</div>
+                </div>
+                ` : ''}
                 <div class="orb-visual" style="color:${orb.color}; background:currentColor"></div>
                 <b>${orb.name}</b>
                 ${isUnlocked ? `
                     <div style="font-size:10px; margin:5px 0;">
                         <span style="color:#10b981">+$${calcIncome(orb, owned).toLocaleString()}</span>
                         <br><span style="color:#94a3b8">Every ${orb.time/1000}s</span>
-                        <br><span style="color:#6366f1">Owned: ${owned}</span>
                     </div>
                     <div class="progress-bg"><div class="progress-fill" id="bar-${orb.id}"></div></div>
                 ` : ''}
@@ -277,29 +277,11 @@
         await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-cost), [`orbs.${id}`]: increment(1) });
     };
 
-    // New Sell Function
-    window.sellTopOrb = async () => {
-        if(!userData || !userData.orbs) return;
-        const ALL_ORBS = [...MARKET_ORB_DATA, ...ORB_DATA].reverse();
-        let orbToSell = null;
-        
-        for(let orb of ALL_ORBS) {
-            if(userData.orbs[orb.id] > 0) {
-                orbToSell = orb;
-                break;
-            }
-        }
-
-        if(!orbToSell) return alert("You have no orbs to sell!");
-        
-        const currentQty = userData.orbs[orbToSell.id];
-        const sellPrice = Math.floor((orbToSell.baseCost * Math.pow(1.3, currentQty - 1)) / 2);
-
-        if(confirm(`Sell 1 ${orbToSell.name} for $${sellPrice.toLocaleString()}?`)) {
-            await updateDoc(doc(db, "users", auth.currentUser.uid), { 
-                balance: increment(sellPrice), 
-                [`orbs.${orbToSell.id}`]: increment(-1) 
-            });
+    // New Sell Logic
+    window.sellOrb = async (id, refund) => {
+        if(!userData || !userData.orbs?.[id] || userData.orbs[id] <= 0) return;
+        if(confirm(`Sell 1 for $${refund.toLocaleString()}?`)) {
+            await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(refund), [`orbs.${id}`]: increment(-1) });
         }
     };
 
@@ -374,20 +356,20 @@
                     window[orb.id+'_start'] = Date.now();
                     window[orb.id+'_timer'] = setInterval(() => {
                         if (!userData) return;
-                        const currentOwned = userData.orbs[orb.id];
-                        if(currentOwned > 0) {
-                             updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(calcIncome(orb, currentOwned)) });
-                             window[orb.id+'_start'] = Date.now();
-                        } else {
-                            clearInterval(window[orb.id+'_timer']);
-                            window[orb.id+'_timer'] = null;
-                        }
+                        updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(calcIncome(orb, userData.orbs[orb.id])) });
+                        window[orb.id+'_start'] = Date.now();
                     }, orb.time);
                 }
                 const bar = document.getElementById(`bar-${orb.id}`);
                 if(bar) {
                     const elapsed = Date.now() - (window[orb.id+'_start'] || Date.now());
                     bar.style.width = Math.min((elapsed / orb.time) * 100, 100) + "%";
+                }
+            } else {
+                // Clear timer if orb sold to 0
+                if(window[orb.id+'_timer']) {
+                    clearInterval(window[orb.id+'_timer']);
+                    window[orb.id+'_timer'] = null;
                 }
             }
         });
