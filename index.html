@@ -278,13 +278,15 @@
     };
 
     // New Sell Logic
+    // New Sell Logic - Verification Removed
     window.sellOrb = async (id, refund) => {
         if(!userData || !userData.orbs?.[id] || userData.orbs[id] <= 0) return;
-        if(confirm(`Sell 1 for $${refund.toLocaleString()}?`)) {
-            await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(refund), [`orbs.${id}`]: increment(-1) });
-        }
+        // The confirm() check has been removed for instant selling
+        await updateDoc(doc(db, "users", auth.currentUser.uid), { 
+            balance: increment(refund), 
+            [`orbs.${id}`]: increment(-1) 
+        });
     };
-
     window.upgradeClicker = async () => {
         const lvl = userData.clickLevel || 1;
         const cost = lvl * 200;
