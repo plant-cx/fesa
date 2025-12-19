@@ -75,6 +75,10 @@
         .notif-banner.active { left: 20px; }
         .notif-dot { width: 10px; height: 10px; background: #10b981; border-radius: 50%; animation: pulse 1s infinite; }
         @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.5); opacity: 0.5; } 100% { transform: scale(1); opacity: 1; } }
+
+        /* Chest Styling */
+        .chest-card { background: linear-gradient(135deg, #4338ca, #6366f1); padding: 20px; border-radius: 16px; text-align: center; border: 2px solid #818cf8; margin-bottom: 25px; }
+        .chest-icon { font-size: 40px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -146,8 +150,14 @@
         </div>
 
         <div id="marketplaceView" class="tab-view hidden">
+            <div class="chest-card">
+                <div class="chest-icon">📦</div>
+                <h4>Mystery Chest</h4>
+                <p style="font-size: 12px; opacity: 0.9; margin-bottom: 12px;">Get a random Orb earning $1-$500/5s</p>
+                <button onclick="buyChest()" id="chestBtn" style="background: #fbbf24; color: #1e293b; border: none;">Buy Chest ($100)</button>
+            </div>
+            
             <h3 style="text-align:center; color:#f59e0b; margin-bottom:10px;">💎 Hyper Rare Market</h3>
-            <p style="text-align:center; font-size:11px; color:#94a3b8; margin-bottom:20px;">Elite orbs with massive multipliers.</p>
             <div class="orb-grid" id="marketOrbGrid"></div>
         </div>
 
@@ -176,7 +186,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, updateDoc, onSnapshot, query, collection, where, getDocs, increment, orderBy, addDoc, deleteDoc, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, updateDoc, onSnapshot, query, collection, where, getDocs, increment, orderBy, addDoc, deleteDoc, limit, arrayUnion } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBo2zhESYzv1OChHSAfSb2GLiP6XtI6q1s",
@@ -262,15 +272,13 @@
     function updateUI() {
         if (!userData) return;
         const bal = userData.balance || 0;
-        const lvl = userData.clickLevel || 1;
-        const power = getPower(lvl);
-        const cost = lvl * 200;
         document.getElementById('userBal').innerText = Math.floor(bal).toLocaleString();
         document.getElementById('userDisplay').innerText = "@" + userData.username;
         document.getElementById('userPfp').src = `https://api.dicebear.com/7.x/identicon/svg?seed=${userData.pfpSeed || userData.username}`;
-        document.getElementById('clickPowerVal').innerText = power.toLocaleString();
-        document.getElementById('clickCost').innerText = cost.toLocaleString();
-        document.getElementById('upgradeClickBtn').className = (bal >= cost) ? "btn-available" : "btn-locked";
+        document.getElementById('clickPowerVal').innerText = getPower(userData.clickLevel || 1).toLocaleString();
+        document.getElementById('clickCost').innerText = ((userData.clickLevel || 1) * 200).toLocaleString();
+        document.getElementById('upgradeClickBtn').className = (bal >= (userData.clickLevel * 200)) ? "btn-available" : "btn-locked";
+        document.getElementById('chestBtn').style.opacity = (bal >= 100) ? "1" : "0.5";
     }
 
     const calcIncome = (orb, owned) => owned > 0 ? Math.floor(orb.baseInc * (Math.pow(2.0, owned) - 1)) : 0;
@@ -279,6 +287,23 @@
         if (!userData) return;
         const grid = document.getElementById(gridId);
         grid.innerHTML = '';
+
+        // Render Chest Orbs if in Marketplace
+        if (gridId === 'marketOrbGrid' && userData.mysteryOrbs) {
+            userData.mysteryOrbs.forEach((mOrb, idx) => {
+                const div = document.createElement('div');
+                div.className = 'orb-item';
+                div.innerHTML = `
+                    <div class="orb-visual" style="color:#fbbf24; background:currentColor"></div>
+                    <b>Mystery Orb #${idx+1}</b>
+                    <div style="font-size:10px; margin:5px 0;"><span style="color:#10b981">+$${mOrb.inc}/5s</span></div>
+                    <div class="progress-bg"><div class="progress-fill" id="bar-mystery-${idx}"></div></div>
+                    <button class="buy-btn btn-locked">CHEST EXCLUSIVE</button>
+                `;
+                grid.appendChild(div);
+            });
+        }
+
         dataList.forEach((orb, index) => {
             const owned = userData.orbs?.[orb.id] || 0;
             const isUnlocked = index === 0 || (userData.orbs?.[dataList[index-1].id] > 0);
@@ -320,12 +345,10 @@
         else if (clicks >= 250) b = { name: "Gold", icon: "🥇", color: "#f59e0b" };
         else if (clicks >= 50) b = { name: "Silver", icon: "🥈", color: "#94a3b8" };
         else if (clicks >= 1) b = { name: "Bronze", icon: "🥉", color: "#b45309" };
-        
         badgeSec.innerHTML = `<div class="badge-card" style="border-left: 5px solid ${b.color}"><div class="badge-icon">${b.icon}</div><div class="badge-info"><h4>${b.name} Clicker</h4><p>Total Lifetime Clicks: ${clicks.toLocaleString()}</p></div></div>`;
-        
         const grid = document.getElementById('collectionGrid');
         grid.innerHTML = '';
-        const ownedList = [...ORB_DATA, ...MARKET_ORB_DATA].filter(o => userData.orbs?.[o.id] > 0).sort((a,b) => a.baseCost - b.baseCost);
+        const ownedList = [...ORB_DATA, ...MARKET_ORB_DATA].filter(o => userData.orbs?.[o.id] > 0);
         ownedList.forEach(o => {
             const div = document.createElement('div');
             div.className = 'orb-item';
@@ -333,6 +356,16 @@
             grid.appendChild(div);
         });
     }
+
+    window.buyChest = async () => {
+        if(!userData || userData.balance < 100) return alert("Need $100!");
+        const randInc = Math.floor(Math.random() * 500) + 1;
+        await updateDoc(doc(db, "users", auth.currentUser.uid), {
+            balance: increment(-100),
+            mysteryOrbs: arrayUnion({ inc: randInc, lastClaim: Date.now() })
+        });
+        alert(`You got a Mystery Orb earning $${randInc}/5s!`);
+    };
 
     window.buyOrb = async (id, cost) => {
         if(!userData || (userData.orbs?.[id] || 0) >= 100 || userData.balance < cost) return;
@@ -363,7 +396,7 @@
             if(isReg) {
                 const email = document.getElementById('regEmail').value;
                 const res = await createUserWithEmailAndPassword(auth, email, pass);
-                await setDoc(doc(db, "users", res.user.uid), { username: userNm, email, balance: 1000, orbs: {}, clickLevel: 1, totalClicks: 0, pfpSeed: userNm });
+                await setDoc(doc(db, "users", res.user.uid), { username: userNm, email, balance: 1000, orbs: {}, clickLevel: 1, totalClicks: 0, pfpSeed: userNm, mysteryOrbs: [] });
             } else {
                 const s = await getDocs(query(collection(db, "users"), where("username", "==", userNm)));
                 if(s.empty) throw new Error("No user found");
@@ -398,6 +431,8 @@
 
     setInterval(() => {
         if(!userData) return;
+        
+        // standard orbs
         [...ORB_DATA, ...MARKET_ORB_DATA].forEach(orb => {
             if((userData.orbs?.[orb.id] || 0) > 0) {
                 if(!window[orb.id+'_timer']) {
@@ -409,8 +444,23 @@
                 }
                 const bar = document.getElementById(`bar-${orb.id}`);
                 if(bar) bar.style.width = Math.min(((Date.now() - window[orb.id+'_start']) / orb.time) * 100, 100) + "%";
-            } else if(window[orb.id+'_timer']) { clearInterval(window[orb.id+'_timer']); window[orb.id+'_timer'] = null; }
+            }
         });
+
+        // mystery orbs claim logic
+        if (userData.mysteryOrbs) {
+            userData.mysteryOrbs.forEach((mOrb, idx) => {
+                if(!window['mystery_'+idx+'_timer']) {
+                    window['mystery_'+idx+'_start'] = Date.now();
+                    window['mystery_'+idx+'_timer'] = setInterval(() => {
+                        updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(mOrb.inc) });
+                        window['mystery_'+idx+'_start'] = Date.now();
+                    }, 5000);
+                }
+                const bar = document.getElementById(`bar-mystery-${idx}`);
+                if(bar) bar.style.width = Math.min(((Date.now() - window['mystery_'+idx+'_start']) / 5000) * 100, 100) + "%";
+            });
+        }
     }, 100);
 
     window.showTab = (t) => {
