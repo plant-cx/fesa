@@ -237,15 +237,18 @@
         const grid = document.getElementById(gridId);
         grid.innerHTML = '';
 
+        // RENDERING MYSTERY ORBS FIRST (NEWEST TO OLDEST)
         if (gridId === 'marketOrbGrid' && userData.mysteryOrbs) {
-            userData.mysteryOrbs.forEach((mOrb, idx) => {
+            [...userData.mysteryOrbs].reverse().forEach((mOrb, reverseIdx) => {
+                // Find actual index for progress bar sync
+                const actualIdx = userData.mysteryOrbs.indexOf(mOrb);
                 const div = document.createElement('div');
                 div.className = 'orb-item';
                 div.innerHTML = `
                     <div class="orb-visual" style="color:${mOrb.color || '#fbbf24'}; background:currentColor"></div>
                     <b style="font-size:18px;">${mOrb.name}</b>
                     <div style="font-size:14px; margin:8px 0; font-weight:800; color:#10b981">+$${mOrb.inc}/5s</div>
-                    <div class="progress-bg"><div class="progress-fill" id="bar-mystery-${idx}"></div></div>
+                    <div class="progress-bg"><div class="progress-fill" id="bar-mystery-${actualIdx}"></div></div>
                     <button class="buy-btn btn-locked">CHEST FIND</button>
                 `;
                 grid.appendChild(div);
@@ -284,7 +287,7 @@
         document.getElementById('clickerBadgeSection').innerHTML = `<div class="badge-card" style="border-left: 8px solid ${b.color}"><div class="badge-icon">${b.icon}</div><div class="badge-info"><h4>${b.name} Clicker</h4><p>LIFETIME CLICKS: ${clicks.toLocaleString()}</p></div></div>`;
         
         if(userData.mysteryOrbs) {
-            userData.mysteryOrbs.forEach(mOrb => {
+            [...userData.mysteryOrbs].reverse().forEach(mOrb => {
                const div = document.createElement('div'); div.className = 'orb-item';
                div.innerHTML = `<div class="orb-visual" style="color:${mOrb.color || '#fbbf24'}; background:currentColor"></div><b style="font-size:18px;">${mOrb.name}</b><div style="font-size:14px; margin-top:10px; color:#6366f1; font-weight:900;">LOOT</div>`;
                grid.appendChild(div);
