@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MailCash - Mail, Games & Investing</title>
+    <title>MailCash - Pro Trader Edition</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', sans-serif; background: #0f172a; min-height: 100vh; padding: 20px; color: #f8fafc; }
@@ -23,29 +23,29 @@
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .balance-pill { background: #064e3b; color: #34d399; padding: 8px 16px; border-radius: 50px; font-weight: 800; border: 1px solid #059669; }
 
-        .tabs { display: flex; gap: 5px; margin-bottom: 20px; background: #0f172a; padding: 5px; border-radius: 12px; overflow-x: auto; }
-        .tab { flex: 1; text-align: center; padding: 10px; cursor: pointer; border-radius: 8px; color: #94a3b8; white-space: nowrap; }
+        .tabs { display: flex; gap: 5px; margin-bottom: 20px; background: #0f172a; padding: 5px; border-radius: 12px; }
+        .tab { flex: 1; text-align: center; padding: 10px; cursor: pointer; border-radius: 8px; color: #94a3b8; }
         .tab.active { background: #334155; color: white; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        /* Coin Flip Animation */
-        #coin { width: 80px; height: 80px; margin: 20px auto; background: #fbbf24; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #92400e; border: 4px solid #d97706; transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .flip-anim { transform: rotateY(1800deg) scale(1.2); }
-
-        /* Stocks UI */
-        .stock-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #334155; }
-        .stock-info { flex: 1; }
-        .stock-price { font-weight: 800; margin: 0 15px; }
+        /* Stock UI */
+        .stock-row { background: #1e293b; border: 1px solid #334155; padding: 15px; border-radius: 12px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; }
+        .stock-row:hover { border-color: #6366f1; }
+        .stock-main { display: flex; justify-content: space-between; align-items: center; }
+        .stock-meta { font-size: 12px; color: #94a3b8; margin-top: 5px; }
         .up { color: #10b981; } .down { color: #ef4444; }
-        .stock-btns { display: flex; gap: 5px; }
-        .btn-sm { padding: 5px 10px; font-size: 12px; width: auto; }
+        
+        .chart-container { height: 100px; width: 100%; margin-top: 15px; background: #0f172a; border-radius: 8px; overflow: hidden; display: none; }
+        .chart-container.active { display: block; }
+        polyline { fill: none; stroke-width: 2; transition: all 0.5s; }
 
-        /* General Game UI */
-        .game-section { background: #0f172a; padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #334155; }
-        .playing-cards { font-size: 40px; margin: 15px 0; min-height: 60px; }
+        /* Mini Games */
+        #coin { width: 60px; height: 60px; margin: 10px auto; background: #fbbf24; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #92400e; border: 3px solid #d97706; transition: 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .flip-anim { transform: rotateY(1800deg) scale(1.1); }
+        .playing-cards { font-size: 35px; margin: 10px 0; }
         .hidden { display: none !important; }
-        .message-item { background: #0f172a; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #6366f1; }
+        .message-item { background: #0f172a; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 3px solid #6366f1; }
     </style>
 </head>
 <body>
@@ -56,15 +56,15 @@
         <input type="email" id="loginEmail" placeholder="Email">
         <input type="password" id="loginPassword" placeholder="Password">
         <button onclick="login()">Login</button>
-        <button class="link-btn" onclick="showRegister()" style="background:none; text-decoration:underline;">Register</button>
+        <button class="link-btn" onclick="showRegister()" style="background:none; color:#818cf8; font-size:12px; margin-top:10px;">New? Register</button>
     </div>
 
     <div id="registerScreen" class="auth-card hidden">
-        <h1>Create Account</h1>
-        <input type="text" id="regName" placeholder="Full Name">
+        <h1>Register</h1>
+        <input type="text" id="regName" placeholder="Name">
         <input type="email" id="regEmail" placeholder="Email">
         <input type="password" id="regPassword" placeholder="Password">
-        <button onclick="register()">Join Now</button>
+        <button onclick="register()">Create Account</button>
     </div>
 
     <div id="appScreen" class="app-container hidden">
@@ -75,9 +75,9 @@
 
         <div class="tabs">
             <div class="tab active" id="tab-inbox" onclick="switchTab('inbox')">Inbox</div>
-            <div class="tab" id="tab-compose" onclick="switchTab('compose')">Send</div>
-            <div class="tab" id="tab-games" onclick="switchTab('games')">🎰 Play</div>
             <div class="tab" id="tab-stocks" onclick="switchTab('stocks')">📈 Stocks</div>
+            <div class="tab" id="tab-games" onclick="switchTab('games')">🎰 Play</div>
+            <div class="tab" id="tab-compose" onclick="switchTab('compose')">Send</div>
         </div>
 
         <div id="inboxTab" class="tab-content active"><div id="inboxMessages"></div></div>
@@ -86,44 +86,40 @@
             <input type="email" id="sendTo" placeholder="Recipient">
             <input type="text" id="sendSubject" placeholder="Subject">
             <textarea id="sendBody" rows="4" placeholder="Message"></textarea>
-            <input type="number" id="sendAmount" placeholder="Send Money (Optional)">
-            <button onclick="handleSmartSend()">Send</button>
+            <input type="number" id="sendAmount" placeholder="Attach Money ($)">
+            <button onclick="handleSmartSend()">Send Message</button>
         </div>
 
         <div id="stocksTab" class="tab-content">
-            <h2>Market Simulator (Updates 10s)</h2>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2>Market</h2>
+                <div style="font-size:12px; color:#94a3b8;">Updates: 10s</div>
+            </div>
             <div id="stockMarketList"></div>
         </div>
 
         <div id="gamesTab" class="tab-content">
-            <div class="game-section">
-                <h3>Coin Flip</h3>
-                <div id="coin">H</div>
-                <input type="number" id="coinBet" placeholder="Bet Amount">
-                <div style="display:flex; gap:10px;">
-                    <button id="flipH" onclick="playCoinFlip('Heads')">Heads</button>
-                    <button id="flipT" onclick="playCoinFlip('Tails')">Tails</button>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+                <div class="auth-card" style="width:100%; margin:0; padding:15px; background:#0f172a;">
+                    <h3>Coin Flip</h3>
+                    <div id="coin">H</div>
+                    <input type="number" id="coinBet" placeholder="Bet $">
+                    <button onclick="playCoinFlip('Heads')" style="margin-bottom:5px;">Heads</button>
+                    <button onclick="playCoinFlip('Tails')" style="background:#475569">Tails</button>
                 </div>
-                <p id="coinStatus" style="margin-top:10px; text-align:center;"></p>
-            </div>
-
-            <div class="game-section">
-                <h3>Blackjack</h3>
-                <div id="bjTable">
-                    <p>Dealer: <span id="dealerVal">?</span></p>
-                    <div id="dealerCards" class="playing-cards">🎴 🎴</div>
-                    <p>You: <span id="playerVal">0</span></p>
-                    <div id="playerCards" class="playing-cards"></div>
-                    <div id="bjControls" class="hidden" style="display:flex; gap:10px;">
-                        <button onclick="bjAction('hit')">Hit</button>
+                <div class="auth-card" style="width:100%; margin:0; padding:15px; background:#0f172a;">
+                    <h3>Blackjack</h3>
+                    <div id="bjUI">
+                        <div id="playerCards" class="playing-cards"></div>
+                        <input type="number" id="bjBet" placeholder="Bet $">
+                        <button onclick="startBlackjack()">Deal</button>
+                    </div>
+                    <div id="bjPlay" class="hidden">
+                        <div id="bjCards" class="playing-cards"></div>
+                        <button onclick="bjAction('hit')" style="margin-bottom:5px;">Hit</button>
                         <button onclick="bjAction('stand')" style="background:#475569">Stand</button>
                     </div>
                 </div>
-                <div id="bjStartUI">
-                    <input type="number" id="bjBet" placeholder="Bet Amount">
-                    <button onclick="startBlackjack()">Deal Cards</button>
-                </div>
-                <p id="bjStatus" style="margin-top:10px; font-weight:bold;"></p>
             </div>
         </div>
     </div>
@@ -147,147 +143,123 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
     let curBal = 0;
-
-    // --- STOCK MARKET SYSTEM ---
-    const STOCKS = [
-        { s: 'GGL', n: 'Gogle', p: 150 }, { s: 'AMZ', n: 'Amazen', p: 200 }, { s: 'TSL', n: 'Tessla', p: 100 },
-        { s: 'MCF', n: 'Microsof', p: 300 }, { s: 'APP', n: 'Aple', p: 180 }, { s: 'NFL', n: 'Netflic', p: 400 },
-        { s: 'MET', n: 'Metaa', p: 250 }, { s: 'NVD', n: 'Nvidie', p: 600 }, { s: 'BIT', n: 'Bitcoin', p: 50000 },
-        { s: 'DIS', n: 'Disnay', p: 90 }
-    ];
     let userStocks = {}; 
 
-    function updateStockMarket() {
+    // --- STOCKS SYSTEM ---
+    const STOCKS = [
+        { s: 'GGL', p: 150, h: [150, 152, 148, 150] }, { s: 'AMZ', p: 200, h: [200, 198, 205, 210] },
+        { s: 'TSL', p: 100, h: [100, 90, 110, 105] }, { s: 'NVD', p: 600, h: [580, 590, 600, 610] },
+        { s: 'BIT', p: 40000, h: [39000, 41000, 40000, 42000] }
+    ];
+
+    function updateMarket() {
         const list = document.getElementById('stockMarketList');
         list.innerHTML = STOCKS.map(st => {
-            const change = (Math.random() * 4 - 2).toFixed(2);
+            const last = st.h[st.h.length - 1];
+            const change = (Math.random() * 6 - 3).toFixed(2);
             st.p = Math.max(1, st.p + parseFloat(change));
+            st.h.push(st.p);
+            if(st.h.length > 20) st.h.shift();
+
             const owned = userStocks[st.s] || 0;
+            const equity = (owned * st.p).toFixed(2);
+            const isUp = st.p >= last;
+
+            // Generate Chart Points
+            const min = Math.min(...st.h);
+            const max = Math.max(...st.h);
+            const range = max - min || 1;
+            const points = st.h.map((val, i) => `${(i * 50)},${80 - ((val - min) / range * 60)}`).join(' ');
+
             return `
-                <div class="stock-row">
-                    <div class="stock-info"><b>${st.s}</b> <small>${st.n}</small><br><small>Owned: ${owned}</small></div>
-                    <div class="stock-price ${change >= 0 ? 'up' : 'down'}">$${st.p.toFixed(2)} (${change >= 0 ? '+' : ''}${change})</div>
-                    <div class="stock-btns">
-                        <button class="btn-sm" onclick="tradeStock('${st.s}', ${st.p}, 1)">Buy</button>
-                        <button class="btn-sm" style="background:red" onclick="tradeStock('${st.s}', ${st.p}, -1)">Sell</button>
+                <div class="stock-row" onclick="this.querySelector('.chart-container').classList.toggle('active')">
+                    <div class="stock-main">
+                        <div><b>${st.s}</b> <span class="${isUp ? 'up' : 'down'}">$${st.p.toFixed(2)}</span></div>
+                        <div style="text-align:right">
+                            <button class="btn-sm" style="width:50px; padding:4px;" onclick="event.stopPropagation(); trade('${st.s}',${st.p},1)">Buy</button>
+                            <button class="btn-sm" style="width:50px; padding:4px; background:red;" onclick="event.stopPropagation(); trade('${st.s}',${st.p},-1)">Sell</button>
+                        </div>
+                    </div>
+                    <div class="stock-meta">
+                        Owned: ${owned} shares | <span style="color:white">Equity: $${equity}</span>
+                    </div>
+                    <div class="chart-container">
+                        <svg viewBox="0 0 1000 80" preserveAspectRatio="none" style="width:100%; height:100%">
+                            <polyline points="${points}" stroke="${isUp ? '#10b981' : '#ef4444'}"></polyline>
+                        </svg>
                     </div>
                 </div>
             `;
         }).join('');
     }
-    setInterval(updateStockMarket, 10000);
-    updateStockMarket();
+    setInterval(updateMarket, 10000);
+    updateMarket();
 
-    window.tradeStock = async (symbol, price, qty) => {
-        const cost = price * qty;
-        if (qty > 0 && cost > curBal) return alert("Insufficient funds!");
-        if (qty < 0 && (userStocks[symbol] || 0) < Math.abs(qty)) return alert("Not enough shares!");
-        
-        try {
-            await updateBalance(-cost);
-            userStocks[symbol] = (userStocks[symbol] || 0) + qty;
-            updateStockMarket();
-        } catch(e) { alert(e); }
+    window.trade = async (s, p, q) => {
+        const cost = p * q;
+        if(q > 0 && cost > curBal) return alert("Broke!");
+        if(q < 0 && (userStocks[s] || 0) < 1) return alert("Nothing to sell!");
+        await updateBalance(-cost);
+        userStocks[s] = (userStocks[s] || 0) + q;
+        updateMarket();
     };
 
-    // --- COIN FLIP WITH ANIMATION ---
+    // --- COIN FLIP ---
     window.playCoinFlip = (choice) => {
         const bet = parseFloat(document.getElementById('coinBet').value);
-        if (isNaN(bet) || bet <= 0 || bet > curBal) return alert("Invalid Bet!");
-        
-        const coin = document.getElementById('coin');
-        const status = document.getElementById('coinStatus');
-        coin.classList.add('flip-anim');
-        status.innerText = "Flipping...";
-        
+        if(!bet || bet > curBal) return alert("Invalid bet");
+        const c = document.getElementById('coin');
+        c.classList.add('flip-anim');
         setTimeout(async () => {
-            const result = Math.random() > 0.5 ? 'Heads' : 'Tails';
-            coin.innerText = result[0];
-            coin.classList.remove('flip-anim');
-            
-            if (result === choice) {
-                await updateBalance(bet);
-                status.innerHTML = `<b class="up">WIN! +$${bet}</b>`;
-            } else {
-                await updateBalance(-bet);
-                status.innerHTML = `<b class="down">LOST! -$${bet}</b>`;
-            }
+            const res = Math.random() > 0.5 ? 'Heads' : 'Tails';
+            c.innerText = res[0];
+            c.classList.remove('flip-anim');
+            await updateBalance(res === choice ? bet : -bet);
         }, 600);
     };
 
-    // --- BLACKJACK (NON-RESETTING) ---
-    let bj = { p: [], d: [], deck: [], bet: 0 };
-    window.startBlackjack = async () => {
+    // --- BLACKJACK ---
+    let bj = { p:[], d:[], bet:0 };
+    window.startBlackjack = () => {
         const bet = parseFloat(document.getElementById('bjBet').value);
-        if (isNaN(bet) || bet <= 0 || bet > curBal) return alert("Invalid Bet!");
-        bj.bet = bet;
-        bj.deck = Array.from({length: 52}, (_, i) => ({
-            v: ['A','2','3','4','5','6','7','8','9','10','J','Q','K'][i % 13],
-            s: ['♠','♥','♦','♣'][Math.floor(i/13)]
-        })).sort(() => Math.random() - 0.5);
-        
-        bj.p = [bj.deck.pop(), bj.deck.pop()];
-        bj.d = [bj.deck.pop(), bj.deck.pop()];
-        
-        document.getElementById('bjStartUI').classList.add('hidden');
-        document.getElementById('bjControls').classList.remove('hidden');
-        document.getElementById('bjStatus').innerText = "";
-        updateBJUI(false);
+        if(!bet || bet > curBal) return alert("Invalid bet");
+        bj.bet = bet; bj.p = [rv(), rv()]; bj.d = [rv(), rv()];
+        document.getElementById('bjUI').classList.add('hidden');
+        document.getElementById('bjPlay').classList.remove('hidden');
+        renderBJ();
     };
-
-    const getVal = (h) => {
-        let v = 0, a = 0;
-        h.forEach(c => {
-            if(c.v === 'A') a++;
-            else if(['J','Q','K'].includes(c.v)) v += 10;
-            else v += parseInt(c.v);
-        });
-        for(let i=0; i<a; i++) v += (v + 11 <= 21) ? 11 : 1;
-        return v;
+    const rv = () => Math.floor(Math.random()*10)+1;
+    const sum = (h) => h.reduce((a,b)=>a+b,0);
+    const renderBJ = (done) => {
+        document.getElementById('bjCards').innerHTML = `You: ${sum(bj.p)} [${bj.p}] <br> Dealer: ${done ? sum(bj.d) : '?'}`;
     };
-
-    function updateBJUI(done) {
-        document.getElementById('playerCards').innerText = bj.p.map(c => c.v+c.s).join(' ');
-        document.getElementById('playerVal').innerText = getVal(bj.p);
-        if(done) {
-            document.getElementById('dealerCards').innerText = bj.d.map(c => c.v+c.s).join(' ');
-            document.getElementById('dealerVal').innerText = getVal(bj.d);
+    window.bjAction = async (a) => {
+        if(a === 'hit') {
+            bj.p.push(rv()); renderBJ();
+            if(sum(bj.p) > 21) endBJ('L');
         } else {
-            document.getElementById('dealerCards').innerText = bj.d[0].v+bj.d[0].s + " 🎴";
-        }
-    }
-
-    window.bjAction = async (act) => {
-        if(act === 'hit') {
-            bj.p.push(bj.deck.pop());
-            updateBJUI(false);
-            if(getVal(bj.p) > 21) endBJ('bust');
-        } else {
-            while(getVal(bj.d) < 17) bj.d.push(bj.deck.pop());
-            updateBJUI(true);
-            const p = getVal(bj.p), d = getVal(bj.d);
-            if(d > 21 || p > d) endBJ('win');
-            else if(p === d) endBJ('push');
-            else endBJ('loss');
+            while(sum(bj.d) < 17) bj.d.push(rv());
+            renderBJ(true);
+            const sP = sum(bj.p), sD = sum(bj.d);
+            if(sD > 21 || sP > sD) endBJ('W');
+            else if(sP === sD) endBJ('P');
+            else endBJ('L');
         }
     };
+    const endBJ = async (r) => {
+        if(r==='W') await updateBalance(bj.bet);
+        if(r==='L') await updateBalance(-bj.bet);
+        alert(r === 'W' ? "WON!" : r === 'P' ? "PUSH" : "LOST");
+        document.getElementById('bjUI').classList.remove('hidden');
+        document.getElementById('bjPlay').classList.add('hidden');
+    };
 
-    async function endBJ(res) {
-        const s = document.getElementById('bjStatus');
-        if(res === 'win') { await updateBalance(bj.bet); s.innerHTML = "<span class='up'>WINNER!</span>"; }
-        else if(res === 'push') s.innerText = "PUSH";
-        else { await updateBalance(-bj.bet); s.innerHTML = "<span class='down'>DEALER WINS!</span>"; }
-        
-        document.getElementById('bjControls').classList.add('hidden');
-        document.getElementById('bjStartUI').classList.remove('hidden');
-    }
-
-    // --- SYSTEM LOGIC ---
-    async function updateBalance(amt) {
+    // --- SYSTEM ---
+    async function updateBalance(n) {
         const ref = doc(db, "users", auth.currentUser.uid);
         await runTransaction(db, async (t) => {
             const s = await t.get(ref);
-            t.update(ref, { balance: s.data().balance + amt });
+            t.update(ref, { balance: s.data().balance + n });
         });
     }
 
@@ -299,33 +271,26 @@
                 document.getElementById('userBalance').innerText = curBal.toFixed(2);
                 document.getElementById('userNameDisplay').innerText = d.data().name;
             });
-            const qm = query(collection(db,"messages"), where("to","==",u.email), orderBy("date","desc"));
-            onSnapshot(qm, s => {
+            onSnapshot(query(collection(db,"messages"), where("to","==",u.email), orderBy("date","desc")), s => {
                 document.getElementById('inboxMessages').innerHTML = s.docs.map(d => `
-                    <div class="message-item">
-                        <b>${d.data().from}</b>: ${d.data().subject}
-                        <p>${d.data().body}</p>
-                        ${d.data().amountAttached > 0 ? `<small class="up">+$${d.data().amountAttached} included</small>` : ''}
-                    </div>
+                    <div class="message-item"><b>${d.data().from}</b>: ${d.data().subject}</div>
                 `).join('');
             });
-        } else { showLogin(); }
+        } else showLogin();
     });
 
     window.handleSmartSend = async () => {
         const to = document.getElementById('sendTo').value;
         const sub = document.getElementById('sendSubject').value;
-        const bod = document.getElementById('sendBody').value;
         const amt = parseFloat(document.getElementById('sendAmount').value) || 0;
         try {
             if(amt > 0) {
-                const q = query(collection(db,"users"), where("email","==",to));
-                const snap = await getDocs(q);
-                if(snap.empty) throw "User not found";
+                const q = await getDocs(query(collection(db,"users"), where("email","==",to)));
+                if(q.empty) throw "No user";
                 await updateBalance(-amt);
-                await updateDoc(doc(db,"users",snap.docs[0].id), { balance: snap.docs[0].data().balance + amt });
+                await updateDoc(doc(db,"users",q.docs[0].id), { balance: q.docs[0].data().balance + amt });
             }
-            await addDoc(collection(db,"messages"), { from: auth.currentUser.email, to, subject: sub, body: bod, amountAttached: amt, date: new Date() });
+            await addDoc(collection(db,"messages"), { from: auth.currentUser.email, to, subject: sub, date: new Date() });
             alert("Sent!");
         } catch(e) { alert(e); }
     };
