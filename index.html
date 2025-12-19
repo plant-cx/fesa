@@ -3,153 +3,174 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MailCash - Real Backend</title>
+    <title>MailCash - Secure Messaging & Payments</title>
     <style>
-        /* [Paste your original CSS here - kept same for brevity] */
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        .auth-card, .app-container { background: white; border-radius: 16px; padding: 40px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; color: #333; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        
+        /* Cards */
+        .auth-card, .app-container { background: white; border-radius: 16px; padding: 30px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
         .auth-card { max-width: 400px; margin: 50px auto; }
+        
+        /* Typography */
         h1 { color: #667eea; margin-bottom: 10px; font-size: 28px; }
+        h2 { margin-bottom: 20px; font-size: 20px; color: #444; }
         .subtitle { color: #666; margin-bottom: 30px; }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; font-weight: 500; }
-        input, textarea { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; }
-        button { width: 100%; padding: 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px; }
-        .link-btn { background: none; color: #667eea; text-decoration: underline; font-size: 14px; }
-        .hidden { display: none; }
-        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e0e0e0; padding-bottom: 20px; margin-bottom: 30px; }
-        .balance { background: #667eea; color: white; padding: 10px 20px; border-radius: 8px; font-weight: 600; }
-        .tabs { display: flex; gap: 10px; margin-bottom: 30px; border-bottom: 2px solid #e0e0e0; overflow-x: auto; }
-        .tab { padding: 12px 24px; cursor: pointer; background: none; border: none; border-bottom: 3px solid transparent; }
-        .tab.active { border-bottom-color: #667eea; color: #667eea; }
+        
+        /* Forms */
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; }
+        input, textarea { width: 100%; padding: 12px; border: 2px solid #f0f0f0; border-radius: 8px; font-size: 15px; transition: border-color 0.3s; }
+        input:focus { border-color: #667eea; outline: none; }
+        
+        /* Buttons */
+        button { width: 100%; padding: 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
+        button:hover { opacity: 0.9; }
+        .link-btn { background: none; color: #667eea; text-decoration: underline; font-size: 14px; margin-top: 10px; }
+        
+        /* App Layout */
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f0f0f0; padding-bottom: 20px; margin-bottom: 20px; }
+        .balance-pill { background: #eef2ff; color: #4c51bf; padding: 8px 16px; border-radius: 50px; font-weight: 700; border: 1px solid #c3dafe; }
+        .hidden { display: none !important; }
+
+        /* Tabs */
+        .tabs { display: flex; gap: 5px; margin-bottom: 25px; background: #f8f9fa; padding: 5px; border-radius: 12px; }
+        .tab { flex: 1; text-align: center; padding: 10px; cursor: pointer; border-radius: 8px; font-weight: 500; color: #666; transition: all 0.2s; }
+        .tab.active { background: white; color: #667eea; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        .message-item, .transaction-item { padding: 15px; border: 1px solid #eee; border-radius: 8px; margin-bottom: 10px; }
-        .unread { background: #f0f4ff; border-color: #667eea; }
-        .alert { padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 14px; }
-        .alert-error { background: #fee; color: red; }
-        .alert-success { background: #efe; color: green; }
-        .received { color: green; font-weight: bold; }
-        .sent { color: red; font-weight: bold; }
+
+        /* Smart Send Box */
+        .payment-addon { background: #fff9eb; border: 2px dashed #f6ad55; padding: 15px; border-radius: 12px; margin-top: 15px; }
+        
+        /* Lists */
+        .message-item, .transaction-item { padding: 15px; border: 1px solid #eee; border-radius: 10px; margin-bottom: 12px; position: relative; }
+        .message-from { font-weight: bold; color: #667eea; font-size: 14px; }
+        .message-subject { font-weight: 600; margin: 4px 0; }
+        .message-body { font-size: 14px; color: #555; }
+        .cash-tag { background: #48bb78; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; float: right; }
+        
+        .transaction-header { display: flex; justify-content: space-between; align-items: center; }
+        .received { color: #38a169; font-weight: 800; }
+        .sent { color: #e53e3e; font-weight: 800; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div id="loginScreen" class="auth-card">
-            <h1>MailCash</h1>
-            <p class="subtitle">Login to your account</p>
-            <div id="loginAlert"></div>
-            <div class="form-group">
-                <label>Email</label>
-                <input type="email" id="loginEmail" placeholder="demo@mail.com">
-            </div>
-            <div class="form-group">
-                <label>Password</label>
-                <input type="password" id="loginPassword">
-            </div>
-            <button onclick="login()">Login</button>
-            <button class="link-btn" onclick="showRegister()">New here? Register</button>
+
+<div class="container">
+    <div id="loginScreen" class="auth-card">
+        <h1>MailCash</h1>
+        <p class="subtitle">Secure mail with instant payments</p>
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="loginEmail" placeholder="you@example.com">
         </div>
-
-        <div id="registerScreen" class="auth-card hidden">
-            <h1>Join MailCash</h1>
-            <div id="registerAlert"></div>
-            <div class="form-group">
-                <label>Full Name</label>
-                <input type="text" id="regName">
-            </div>
-            <div class="form-group">
-                <label>Email</label>
-                <input type="email" id="regEmail">
-            </div>
-            <div class="form-group">
-                <label>Password</label>
-                <input type="password" id="regPassword">
-            </div>
-            <button onclick="register()">Create Account</button>
-            <button class="link-btn" onclick="showLogin()">Back to Login</button>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="loginPassword">
         </div>
-
-        <div id="appScreen" class="app-container hidden">
-            <div class="header">
-                <h1>MailCash</h1>
-                <div style="display:flex; align-items:center; gap:15px;">
-                    <div class="balance">$<span id="userBalance">0.00</span></div>
-                    <span id="userNameDisplay"></span>
-                    <button onclick="logout()" style="width:auto; padding:8px 15px; background:red;">Logout</button>
-                </div>
-            </div>
-
-            <div class="tabs">
-                <div class="tab active" onclick="switchTab('inbox')">Inbox</div>
-                <div class="tab" onclick="switchTab('compose')">Compose</div>
-                <div class="tab" onclick="switchTab('transfer')">Send Money</div>
-                <div class="tab" onclick="switchTab('transactions')">History</div>
-            </div>
-
-            <div id="inboxTab" class="tab-content active">
-                <div id="inboxMessages">Loading messages...</div>
-            </div>
-
-            <div id="composeTab" class="tab-content">
-                <h2>Compose Email</h2>
-                <div id="composeAlert"></div>
-                <input type="email" id="emailTo" placeholder="Recipient Email" style="margin-bottom:10px">
-                <input type="text" id="emailSubject" placeholder="Subject" style="margin-bottom:10px">
-                <textarea id="emailBody" rows="5" placeholder="Message"></textarea>
-                <button onclick="sendEmail()">Send Message</button>
-            </div>
-
-            <div id="transferTab" class="tab-content">
-                <h2>Send Money</h2>
-                <div id="transferAlert"></div>
-                <input type="email" id="transferTo" placeholder="Recipient Email" style="margin-bottom:10px">
-                <input type="number" id="transferAmount" placeholder="0.00" style="margin-bottom:10px">
-                <button onclick="sendMoney()">Transfer Funds</button>
-            </div>
-
-            <div id="transactionsTab" class="tab-content">
-                <div id="transactionsList"></div>
-            </div>
-        </div>
+        <button onclick="login()">Sign In</button>
+        <button class="link-btn" onclick="showRegister()">Create an account</button>
     </div>
 
-    <script type="module">
-    // 1. Import Firebase SDKs from CDN (Essential for HTML files)
+    <div id="registerScreen" class="auth-card hidden">
+        <h1>Join Us</h1>
+        <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" id="regName">
+        </div>
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="regEmail">
+        </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="regPassword">
+        </div>
+        <button onclick="register()">Get Started</button>
+        <button class="link-btn" onclick="showLogin()">Already have an account?</button>
+    </div>
+
+    <div id="appScreen" class="app-container hidden">
+        <div class="header">
+            <div>
+                <h1 style="font-size: 22px;">MailCash</h1>
+                <span id="userNameDisplay" style="font-size: 13px; color: #666;"></span>
+            </div>
+            <div style="text-align: right;">
+                <div class="balance-pill">$<span id="userBalance">0.00</span></div>
+                <button onclick="logout()" style="width:auto; background:none; color:red; font-size:12px; padding:5px; text-decoration:underline;">Logout</button>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" id="tab-inbox" onclick="switchTab('inbox')">Inbox</div>
+            <div class="tab" id="tab-compose" onclick="switchTab('compose')">Compose & Pay</div>
+            <div class="tab" id="tab-history" onclick="switchTab('history')">History</div>
+        </div>
+
+        <div id="inboxTab" class="tab-content active">
+            <div id="inboxMessages">Loading your mail...</div>
+        </div>
+
+        <div id="composeTab" class="tab-content">
+            <h2>New Message</h2>
+            <div class="form-group">
+                <label>To (Email)</label>
+                <input type="email" id="sendTo" placeholder="recipient@mail.com">
+            </div>
+            <div class="form-group">
+                <label>Subject</label>
+                <input type="text" id="sendSubject" placeholder="Quick update">
+            </div>
+            <div class="form-group">
+                <label>Message</label>
+                <textarea id="sendBody" rows="4" placeholder="Write your message here..."></textarea>
+            </div>
+            
+            <div class="payment-addon">
+                <label>💸 Attach Money (Optional)</label>
+                <input type="number" id="sendAmount" placeholder="0.00" step="0.01">
+                <p style="font-size: 11px; color: #856404; margin-top: 5px;">If you enter an amount, it will be deducted from your balance immediately.</p>
+            </div>
+            
+            <button onclick="handleSmartSend()" style="margin-top: 20px;">Send Message & Funds</button>
+        </div>
+
+        <div id="historyTab" class="tab-content">
+            <h2>Transaction History</h2>
+            <div id="transactionsList"></div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, query, where, onSnapshot, orderBy, runTransaction, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    // 2. Your specific Firebase configuration
     const firebaseConfig = {
         apiKey: "AIzaSyBo2zhESYzv1OChHSAfSb2GLiP6XtI6q1s",
         authDomain: "mailcash-3da79.firebaseapp.com",
         projectId: "mailcash-3da79",
         storageBucket: "mailcash-3da79.firebasestorage.app",
         messagingSenderId: "9602664972",
-        appId: "1:9602664972:web:2ded4f3a7f583558513c29",
-        measurementId: "G-4V6B28HZG4"
+        appId: "1:9602664972:web:2ded4f3a7f583558513c29"
     };
 
-    // 3. Initialize Services
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // --- AUTHENTICATION LOGIC ---
-
-    // Monitor login state
+    // --- AUTH ---
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             const userDoc = await getDoc(doc(db, "users", user.uid));
             if (userDoc.exists()) {
-                const userData = userDoc.data();
-                document.getElementById('userNameDisplay').textContent = userData.name;
-                document.getElementById('userBalance').textContent = userData.balance.toFixed(2);
+                document.getElementById('userNameDisplay').textContent = userDoc.data().name;
                 showApp();
-                setupRealtimeListeners(user.email, user.uid);
+                setupListeners(user.email, user.uid);
             }
         } else {
             showLogin();
@@ -157,71 +178,114 @@
     });
 
     window.register = async () => {
-        const name = document.getElementById('regName').value.trim();
-        const email = document.getElementById('regEmail').value.trim();
+        const name = document.getElementById('regName').value;
+        const email = document.getElementById('regEmail').value;
         const pass = document.getElementById('regPassword').value;
-
-        if (!name || !email || !pass) return alert("Please fill all fields");
-
         try {
             const res = await createUserWithEmailAndPassword(auth, email, pass);
-            // Create user profile in Firestore
-            await setDoc(doc(db, "users", res.user.uid), {
-                name: name,
-                email: email,
-                balance: 1000.00 // Sign-up bonus
-            });
+            await setDoc(doc(db, "users", res.user.uid), { name, email, balance: 500.00 });
         } catch (e) { alert(e.message); }
     };
 
     window.login = () => {
-        const email = document.getElementById('loginEmail').value.trim();
+        const email = document.getElementById('loginEmail').value;
         const pass = document.getElementById('loginPassword').value;
-        signInWithEmailAndPassword(auth, email, pass).catch(e => alert("Login failed: " + e.message));
+        signInWithEmailAndPassword(auth, email, pass).catch(e => alert(e.message));
     };
 
     window.logout = () => signOut(auth);
 
-    // --- REALTIME DATA LISTENERS ---
+    // --- SMART SEND LOGIC ---
+    window.handleSmartSend = async () => {
+        const to = document.getElementById('sendTo').value.trim();
+        const subject = document.getElementById('sendSubject').value.trim();
+        const body = document.getElementById('sendBody').value.trim();
+        const amount = parseFloat(document.getElementById('sendAmount').value) || 0;
 
-    function setupRealtimeListeners(email, uid) {
-        // Listen for balance updates
-        onSnapshot(doc(db, "users", uid), (doc) => {
-            if (doc.exists()) document.getElementById('userBalance').textContent = doc.data().balance.toFixed(2);
+        if (!to || !subject || !body) return alert("Fill in recipient, subject and message");
+
+        try {
+            if (amount > 0) {
+                if (to === auth.currentUser.email) throw "You can't pay yourself!";
+                
+                const q = query(collection(db, "users"), where("email", "==", to));
+                const snap = await getDocs(q);
+                if (snap.empty) throw "Recipient doesn't have a MailCash account.";
+                
+                const recipientUid = snap.docs[0].id;
+
+                await runTransaction(db, async (txn) => {
+                    const senderRef = doc(db, "users", auth.currentUser.uid);
+                    const senderSnap = await txn.get(senderRef);
+                    if (senderSnap.data().balance < amount) throw "Insufficient balance";
+
+                    txn.update(senderRef, { balance: senderSnap.data().balance - amount });
+                    txn.update(doc(db, "users", recipientUid), { balance: snap.docs[0].data().balance + amount });
+                    
+                    txn.set(doc(collection(db, "transactions")), {
+                        from: auth.currentUser.email,
+                        to: to,
+                        amount: amount,
+                        participants: [auth.currentUser.email, to],
+                        date: new Date()
+                    });
+                });
+            }
+
+            await addDoc(collection(db, "messages"), {
+                from: auth.currentUser.email,
+                to: to,
+                subject: amount > 0 ? `💰 $${amount} - ${subject}` : subject,
+                body: body,
+                amountAttached: amount,
+                date: new Date()
+            });
+
+            alert("Sent!");
+            switchTab('inbox');
+            document.getElementById('sendAmount').value = "";
+            document.getElementById('sendBody').value = "";
+            document.getElementById('sendSubject').value = "";
+        } catch (e) { alert(e); }
+    };
+
+    // --- LISTENERS ---
+    function setupListeners(email, uid) {
+        onSnapshot(doc(db, "users", uid), (d) => {
+            if (d.exists()) document.getElementById('userBalance').textContent = d.data().balance.toFixed(2);
         });
 
-        // Listen for incoming emails
-const msgQuery = query(collection(db, "messages"), where("to", "==", email));        onSnapshot(msgQuery, (snapshot) => {
-            const container = document.getElementById('inboxMessages');
-            if (snapshot.empty) { container.innerHTML = '<div class="empty-state">No messages</div>'; return; }
-            container.innerHTML = snapshot.docs.map(d => `
-                <div class="message-item">
-                    <div class="message-header">
-                        <span class="message-from">${d.data().from}</span>
-                    </div>
-                    <div class="message-subject">${d.data().subject}</div>
-                    <div class="message-body">${d.data().body}</div>
-                </div>
-            `).join('');
-        });
-
-        // Listen for transactions
-        const txnQuery = query(collection(db, "transactions"), where("participants", "array-contains", email), orderBy("date", "desc"));
-        onSnapshot(txnQuery, (snapshot) => {
-            const container = document.getElementById('transactionsList');
-            if (snapshot.empty) { container.innerHTML = '<div class="empty-state">No transactions</div>'; return; }
-            container.innerHTML = snapshot.docs.map(d => {
+        const mQuery = query(collection(db, "messages"), where("to", "==", email), orderBy("date", "desc"));
+        onSnapshot(mQuery, (snap) => {
+            const cont = document.getElementById('inboxMessages');
+            cont.innerHTML = snap.empty ? "No messages yet." : snap.docs.map(d => {
                 const data = d.data();
-                const isReceived = data.to === email;
+                return `
+                    <div class="message-item">
+                        ${data.amountAttached > 0 ? `<span class="cash-tag">+$${data.amountAttached}</span>` : ''}
+                        <div class="message-from">${data.from}</div>
+                        <div class="message-subject">${data.subject}</div>
+                        <div class="message-body">${data.body}</div>
+                    </div>
+                `;
+            }).join('');
+        });
+
+        const tQuery = query(collection(db, "transactions"), where("participants", "array-contains", email), orderBy("date", "desc"));
+        onSnapshot(tQuery, (snap) => {
+            const cont = document.getElementById('transactionsList');
+            cont.innerHTML = snap.empty ? "No history." : snap.docs.map(d => {
+                const data = d.data();
+                const isRec = data.to === email;
                 return `
                     <div class="transaction-item">
                         <div class="transaction-header">
                             <div>
-                                <div class="transaction-type">${isReceived ? 'Received from' : 'Sent to'}: ${isReceived ? data.from : data.to}</div>
-                                <div class="transaction-date">${data.date.toDate().toLocaleString()}</div>
+                                <b>${isRec ? 'From: ' + data.from : 'To: ' + data.to}</b><br>
+                                <small>${data.date.toDate().toLocaleDateString()}</small>
                             </div>
-                            <div class="transaction-amount ${isReceived ? 'received' : 'sent'}">
-                                ${isReceived ? '+' : '-'}$${data.amount.toFixed(2)}
+                            <div class="${isRec ? 'received' : 'sent'}">
+                                ${isRec ? '+' : '-'}$${data.amount.toFixed(2)}
                             </div>
                         </div>
                     </div>
@@ -230,85 +294,17 @@ const msgQuery = query(collection(db, "messages"), where("to", "==", email));   
         });
     }
 
-    // --- ACTIONS ---
-
-    window.sendEmail = async () => {
-        const to = document.getElementById('emailTo').value.trim();
-        const subject = document.getElementById('emailSubject').value.trim();
-        const body = document.getElementById('emailBody').value.trim();
-
-        if (!to || !subject || !body) return alert("Fill all fields");
-
-        try {
-            await addDoc(collection(db, "messages"), {
-                from: auth.currentUser.email,
-                to: to,
-                subject: subject,
-                body: body,
-                date: new Date()
-            });
-            alert("Email sent!");
-            switchTab('inbox');
-        } catch (e) { alert(e.message); }
+    // --- NAVIGATION ---
+    window.switchTab = (tab) => {
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.getElementById(tab + 'Tab').classList.add('active');
+        document.getElementById('tab-' + tab).classList.add('active');
     };
 
-    window.sendMoney = async () => {
-        const toEmail = document.getElementById('transferTo').value.trim();
-        const amount = parseFloat(document.getElementById('transferAmount').value);
-
-        if (!toEmail || isNaN(amount) || amount <= 0) return alert("Enter valid recipient and amount");
-        if (toEmail === auth.currentUser.email) return alert("You cannot send money to yourself");
-
-        try {
-            // Find recipient user first
-            const q = query(collection(db, "users"), where("email", "==", toEmail));
-            const querySnapshot = await getDocs(q);
-            
-            if (querySnapshot.empty) return alert("User not found!");
-            const recipientDoc = querySnapshot.docs[0];
-
-            // Transactional update: Deduct from sender, add to recipient
-            await runTransaction(db, async (transaction) => {
-                const senderDoc = await transaction.get(doc(db, "users", auth.currentUser.uid));
-                
-                if (senderDoc.data().balance < amount) throw "Insufficient balance!";
-
-                transaction.update(doc(db, "users", auth.currentUser.uid), {
-                    balance: senderDoc.data().balance - amount
-                });
-                transaction.update(doc(db, "users", recipientDoc.id), {
-                    balance: recipientDoc.data().balance + amount
-                });
-                
-                // Record the transaction
-                const txnRef = doc(collection(db, "transactions"));
-                transaction.set(txnRef, {
-                    from: auth.currentUser.email,
-                    to: toEmail,
-                    amount: amount,
-                    participants: [auth.currentUser.email, toEmail],
-                    date: new Date()
-                });
-            });
-
-            alert("Transfer successful!");
-            switchTab('transactions');
-        } catch (e) { alert(e); }
-    };
-
-    // --- NAVIGATION HELPERS ---
     window.showRegister = () => { document.getElementById('loginScreen').classList.add('hidden'); document.getElementById('registerScreen').classList.remove('hidden'); };
     window.showLogin = () => { document.getElementById('registerScreen').classList.add('hidden'); document.getElementById('loginScreen').classList.remove('hidden'); };
     function showApp() { document.getElementById('loginScreen').classList.add('hidden'); document.getElementById('registerScreen').classList.add('hidden'); document.getElementById('appScreen').classList.remove('hidden'); }
-    
-    window.switchTab = (tabName) => {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        document.getElementById(tabName + 'Tab').classList.add('active');
-        // Handle logic to find the button that was clicked if possible
-        const buttons = document.querySelectorAll('.tab');
-        buttons.forEach(btn => { if(btn.innerText.toLowerCase().includes(tabName)) btn.classList.add('active'); });
-    };
 </script>
 </body>
 </html>
