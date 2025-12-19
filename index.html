@@ -3,53 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MailCash - Final Edition</title>
+    <title>MailCash - Classic Gaming</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', sans-serif; background: #0f172a; min-height: 100vh; padding: 20px; color: #f8fafc; }
         .container { max-width: 900px; margin: 0 auto; }
         
-        /* Auth & Main Cards */
         .auth-card, .app-container { background: #1e293b; border-radius: 16px; padding: 30px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); border: 1px solid #334155; }
         .auth-card { max-width: 400px; margin: 50px auto; text-align: center; }
         
         h1 { color: #818cf8; margin-bottom: 5px; font-size: 28px; }
         input, textarea { width: 100%; padding: 12px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: white; margin-bottom: 12px; }
         
-        /* Buttons */
-        button { width: 100%; padding: 12px; background: #6366f1; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.2s; }
-        button:hover { background: #4f46e5; transform: translateY(-1px); }
+        button { width: 100%; padding: 12px; background: #6366f1; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.1s; }
+        button:active { transform: scale(0.98); }
         .logout-btn { background: #ef4444 !important; width: auto !important; padding: 10px 25px !important; margin-top: 10px; }
 
-        /* Navigation */
         .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; border-bottom: 1px solid #334155; padding-bottom: 15px; }
-        .balance-pill { background: #064e3b; color: #34d399; padding: 12px 24px; border-radius: 50px; font-weight: 800; border: 1px solid #059669; font-size: 20px; box-shadow: 0 0 15px rgba(52, 211, 153, 0.2); }
+        .balance-pill { background: #064e3b; color: #34d399; padding: 12px 24px; border-radius: 50px; font-weight: 800; border: 1px solid #059669; font-size: 20px; }
+        
         .tabs { display: flex; gap: 8px; margin-bottom: 20px; background: #0f172a; padding: 6px; border-radius: 12px; }
-        .tab { flex: 1; text-align: center; padding: 12px; cursor: pointer; border-radius: 8px; color: #94a3b8; font-weight: 600; transition: 0.3s; }
-        .tab.active { background: #334155; color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        .tab { flex: 1; text-align: center; padding: 12px; cursor: pointer; border-radius: 8px; color: #94a3b8; font-weight: 600; }
+        .tab.active { background: #334155; color: white; }
         
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        /* --- COIN FLIP ANIMATION --- */
-        .coin-wrapper { perspective: 1000px; width: 80px; height: 80px; margin: 20px auto; }
-        #coin { 
-            width: 100%; height: 100%; position: relative; transform-style: preserve-3d; 
-            transition: transform 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-        }
-        .coin-face {
-            position: absolute; width: 100%; height: 100%; border-radius: 50%;
-            backface-visibility: hidden; display: flex; align-items: center; 
-            justify-content: center; font-size: 24px; font-weight: 800; border: 4px solid #d97706;
-        }
-        .heads { background: #fbbf24; color: #92400e; }
-        .tails { background: #94a3b8; color: #1e293b; transform: rotateY(180deg); }
-        .flipping { transform: rotateY(1800deg); }
-
-        /* --- BLACKJACK UI --- */
-        .game-card { background: #0f172a; padding: 25px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #334155; text-align: center; }
-        .card-display { font-size: 40px; min-height: 60px; letter-spacing: 10px; margin: 15px 0; }
-        .status-msg { font-weight: 800; padding: 10px; border-radius: 4px; margin: 10px 0; }
+        /* Game UI */
+        .game-card { background: #1a202c; color: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; text-align: center; border: 1px solid #444; }
+        .playing-cards { font-size: 35px; letter-spacing: 5px; margin: 15px 0; min-height: 50px; color: #fff; }
+        .win-text { color: #48bb78; font-weight: bold; }
+        .loss-text { color: #f56565; font-weight: bold; }
+        .game-controls { display: flex; gap: 10px; margin-top: 15px; }
         
         .hidden { display: none !important; }
         .msg-item { background: #0f172a; padding: 15px; border-radius: 8px; margin-bottom: 12px; border-left: 4px solid #6366f1; }
@@ -63,22 +48,22 @@
         <input type="email" id="loginEmail" placeholder="Email">
         <input type="password" id="loginPassword" placeholder="Password">
         <button onclick="login()">Sign In</button>
-        <button class="link-btn" onclick="showRegister()" style="background:none; text-decoration:underline; font-size:12px; margin-top:10px;">Create Account</button>
+        <button onclick="showRegister()" style="background:none; text-decoration:underline; font-size:12px; margin-top:10px;">Create Account</button>
     </div>
 
     <div id="registerScreen" class="auth-card hidden">
         <h1>Register</h1>
-        <input type="text" id="regUser" placeholder="Choose Username">
+        <input type="text" id="regUser" placeholder="Username">
         <input type="email" id="regEmail" placeholder="Email">
-        <input type="password" id="regPassword" placeholder="Password (min 6 chars)">
-        <button onclick="register()">Start Earning</button>
-        <button class="link-btn" onclick="showLogin()" style="background:none; text-decoration:underline; font-size:12px; margin-top:10px;">Back to Login</button>
+        <input type="password" id="regPassword" placeholder="Password">
+        <button onclick="register()">Register</button>
+        <button onclick="showLogin()" style="background:none; text-decoration:underline; font-size:12px; margin-top:10px;">Login</button>
     </div>
 
     <div id="appScreen" class="app-container hidden">
         <div class="header">
             <div>
-                <h1 style="font-size: 20px;">MailCash 💸</h1>
+                <h1 style="font-size: 20px;">MailCash</h1>
                 <p id="userDisplay" style="color: #818cf8; font-weight: bold;"></p>
             </div>
             <div style="text-align: right;">
@@ -90,55 +75,49 @@
         <div class="tabs">
             <div class="tab active" onclick="switchTab('inbox')">Inbox</div>
             <div class="tab" onclick="switchTab('compose')">Send</div>
-            <div class="tab" onclick="switchTab('games')">Gambling</div>
+            <div class="tab" onclick="switchTab('games')">🎰 Games</div>
         </div>
 
         <div id="inboxTab" class="tab-content active">
-            <div id="inboxMessages">Loading messages...</div>
+            <div id="inboxMessages"></div>
         </div>
 
         <div id="composeTab" class="tab-content">
-            <input type="text" id="sendTo" placeholder="Recipient Username">
+            <input type="text" id="sendTo" placeholder="To Username">
             <input type="text" id="sendSub" placeholder="Subject">
-            <textarea id="sendBody" rows="4" placeholder="Message content..."></textarea>
-            <input type="number" id="sendAmt" placeholder="Attach Cash ($)">
-            <button onclick="handleSend()">Send Message</button>
+            <textarea id="sendBody" rows="4" placeholder="Message"></textarea>
+            <input type="number" id="sendAmt" placeholder="Attach Money ($)">
+            <button onclick="handleSend()">Send Everything</button>
         </div>
 
         <div id="gamesTab" class="tab-content">
             <div class="game-card">
-                <h3>Coin Flip (2x)</h3>
-                <div class="coin-wrapper">
-                    <div id="coin">
-                        <div class="coin-face heads">H</div>
-                        <div class="coin-face tails">T</div>
-                    </div>
+                <h3>🪙 Coin Flip (2x)</h3>
+                <input type="number" id="coinBet" placeholder="Bet Amount" style="margin-top:10px">
+                <div class="game-controls">
+                    <button onclick="playCoinFlip('Heads')">Heads</button>
+                    <button onclick="playCoinFlip('Tails')">Tails</button>
                 </div>
-                <input type="number" id="coinBet" placeholder="Bet Amount">
-                <div style="display:flex; gap:10px;">
-                    <button onclick="playFlip('Heads')">Bet Heads</button>
-                    <button onclick="playFlip('Tails')">Bet Tails</button>
-                </div>
-                <div id="flipStatus" class="status-msg"></div>
+                <div id="coinResult" style="margin-top:10px"></div>
             </div>
 
             <div class="game-card">
-                <h3>Blackjack</h3>
-                <div id="bjStartUI">
+                <h3>🃏 Blackjack</h3>
+                <div id="bjSetup">
                     <input type="number" id="bjBet" placeholder="Bet Amount">
-                    <button onclick="startBJ()">Deal Cards</button>
+                    <button onclick="startBlackjack()" style="margin-top:10px">Deal Cards</button>
                 </div>
-                <div id="bjGameUI" class="hidden">
-                    <p style="color:#94a3b8">Dealer</p>
-                    <div id="dCards" class="card-display"></div>
-                    <p style="color:#94a3b8">You</p>
-                    <div id="pCards" class="card-display"></div>
-                    <div style="display:flex; gap:10px;">
-                        <button onclick="bjHit()">Hit</button>
-                        <button onclick="bjStand()" style="background:#475569">Stand</button>
+                <div id="bjTable" class="hidden">
+                    <p>Dealer: <span id="dealerVal">?</span></p>
+                    <div id="dealerCards" class="playing-cards"></div>
+                    <p>You: <span id="playerVal">0</span></p>
+                    <div id="playerCards" class="playing-cards"></div>
+                    <div class="game-controls">
+                        <button onclick="bjAction('hit')">Hit</button>
+                        <button onclick="bjAction('stand')" style="background:gray">Stand</button>
                     </div>
                 </div>
-                <div id="bjStatus" class="status-msg"></div>
+                <div id="bjResult" style="margin-top:10px"></div>
             </div>
         </div>
     </div>
@@ -147,7 +126,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, query, where, onSnapshot, orderBy, runTransaction, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, updateDoc, collection, addDoc, query, where, onSnapshot, orderBy, runTransaction, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBo2zhESYzv1OChHSAfSb2GLiP6XtI6q1s",
@@ -163,7 +142,6 @@
     const db = getFirestore(app);
     let userProfile = null;
 
-    // --- AUTH ---
     onAuthStateChanged(auth, u => {
         if(u) {
             onSnapshot(doc(db, "users", u.uid), d => {
@@ -176,40 +154,20 @@
         } else { showLogin(); }
     });
 
-    window.register = async () => {
-        const u = document.getElementById('regUser').value.trim().toLowerCase();
-        const e = document.getElementById('regEmail').value;
-        const p = document.getElementById('regPassword').value;
-        try {
-            const snap = await getDocs(query(collection(db, "users"), where("username", "==", u)));
-            if(!snap.empty) return alert("Username taken!");
-            const res = await createUserWithEmailAndPassword(auth, e, p);
-            await setDoc(doc(db, "users", res.user.uid), { username: u, balance: 1000 });
-        } catch(err) { alert(err.message); }
-    };
-
-    // --- COIN FLIP (WITH ANIMATION) ---
-    window.playFlip = async (pick) => {
+    // --- GAMES LOGIC (Original Classic Version) ---
+    window.playCoinFlip = async (choice) => {
         const bet = parseFloat(document.getElementById('coinBet').value);
-        if(bet > userProfile.balance || bet <= 0) return alert("Invalid Bet");
+        if(!bet || bet > userProfile.balance || bet <= 0) return alert("Invalid Bet");
         
-        const coin = document.getElementById('coin');
-        const status = document.getElementById('flipStatus');
-        status.innerText = "Flipping...";
-        coin.style.transform = `rotateY(${Math.random() > 0.5 ? 1800 : 1980}deg)`;
+        const win = Math.random() > 0.5;
+        const resultEl = document.getElementById('coinResult');
+        const change = win ? bet : -bet;
 
-        setTimeout(async () => {
-            const result = Math.random() > 0.5 ? 'Heads' : 'Tails';
-            const win = result === pick;
-            await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: userProfile.balance + (win ? bet : -bet) });
-            status.innerText = win ? `WIN! It was ${result}` : `LOSE! It was ${result}`;
-            coin.style.transform = result === 'Heads' ? 'rotateY(0deg)' : 'rotateY(180deg)';
-        }, 1500);
+        await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: userProfile.balance + change });
+        resultEl.innerHTML = win ? `<span class="win-text">WON $${bet}!</span>` : `<span class="loss-text">LOST $${bet}</span>`;
     };
 
-    // --- BLACKJACK ---
-    let deck, pHand, dHand, currentBet;
-    const cards = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+    let bj = { deck: [], p: [], d: [], bet: 0 };
     const getVal = (h) => {
         let v = 0, a = 0;
         h.forEach(c => { if(c==='A') a++; else if(['J','Q','K'].includes(c)) v+=10; else v+=parseInt(c); });
@@ -217,49 +175,62 @@
         return v;
     };
 
-    window.startBJ = () => {
-        currentBet = parseFloat(document.getElementById('bjBet').value);
-        if(currentBet > userProfile.balance || currentBet <= 0) return alert("Invalid Bet");
+    window.startBlackjack = () => {
+        bj.bet = parseFloat(document.getElementById('bjBet').value);
+        if(!bj.bet || bj.bet > userProfile.balance || bj.bet <= 0) return alert("Invalid Bet");
         
-        deck = [...cards, ...cards, ...cards, ...cards].sort(() => Math.random() - 0.5);
-        pHand = [deck.pop(), deck.pop()];
-        dHand = [deck.pop(), deck.pop()];
+        bj.deck = ['A','2','3','4','5','6','7','8','9','10','J','Q','K','A','2','3','4','5','6','7','8','9','10','J','Q','K'].sort(() => Math.random() - 0.5);
+        bj.p = [bj.deck.pop(), bj.deck.pop()];
+        bj.d = [bj.deck.pop(), bj.deck.pop()];
         
-        document.getElementById('bjStartUI').classList.add('hidden');
-        document.getElementById('bjGameUI').classList.remove('hidden');
-        document.getElementById('bjStatus').innerText = "";
-        renderBJ(false);
+        document.getElementById('bjSetup').classList.add('hidden');
+        document.getElementById('bjTable').classList.remove('hidden');
+        document.getElementById('bjResult').innerText = "";
+        updateBJUI(false);
     };
 
-    function renderBJ(show) {
-        document.getElementById('pCards').innerText = pHand.join(' ');
-        document.getElementById('dCards').innerText = show ? dHand.join(' ') : dHand[0] + " 🎴";
+    function updateBJUI(done) {
+        document.getElementById('playerCards').innerText = bj.p.join(' ');
+        document.getElementById('playerVal').innerText = getVal(bj.p);
+        document.getElementById('dealerCards').innerText = done ? bj.d.join(' ') : bj.d[0] + " 🎴";
+        document.getElementById('dealerVal').innerText = done ? getVal(bj.d) : "?";
     }
 
-    window.bjHit = () => {
-        pHand.push(deck.pop());
-        renderBJ(false);
-        if(getVal(pHand) > 21) endBJ('Bust');
+    window.bjAction = async (act) => {
+        if(act === 'hit') {
+            bj.p.push(bj.deck.pop());
+            updateBJUI(false);
+            if(getVal(bj.p) > 21) finishBJ('BUST');
+        } else {
+            while(getVal(bj.d) < 17) bj.d.push(bj.deck.pop());
+            updateBJUI(true);
+            const p = getVal(bj.p), d = getVal(bj.d);
+            if(d > 21 || p > d) finishBJ('WIN');
+            else if(p === d) finishBJ('PUSH');
+            else finishBJ('LOSE');
+        }
     };
 
-    window.bjStand = () => {
-        while(getVal(dHand) < 17) dHand.push(deck.pop());
-        renderBJ(true);
-        const p = getVal(pHand), d = getVal(dHand);
-        if(d > 21 || p > d) endBJ('Win');
-        else if(p === d) endBJ('Push');
-        else endBJ('Lose');
-    };
-
-    async function endBJ(res) {
-        const amt = res === 'Win' ? currentBet : res === 'Push' ? 0 : -currentBet;
-        await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: userProfile.balance + amt });
-        document.getElementById('bjStatus').innerText = "Result: " + res;
-        document.getElementById('bjStartUI').classList.remove('hidden');
-        document.getElementById('bjGameUI').classList.add('hidden');
+    async function finishBJ(res) {
+        const change = res === 'WIN' ? bj.bet : res === 'PUSH' ? 0 : -bj.bet;
+        await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: userProfile.balance + change });
+        document.getElementById('bjResult').className = res === 'WIN' ? 'win-text' : 'loss-text';
+        document.getElementById('bjResult').innerText = res;
+        document.getElementById('bjSetup').classList.remove('hidden');
+        document.getElementById('bjTable').classList.add('hidden');
     }
 
-    // --- MESSAGING ---
+    // --- OTHER LOGIC ---
+    window.register = async () => {
+        const u = document.getElementById('regUser').value.trim().toLowerCase();
+        const e = document.getElementById('regEmail').value;
+        const p = document.getElementById('regPassword').value;
+        const snap = await getDocs(query(collection(db, "users"), where("username", "==", u)));
+        if(!snap.empty) return alert("Username taken");
+        const res = await createUserWithEmailAndPassword(auth, e, p);
+        await setDoc(doc(db, "users", res.user.uid), { username: u, balance: 1000 });
+    };
+
     window.handleSend = async () => {
         const to = document.getElementById('sendTo').value.trim().toLowerCase();
         const amt = parseFloat(document.getElementById('sendAmt').value) || 0;
@@ -270,7 +241,7 @@
             if(amt > 0) {
                 await runTransaction(db, async t => {
                     const me = await t.get(doc(db,"users",auth.currentUser.uid));
-                    if(me.data().balance < amt) throw "Poor!";
+                    if(me.data().balance < amt) throw "Low balance";
                     t.update(doc(db,"users",auth.currentUser.uid), { balance: me.data().balance - amt });
                     t.update(doc(db,"users",s.docs[0].id), { balance: s.docs[0].data().balance + amt });
                 });
@@ -286,7 +257,7 @@
                 <div class="msg-item">
                     <b>@${d.data().from}</b>: ${d.data().subject}
                     <p>${d.data().body}</p>
-                    ${d.data().cash > 0 ? `<p style="color:#10b981">+$${d.data().cash} Included</p>` : ''}
+                    ${d.data().cash > 0 ? `<p style="color:#48bb78">+$${d.data().cash}</p>` : ''}
                 </div>
             `).join('');
         });
