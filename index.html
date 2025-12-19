@@ -112,9 +112,9 @@
         <div class="tabs">
             <div id="tEar" class="tab active" onclick="showTab('earn')">EARN</div>
             <div id="tCol" class="tab" onclick="showTab('collection')">COLLECTION</div>
-            <div id="tMkt" class="tab" onclick="showTab('marketplace')">CHESTS</div>
+            <div id="tMkt" class="tab" onclick="showTab('marketplace')">MARKET</div>
             <div id="tIn" class="tab" onclick="showTab('inbox')">INBOX</div>
-            <div id="tMsg" class="tab" onclick="showTab('message')">MESSAGE</div>
+            <div id="tMsg" class="tab" onclick="showTab('message')">MAIL</div>
             <div id="tPay" class="tab" onclick="showTab('transfer')">PAY</div>
         </div>
 
@@ -271,9 +271,8 @@
             const owned = userData.orbs?.[orb.id] || 0;
             const isUnlocked = index === 0 || (userData.orbs?.[dataList[index-1].id] > 0);
             const cost = Math.floor(orb.baseCost * Math.pow(1.3, owned));
-            const isMaxed = owned >= 100;
+            const isMaxed = owned >= 50; // MAX CAP CHANGED TO 50
 
-            // EXPONENTIAL LEVEL CALCULATION
             const currentInc = calcIncome(orb, owned);
             const ips = currentInc / (orb.time / 1000);
             let level = 1;
@@ -379,7 +378,7 @@
         alert(`UNBOXED ${tier.toUpperCase()}: ${randName} (+$${randInc}/25s)`);
     };
 
-    window.buyOrb = async (id, cost) => { if(userData && (userData.orbs?.[id] || 0) < 100 && userData.balance >= cost) await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-cost), [`orbs.${id}`]: increment(1) }); };
+    window.buyOrb = async (id, cost) => { if(userData && (userData.orbs?.[id] || 0) < 50 && userData.balance >= cost) await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-cost), [`orbs.${id}`]: increment(1) }); };
     window.sellOrb = async (id, refund) => { if(userData?.orbs?.[id] > 0) await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(refund), [`orbs.${id}`]: increment(-1) }); };
     window.upgradeClicker = async () => { const cost = (userData.clickLevel || 1) * 200; if(userData.balance >= cost) await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-cost), clickLevel: increment(1) }); };
 
