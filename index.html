@@ -5,40 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MailCash | Gaming & Finance</title>
     <style>
-        /* --- ORIGINAL CSS --- */
+        /* --- CORE STYLES --- */
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', -apple-system, sans-serif; background: #0f172a; color: #f8fafc; padding: 20px; }
-        .container { max-width: 600px; margin: 0 auto; }
+        body { font-family: 'Inter', sans-serif; background: #0f172a; color: #f8fafc; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; position: relative; }
         
+        /* NOTIFICATIONS */
         #notifier { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 16px 32px; border-radius: 12px; font-weight: 700; opacity: 0; transition: 0.4s; z-index: 9999; box-shadow: 0 10px 40px rgba(0,0,0,0.6); pointer-events: none; text-align: center; min-width: 280px; }
         .ntf-err { background: #ef4444; border: 1px solid #fca5a5; color: white; }
         .ntf-ok { background: #10b981; border: 1px solid #6ee7b7; color: white; }
 
+        /* UI ELEMENTS */
         .card { background: #1e293b; border-radius: 16px; padding: 25px; border: 1px solid #334155; margin-bottom: 20px; }
         .hidden { display: none !important; }
         input, textarea { width: 100%; padding: 14px; background: #0f172a; border: 1px solid #334155; border-radius: 10px; color: white; margin-bottom: 12px; outline: none; font-size: 16px; }
         button { width: 100%; padding: 14px; background: #6366f1; color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; }
         
-        /* HEADER WITH PFP */
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        /* HEADER & PFP */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; position: relative; }
         .user-info { display: flex; align-items: center; gap: 12px; }
         .pfp-circle { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid #6366f1; background: #334155; }
-        
         .balance-pill { background: #064e3b; color: #34d399; padding: 12px 24px; border-radius: 50px; font-weight: 800; border: 1px solid #059669; }
-        .logout-btn { background: #ef4444; width: auto; padding: 6px 14px; font-size: 11px; margin-top: 8px; border-radius: 6px; }
 
-        .tabs { display: flex; gap: 8px; margin-bottom: 20px; background: #0f172a; padding: 6px; border-radius: 14px; overflow-x: auto; }
-        .tab { flex: 1; text-align: center; padding: 12px; cursor: pointer; border-radius: 10px; color: #94a3b8; font-weight: 700; white-space: nowrap; }
+        /* TABS */
+        .tabs { display: flex; gap: 8px; margin-bottom: 20px; background: #0f172a; padding: 6px; border-radius: 14px; }
+        .tab { flex: 1; text-align: center; padding: 12px; cursor: pointer; border-radius: 10px; color: #94a3b8; font-weight: 700; }
         .tab.active { background: #334155; color: white; }
 
+        /* MESSAGES */
         .msg-card { background: #1e293b; padding: 18px; border-radius: 14px; margin-bottom: 12px; border: 1px solid #334155; border-left: 5px solid #6366f1; }
         .cash-tag { display: inline-block; background: #064e3b; color: #34d399; padding: 4px 10px; border-radius: 6px; font-size: 12px; margin-top: 10px; font-weight: 800; }
 
-        /* SETTINGS SPECIFIC */
-        .settings-btn { background: #334155; margin-bottom: 10px; text-align: left; display: flex; align-items: center; justify-content: space-between; }
-        .sub-panel { background: #0f172a; padding: 15px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #334155; }
+        /* HAMBURGER MENU */
+        #menuBtn { background: none; width: auto; padding: 5px; font-size: 24px; color: #94a3b8; }
+        #settingsMenu { position: absolute; right: 0; top: 60px; width: 280px; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .logout-btn { background: #ef4444; margin-top: 10px; font-size: 14px; }
 
-        /* CASINO ANIMATIONS */
+        /* GAMES */
         .game-area { text-align: center; padding: 20px; background: #0f172a; border-radius: 12px; margin-bottom: 15px; border: 1px solid #334155; }
         .coin { width: 60px; height: 60px; background: gold; border-radius: 50%; margin: 0 auto; display: flex; align-items: center; justify-content: center; color: #b45309; font-weight: 900; border: 4px solid #f59e0b; }
         .flipping { animation: flip-anim 0.2s infinite; }
@@ -66,12 +69,20 @@
         <div class="header">
             <div class="user-info">
                 <img id="userPfp" class="pfp-circle" src="https://api.dicebear.com/7.x/identicon/svg?seed=user" alt="pfp">
-                <div>
-                    <p id="userDisplay" style="color:#fff; font-weight: 900; font-size: 1.2rem;">@loading...</p>
-                    <button class="logout-btn" onclick="logout()">LOGOUT</button>
-                </div>
+                <p id="userDisplay" style="color:#fff; font-weight: 900; font-size: 1.2rem;">@loading...</p>
             </div>
-            <div class="balance-pill">$<span id="userBal">0.00</span></div>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <div class="balance-pill">$<span id="userBal">0.00</span></div>
+                <button id="menuBtn" onclick="document.getElementById('settingsMenu').classList.toggle('hidden')">☰</button>
+            </div>
+
+            <div id="settingsMenu" class="card hidden">
+                <h4 style="margin-bottom:15px;">Edit Profile</h4>
+                <input type="text" id="newUsername" placeholder="New @username">
+                <input type="text" id="newPfpUrl" placeholder="PFP Image URL">
+                <button onclick="updateProfile()" style="background: #10b981; margin-bottom:10px;">Save Changes</button>
+                <button class="logout-btn" onclick="logout()">LOGOUT</button>
+            </div>
         </div>
 
         <div class="tabs">
@@ -79,7 +90,6 @@
             <div id="tMsg" class="tab" onclick="showTab('message')">Message</div>
             <div id="tPay" class="tab" onclick="showTab('transfer')">Transfer</div>
             <div id="tCasino" class="tab" onclick="showTab('casino')">Casino</div>
-            <div id="tSettings" class="tab" onclick="showTab('settings')">Settings</div>
         </div>
 
         <div id="inboxView" class="tab-view"><div id="mailBox">Loading...</div></div>
@@ -125,22 +135,6 @@
                 </div>
             </div>
         </div>
-
-        <div id="settingsView" class="tab-view hidden">
-            <div class="card">
-                <h3>Settings</h3>
-                <button class="settings-btn" onclick="document.getElementById('profilePanel').classList.toggle('hidden')">Edit Profile <span>➔</span></button>
-                <div id="profilePanel" class="sub-panel hidden">
-                    <input type="text" id="newUsername" placeholder="New @username">
-                    <input type="text" id="newPfpUrl" placeholder="PFP Image URL">
-                    <button onclick="updateProfile()" style="background: #10b981;">Save Changes</button>
-                </div>
-                <button class="settings-btn" onclick="document.getElementById('labPanel').classList.toggle('hidden')">The Lab 🧪 <span>➔</span></button>
-                <div id="labPanel" class="sub-panel hidden"><p>Experimental features coming soon.</p></div>
-                <button class="settings-btn" onclick="document.getElementById('aboutPanel').classList.toggle('hidden')">About <span>➔</span></button>
-                <div id="aboutPanel" class="sub-panel hidden"><p>MailCash v2.1 Beta</p></div>
-            </div>
-        </div>
     </div>
 </div>
 
@@ -161,17 +155,19 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
+
     let userData = null;
     let isReg = false;
     let pHand = [], dHand = [], currentBJBet = 0;
 
-    function notify(msg, type = 'ok') {
+    // --- SYSTEM UTILS ---
+    const notify = (msg, type = 'ok') => {
         const n = document.getElementById('notifier');
         n.innerText = msg; n.className = type === 'ok' ? 'ntf-ok' : 'ntf-err';
         n.style.opacity = '1'; setTimeout(() => n.style.opacity = '0', 3000);
-    }
+    };
 
-    // --- AUTH & PROFILE ---
+    // --- USER SESSION ---
     onAuthStateChanged(auth, u => {
         if(u) {
             onSnapshot(doc(db, "users", u.uid), d => {
@@ -203,11 +199,12 @@
             }
             if (newPfp) updates.pfp = newPfp;
             await updateDoc(doc(db, "users", auth.currentUser.uid), updates);
-            notify("Saved!");
+            notify("Profile Saved!");
+            document.getElementById('settingsMenu').classList.add('hidden');
         } catch (e) { notify(e.message, 'err'); }
     };
 
-    // --- MESSAGING ---
+    // --- BANKING & MAIL ---
     window.sendAction = async (type) => {
         const to = (type === 'text' ? document.getElementById('msgTo') : document.getElementById('payTo')).value.trim().toLowerCase();
         const amt = type === 'money' ? (parseFloat(document.getElementById('payAmt').value) || 0) : 0;
@@ -215,31 +212,31 @@
         const body = type === 'text' ? document.getElementById('msgBody').value : document.getElementById('payNote').value;
         try {
             const snap = await getDocs(query(collection(db, "users"), where("username", "==", to)));
-            if (snap.empty) throw new Error("Not found");
+            if (snap.empty) throw new Error("User not found");
             if (amt > 0) {
                 await runTransaction(db, async t => {
                     const myRef = doc(db, "users", auth.currentUser.uid), theirRef = doc(db, "users", snap.docs[0].id);
                     const myB = (await t.get(myRef)).data().balance;
-                    if (myB < amt) throw new Error("Low funds");
+                    if (myB < amt) throw new Error("Insufficient funds");
                     t.update(myRef, { balance: myB - amt });
                     t.update(theirRef, { balance: (await t.get(theirRef)).data().balance + amt });
                 });
             }
             await addDoc(collection(db, "messages"), { to, from: userData.username, subject: sub, body, cash: amt, date: new Date() });
-            notify("Sent!"); showTab('inbox');
+            notify("Sent successfully!"); showTab('inbox');
         } catch (e) { notify(e.message, 'err'); }
     };
 
-    function loadInbox() {
+    const loadInbox = () => {
         onSnapshot(query(collection(db, "messages"), where("to", "==", userData.username), orderBy("date", "desc")), s => {
             document.getElementById('mailBox').innerHTML = s.docs.map(d => {
                 const m = d.data();
                 return `<div class="msg-card"><b>FROM: @${m.from}</b><h4>${m.subject}</h4><p>${m.body}</p>${m.cash > 0 ? `<span class="cash-tag">+$${m.cash.toFixed(2)}</span>` : ''}</div>`;
-            }).join('') || "Inbox Empty";
+            }).join('') || "Inbox is empty";
         });
-    }
+    };
 
-    // --- GAMES ---
+    // --- BLACKJACK LOGIC ---
     const getCard = () => {
         const v = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'], s = ['♠','♥','♦','♣'];
         return { v: v[Math.floor(Math.random()*v.length)], s: s[Math.floor(Math.random()*s.length)] };
@@ -251,15 +248,15 @@
         return s;
     };
     window.playBJ = async (act) => {
-        const status = document.getElementById('bjStatus');
         if(act === 'deal') {
             currentBJBet = parseFloat(document.getElementById('bjBet').value);
-            if(!currentBJBet || currentBJBet > userData.balance) return notify("Invalid Bet", "err");
+            if(!currentBJBet || currentBJBet > userData.balance) return notify("Invalid bet amount", "err");
             pHand = [getCard(), getCard()]; dHand = [getCard(), getCard()];
             renderBJ(true);
             document.getElementById('bjDealBtn').classList.add('hidden');
             document.getElementById('bjHitBtn').classList.remove('hidden');
             document.getElementById('bjStandBtn').classList.remove('hidden');
+            document.getElementById('bjStatus').innerText = "Good luck!";
         } else if(act === 'hit') {
             pHand.push(getCard()); renderBJ(true);
             if(calc(pHand) > 21) endBJ('lose');
@@ -286,9 +283,10 @@
         document.getElementById('bjStandBtn').classList.add('hidden');
     }
 
+    // --- COIN FLIP ---
     window.playFlip = async (choice) => {
         const bet = parseFloat(document.getElementById('coinBet').value);
-        if(!bet || bet > userData.balance) return notify("Invalid Bet", "err");
+        if(!bet || bet > userData.balance) return notify("Invalid bet", "err");
         const coin = document.getElementById('coin');
         coin.classList.add('flipping');
         const win = Math.random() > 0.5;
@@ -297,15 +295,16 @@
             const r = doc(db, "users", auth.currentUser.uid);
             t.update(r, { balance: (await t.get(r)).data().balance + (win ? bet : -bet) });
         });
-        setTimeout(() => { coin.classList.remove('flipping'); coin.innerText = result[0].toUpperCase(); notify(win ? "Won!" : "Lost"); }, 800);
+        setTimeout(() => { coin.classList.remove('flipping'); coin.innerText = result[0].toUpperCase(); notify(win ? "You won!" : "You lost"); }, 800);
     };
 
-    // UI NAVIGATION
+    // --- NAVIGATION ---
     window.showTab = (t) => {
         document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
         document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
         document.getElementById(t + 'View').classList.remove('hidden');
         document.getElementById('t' + t.charAt(0).toUpperCase() + t.slice(1)).classList.add('active');
+        document.getElementById('settingsMenu').classList.add('hidden');
     };
     window.toggleAuth = () => { isReg = !isReg; document.getElementById('regArea').classList.toggle('hidden'); };
     window.handleAuth = async () => {
@@ -320,7 +319,7 @@
                 const s = await getDocs(query(collection(db, "users"), where("username", "==", u)));
                 await signInWithEmailAndPassword(auth, s.docs[0].data().email, p);
             }
-        } catch (e) { notify(e.message, 'err'); }
+        } catch (e) { notify("Authentication failed", 'err'); }
     };
     window.logout = () => signOut(auth);
 </script>
