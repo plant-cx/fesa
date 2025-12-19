@@ -30,10 +30,6 @@
         .orb-item { background: #0f172a; border: 2px solid #334155; padding: 20px; border-radius: 16px; position: relative; text-align: center; min-height: 240px; display: flex; flex-direction: column; justify-content: space-between; }
         .orb-visual { width: 65px; height: 65px; border-radius: 50%; margin: 0 auto 12px; box-shadow: 0 0 20px currentColor; filter: brightness(1.3); }
         
-        .blur-lock { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(10px); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10; border-radius: 16px; }
-        .lock-q { font-size: 40px; font-weight: 900; color: #f8fafc; }
-        .lock-hint { font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: 900; padding: 0 10px; text-align: center; }
-
         .progress-bg { width: 100%; height: 6px; background: #1e293b; border-radius: 10px; margin-top: 12px; overflow: hidden; }
         .progress-fill { height: 100%; background: #6366f1; width: 0%; transition: width 0.1s linear; }
 
@@ -41,31 +37,18 @@
         .btn-locked { background: #334155 !important; color: #64748b !important; cursor: not-allowed; border: 1px solid transparent; }
         .btn-available { background: #10b981 !important; color: white !important; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3); }
 
+        .chest-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
+        .chest-card { padding: 20px; border-radius: 16px; text-align: center; border: 3px solid #334155; }
+        .chest-card.bronze { border-color: #cd7f32; background: linear-gradient(135deg, #3d2b1f, #1e293b); }
+        .chest-card.silver { border-color: #c0c0c0; background: linear-gradient(135deg, #4b4b4b, #1e293b); }
+        .chest-card.gold { border-color: #ffd700; background: linear-gradient(135deg, #5e4d00, #1e293b); }
+        .chest-card.champion { border-color: #ff00ff; background: linear-gradient(135deg, #4b004b, #1e293b); }
+
         .orb-stats-top { position: absolute; top: 10px; left: 10px; display: flex; gap: 6px; align-items: center; z-index: 5; }
         .sell-btn { background: #ef4444; color: white; border: none; border-radius: 6px; padding: 4px 10px; font-size: 11px; font-weight: 900; cursor: pointer; }
-        .owned-badge { background: #1e293b; color: #f8fafc; font-size: 13px; padding: 4px 10px; border-radius: 6px; font-weight: 900; border: 2px solid #475569; }
         
-        .clicker-btn { width: 130px; height: 130px; border-radius: 50%; background: radial-gradient(circle, #6366f1, #4338ca); border: 10px solid #312e81; font-size: 45px; margin: 0 auto 15px; display: block; cursor: pointer; transition: transform 0.1s; box-shadow: 0 0 30px rgba(99, 102, 241, 0.4); }
-        .clicker-btn:active { transform: scale(0.92); }
-        .popup-anim { position: absolute; color: #34d399; font-weight: 900; animation: floatUp 1.2s ease-out forwards; pointer-events: none; z-index: 10000; font-size: 24px; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
-        
-        .badge-card { background: #0f172a; border: 2px solid #334155; border-radius: 16px; padding: 20px; margin-bottom: 25px; display: flex; align-items: center; gap: 20px; }
-        .badge-icon { font-size: 50px; }
-        .badge-info h4 { color: #f8fafc; margin-bottom: 6px; font-size: 22px; }
-        .badge-info p { color: #94a3b8; font-size: 14px; font-weight: 600; }
-
-        .notif-banner {
-            position: fixed; top: 25px; left: -400px; width: 320px; background: #6366f1; color: white; padding: 20px; border-radius: 16px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.5); z-index: 99999; display: flex; align-items: center; gap: 15px; font-weight: 800; font-size: 18px;
-            transition: left 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 2px solid #818cf8;
-        }
+        .notif-banner { position: fixed; top: 25px; left: -400px; width: 320px; background: #6366f1; color: white; padding: 20px; border-radius: 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); z-index: 99999; display: flex; align-items: center; gap: 15px; font-weight: 800; transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 2px solid #818cf8; }
         .notif-banner.active { left: 25px; }
-
-        .chest-card { background: linear-gradient(135deg, #4338ca, #6366f1); padding: 30px; border-radius: 20px; text-align: center; border: 3px solid #818cf8; margin-bottom: 30px; box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4); }
-        .chest-icon { font-size: 55px; margin-bottom: 12px; }
-        h3 { font-size: 26px; font-weight: 900; }
-        h4 { font-size: 22px; font-weight: 900; }
-        b { font-weight: 900; }
     </style>
 </head>
 <body>
@@ -78,7 +61,7 @@
         <input type="text" id="loginUser" placeholder="Username">
         <div id="regArea" class="hidden"><input type="email" id="regEmail" placeholder="Email Address"></div>
         <input type="password" id="authPass" placeholder="Password">
-        <button onclick="handleAuth()">Enter Game</button>
+        <button id="authBtn" onclick="handleAuth()">Enter Game</button>
         <p style="text-align:center; margin-top:20px;"><a href="javascript:void(0)" onclick="toggleAuthMode()" style="color:#6366f1; font-weight:800;">Switch Login/Register</a></p>
     </div>
 
@@ -94,8 +77,6 @@
             </div>
             <div id="settingsMenu" class="card hidden">
                 <h3 style="margin-bottom:20px;">Settings</h3>
-                <input type="text" id="setNewUser" placeholder="New Username">
-                <button onclick="updateProfile()" style="background:#10b981; margin-bottom:15px;">Update Profile</button>
                 <button onclick="logout()" style="background:#ef4444;">Logout</button>
             </div>
         </div>
@@ -111,16 +92,11 @@
 
         <div id="earnView" class="tab-view">
             <div style="text-align:center">
-                <button class="clicker-btn" id="mainClicker">💰</button>
+                <button class="clicker-btn" id="mainClicker" style="width:130px; height:130px; border-radius:50%; background: radial-gradient(circle, #6366f1, #4338ca); border: 10px solid #312e81; font-size:45px; margin:0 auto 15px; display:block; cursor:pointer; transition: transform 0.1s;">💰</button>
                 <div class="card" style="margin-top: 20px; padding: 20px; background: #0f172a; border: 2px solid #334155;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div style="text-align: left;">
-                            <b style="font-size: 18px; color: #6366f1;">Click Power</b>
-                            <p style="font-size: 16px; color: #94a3b8; font-weight:700;">+ $<span id="clickPowerVal">1</span></p>
-                        </div>
-                        <button id="upgradeClickBtn" onclick="upgradeClicker()" style="width: auto; padding: 12px 20px; font-size: 14px;">
-                            UPGRADE $<span id="clickCost">100</span>
-                        </button>
+                        <div style="text-align: left;"><b style="font-size: 18px; color: #6366f1;">Click Power</b><p style="font-size: 16px; color: #94a3b8; font-weight:700;">+ $<span id="clickPowerVal">1</span></p></div>
+                        <button id="upgradeClickBtn" onclick="upgradeClicker()" style="width: auto; padding: 12px 20px; font-size: 14px;">UPGRADE $<span id="clickCost">100</span></button>
                     </div>
                 </div>
             </div>
@@ -128,20 +104,39 @@
         </div>
 
         <div id="collectionView" class="tab-view hidden">
-            <h3 style="text-align:center; color:#6366f1; margin-bottom:25px; font-size:28px;">YOUR COLLECTION</h3>
+            <h3 style="text-align:center; color:#6366f1; margin-bottom:25px;">YOUR COLLECTION</h3>
             <div id="clickerBadgeSection"></div>
             <div class="orb-grid" id="collectionGrid"></div>
         </div>
 
         <div id="marketplaceView" class="tab-view hidden">
-            <div class="chest-card">
-                <div class="chest-icon">📦</div>
-                <h3>MYSTERY CHEST</h3>
-                <p style="font-size: 16px; font-weight:700; opacity: 0.9; margin-bottom: 5px;" id="chestCounter">Unlocked: 0/10</p>
-                <p style="font-size: 14px; opacity: 0.8; margin-bottom: 15px;">Get a random orb earning $1-$500 every 5s</p>
-                <button onclick="buyChest()" id="chestBtn" style="background: #fbbf24; color: #1e293b; border: none; font-size: 20px;">BUY CHEST ($100)</button>
+            <h3 style="text-align:center; margin-bottom: 20px;">CHEST RANKS (<span id="chestCounter">0/10</span>)</h3>
+            <div class="chest-grid">
+                <div class="chest-card bronze">
+                    <div style="font-size:30px">🥉</div>
+                    <b>BRONZE</b>
+                    <p style="font-size:12px; margin:5px 0;">$0-$100/10s</p>
+                    <button onclick="buyChest('bronze')" class="buy-btn" style="background:#cd7f32">$100</button>
+                </div>
+                <div class="chest-card silver">
+                    <div style="font-size:30px">🥈</div>
+                    <b>SILVER</b>
+                    <p style="font-size:12px; margin:5px 0;">$100-$1K/10s</p>
+                    <button onclick="buyChest('silver')" class="buy-btn" style="background:#c0c0c0; color:#000">$1K</button>
+                </div>
+                <div class="chest-card gold">
+                    <div style="font-size:30px">🥇</div>
+                    <b>GOLD</b>
+                    <p style="font-size:12px; margin:5px 0;">$1K-$5K/10s</p>
+                    <button onclick="buyChest('gold')" class="buy-btn" style="background:#ffd700; color:#000">$100K</button>
+                </div>
+                <div class="chest-card champion">
+                    <div style="font-size:30px">🏆</div>
+                    <b>CHAMPION</b>
+                    <p style="font-size:12px; margin:5px 0;">$5K-$10K/10s</p>
+                    <button onclick="buyChest('champion')" class="buy-btn" style="background:#ff00ff">$1M</button>
+                </div>
             </div>
-            <h3 style="text-align:center; color:#f59e0b; margin-bottom:15px;">💎 HYPER RARE MARKET</h3>
             <div class="orb-grid" id="marketOrbGrid"></div>
         </div>
 
@@ -170,51 +165,32 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, updateDoc, onSnapshot, query, collection, where, getDocs, increment, orderBy, addDoc, deleteDoc, limit, arrayUnion, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    // Fixed imports and Firestore logic
-    import { getFirestore as getDB } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-    import * as fs from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, updateDoc, onSnapshot, query, collection, where, getDocs, increment, addDoc, deleteDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = { apiKey: "AIzaSyBo2zhESYzv1OChHSAfSb2GLiP6XtI6q1s", authDomain: "mailcash-3da79.firebaseapp.com", projectId: "mailcash-3da79", storageBucket: "mailcash-3da79.firebasestorage.app", messagingSenderId: "9602664972", appId: "1:9602664972:web:2ded4f3a7f583558513c29" };
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const db = getDB(app);
+    const db = getFirestore(app);
 
     let userData = null;
     let isReg = false;
-    let initialMailLoad = true;
 
     const ORB_DATA = [
         { id: 'orb1', name: 'Blue Orb', baseCost: 350, baseInc: 15, time: 5000, color: '#3b82f6' },
         { id: 'orb2', name: 'Red Orb', baseCost: 3000, baseInc: 200, time: 7000, color: '#ef4444' },
-        { id: 'orb3', name: 'Green Orb', baseCost: 15000, baseInc: 850, time: 6000, color: '#10b981' },
-        { id: 'orb4', name: 'Gold Orb', baseCost: 50000, baseInc: 3500, time: 4000, color: '#f59e0b' },
-        { id: 'orb5', name: 'Purple Orb', baseCost: 150000, baseInc: 12000, time: 5000, color: '#8b5cf6' },
-        { id: 'orb6', name: 'Cyan Orb', baseCost: 400000, baseInc: 40000, time: 5000, color: '#06b6d4' },
-        { id: 'orb7', name: 'Pink Orb', baseCost: 1000000, baseInc: 120000, time: 8000, color: '#ec4899' },
-        { id: 'orb8', name: 'White Orb', baseCost: 4000000, baseInc: 500000, time: 10000, color: '#f8fafc' },
-        { id: 'orb9', name: 'Void Orb', baseCost: 20000000, baseInc: 3000000, time: 12000, color: '#475569' },
-        { id: 'orb10', name: 'Solar Orb', baseCost: 80000000, baseInc: 15000000, time: 15000, color: '#fbbf24' }
-    ];
-
-    const MARKET_ORB_DATA = [
-        { id: 'h_orb1', name: 'Diamond Orb', baseCost: 100000000, baseInc: 50000000, time: 10000, color: '#e2e8f0' },
-        { id: 'h_orb2', name: 'Emerald Orb', baseCost: 500000000, baseInc: 250000000, time: 12000, color: '#10b981' },
-        { id: 'h_orb3', name: 'Ruby Orb', baseCost: 2500000000, baseInc: 1000000000, time: 15000, color: '#dc2626' },
-        { id: 'h_orb4', name: 'Obsidian Orb', baseCost: 10000000000, baseInc: 5000000000, time: 10000, color: '#1e293b' },
-        { id: 'h_orb5', name: 'Cosmic Orb', baseCost: 100000000000, baseInc: 25000000000, time: 8000, color: '#6366f1' }
+        { id: 'orb3', name: 'Green Orb', baseCost: 15000, baseInc: 850, time: 6000, color: '#10b981' }
     ];
 
     onAuthStateChanged(auth, u => {
         if(u) {
-            fs.onSnapshot(fs.doc(db, "users", u.uid), d => {
+            onSnapshot(doc(db, "users", u.uid), d => {
                 if(d.exists()) {
                     userData = d.data();
                     updateUI();
                     renderOrbs('orbGrid', ORB_DATA);
-                    renderOrbs('marketOrbGrid', MARKET_ORB_DATA);
+                    renderOrbs('marketOrbGrid', []);
                     renderCollection();
-                    if(initialMailLoad) { loadInbox(); initialMailLoad = false; }
+                    loadInbox();
                     document.getElementById('authScreen').classList.add('hidden');
                     document.getElementById('appScreen').classList.remove('hidden');
                 }
@@ -227,42 +203,46 @@
         const chestCount = userData.mysteryOrbs ? userData.mysteryOrbs.length : 0;
         document.getElementById('userBal').innerText = Math.floor(userData.balance || 0).toLocaleString();
         document.getElementById('userDisplay').innerText = "@" + userData.username;
-        document.getElementById('userPfp').src = `https://api.dicebear.com/7.x/identicon/svg?seed=${userData.pfpSeed || userData.username}`;
+        document.getElementById('userPfp').src = `https://api.dicebear.com/7.x/identicon/svg?seed=${userData.username}`;
         document.getElementById('clickPowerVal').innerText = getPower(userData.clickLevel || 1).toLocaleString();
         document.getElementById('clickCost').innerText = ((userData.clickLevel || 1) * 200).toLocaleString();
-        document.getElementById('upgradeClickBtn').className = (userData.balance >= (userData.clickLevel * 200)) ? "btn-available" : "btn-locked";
-        
-        const cBtn = document.getElementById('chestBtn');
-        document.getElementById('chestCounter').innerText = `Unlocked: ${chestCount}/10`;
-        if(chestCount >= 10) { cBtn.innerText = "LIMIT REACHED"; cBtn.className = "buy-btn btn-locked"; cBtn.style.opacity = "1"; }
-        else { cBtn.innerText = "BUY CHEST ($100)"; cBtn.className = "buy-btn"; cBtn.style.background = "#fbbf24"; cBtn.style.opacity = (userData.balance >= 100) ? "1" : "0.5"; }
+        document.getElementById('chestCounter').innerText = `${chestCount}/10`;
     };
 
     const getPower = (lvl) => [1, 5, 25, 50, 100, 250, 500, 1000, 2500, 5000][lvl-1] || lvl * 500;
-    const calcIncome = (orb, owned) => owned > 0 ? Math.floor(orb.baseInc * (Math.pow(2.0, owned) - 1)) : 0;
 
     function renderOrbs(gridId, dataList) {
         if (!userData) return;
         const grid = document.getElementById(gridId);
         grid.innerHTML = '';
+
         if (gridId === 'marketOrbGrid' && userData.mysteryOrbs) {
-            [...userData.mysteryOrbs].reverse().forEach((mOrb) => {
+            [...userData.mysteryOrbs].reverse().forEach((mOrb, idx) => {
                 const actualIdx = userData.mysteryOrbs.indexOf(mOrb);
                 const div = document.createElement('div');
                 div.className = 'orb-item';
-                div.innerHTML = `<div class="orb-stats-top"><button onclick="sellMystery(${actualIdx})" class="sell-btn">SELL $50</button></div><div class="orb-visual" style="color:${mOrb.color || '#fbbf24'}; background:currentColor"></div><b style="font-size:18px;">${mOrb.name}</b><div style="font-size:14px; margin:8px 0; font-weight:800; color:#10b981">+$${mOrb.inc}/5s</div><div class="progress-bg"><div class="progress-fill" id="bar-mystery-${actualIdx}"></div></div><button class="buy-btn btn-locked">CHEST FIND</button>`;
+                div.innerHTML = `
+                    <div class="orb-stats-top"><button onclick="sellMystery(${actualIdx})" class="sell-btn">SELL $50</button></div>
+                    <div class="orb-visual" style="color:${mOrb.color}; background:currentColor"></div>
+                    <b>${mOrb.name}</b>
+                    <div style="font-size:14px; margin:8px 0; font-weight:800; color:#10b981">+$${mOrb.inc}/10s</div>
+                    <div class="progress-bg"><div class="progress-fill" id="bar-mystery-${actualIdx}"></div></div>
+                `;
                 grid.appendChild(div);
             });
         }
-        dataList.forEach((orb, index) => {
+
+        dataList.forEach((orb) => {
             const owned = userData.orbs?.[orb.id] || 0;
-            const isUnlocked = index === 0 || (userData.orbs?.[dataList[index-1].id] > 0);
             const cost = Math.floor(orb.baseCost * Math.pow(1.3, owned));
-            const isMaxed = owned >= 100;
             const div = document.createElement('div');
             div.className = 'orb-item';
-            div.innerHTML = `${isUnlocked ? `<div class="orb-stats-top">${owned > 0 ? `<button onclick="sellOrb('${orb.id}', ${Math.floor(cost * 0.7)})" class="sell-btn">SELL</button>` : ''}<div class="owned-badge" style="${isMaxed ? 'border-color: #ef4444; color: #ef4444;' : ''}">${isMaxed ? 'MAX' : 'x' + owned}</div></div>` : ''}<div class="orb-visual" style="color:${orb.color}; background:currentColor"></div><b style="font-size:18px;">${orb.name}</b>${isUnlocked ? `<div style="font-size:13px; margin:5px 0; font-weight:800;"><span style="color:#10b981">+$${calcIncome(orb, owned).toLocaleString()}</span><br><span style="color:#94a3b8">EVERY ${orb.time/1000}s</span></div><div class="progress-bg"><div class="progress-fill" id="bar-${orb.id}"></div></div>` : ''}<button onclick="buyOrb('${orb.id}', ${cost})" class="buy-btn ${userData.balance >= cost && isUnlocked && !isMaxed ? 'btn-available' : 'btn-locked'}">${isUnlocked ? (isMaxed ? 'MAXED' : `UPGRADE $${cost.toLocaleString()}`) : 'LOCKED'}</button>`;
-            if (!isUnlocked) div.innerHTML += `<div class="blur-lock"><div class="lock-q">?</div><div class="lock-hint">OWN 1 ${dataList[index-1].name}</div></div>`;
+            div.innerHTML = `
+                <div class="orb-visual" style="color:${orb.color}; background:currentColor"></div>
+                <b>${orb.name}</b>
+                <div class="progress-bg"><div class="progress-fill" id="bar-${orb.id}"></div></div>
+                <button onclick="buyOrb('${orb.id}', ${cost})" class="buy-btn">UPGRADE $${cost}</button>
+            `;
             grid.appendChild(div);
         });
     }
@@ -271,80 +251,69 @@
         if (!userData) return;
         const grid = document.getElementById('collectionGrid');
         grid.innerHTML = '';
-        const clicks = userData.totalClicks || 0;
-        let b = { name: "Bronze", icon: "🥉", color: "#b45309" };
-        if (clicks >= 10000) b = { name: "Champion", icon: "🏆", color: "#f8fafc" };
-        else if (clicks >= 1000) b = { name: "Emerald", icon: "❇️", color: "#10b981" };
-        else if (clicks >= 750) b = { name: "Diamond", icon: "💎", color: "#06b6d4" };
-        else if (clicks >= 250) b = { name: "Gold", icon: "🥇", color: "#f59e0b" };
-        else if (clicks >= 50) b = { name: "Silver", icon: "🥈", color: "#94a3b8" };
-        document.getElementById('clickerBadgeSection').innerHTML = `<div class="badge-card" style="border-left: 8px solid ${b.color}"><div class="badge-icon">${b.icon}</div><div class="badge-info"><h4>${b.name} Clicker</h4><p>LIFETIME CLICKS: ${clicks.toLocaleString()}</p></div></div>`;
-        if(userData.mysteryOrbs) { [...userData.mysteryOrbs].reverse().forEach(mOrb => { const div = document.createElement('div'); div.className = 'orb-item'; div.innerHTML = `<div class="orb-visual" style="color:${mOrb.color || '#fbbf24'}; background:currentColor"></div><b style="font-size:18px;">${mOrb.name}</b><div style="font-size:14px; margin-top:10px; color:#6366f1; font-weight:900;">LOOT</div>`; grid.appendChild(div); }); }
-        [...ORB_DATA, ...MARKET_ORB_DATA].filter(o => userData.orbs?.[o.id] > 0).forEach(o => { const div = document.createElement('div'); div.className = 'orb-item'; div.innerHTML = `<div class="orb-visual" style="color:${o.color}; background:currentColor"></div><b style="font-size:18px;">${o.name}</b><div style="font-size:14px; margin-top:10px; color:#6366f1; font-weight:900;">COLLECTED</div>`; grid.appendChild(div); });
+        if(userData.mysteryOrbs) {
+            userData.mysteryOrbs.forEach(mOrb => {
+                const div = document.createElement('div'); div.className = 'orb-item';
+                div.innerHTML = `<div class="orb-visual" style="color:${mOrb.color}; background:currentColor"></div><b>${mOrb.name}</b><p style="font-size:12px">LOOT</p>`;
+                grid.appendChild(div);
+            });
+        }
     }
 
-    window.buyChest = async () => {
+    window.buyChest = async (rank) => {
         if(!userData) return;
-        if(userData.mysteryOrbs && userData.mysteryOrbs.length >= 10) return alert("LIMIT REACHED!");
-        if(userData.balance < 100) return alert("NOT ENOUGH CASH!");
-        const adjectives = ["Ancient", "Pulsing", "Radiant", "Shadow", "Mystic", "Cursed", "Solar", "Lunar", "Glitch", "Frozen", "Neon", "Blazing"];
-        const elements = ["Lava", "Water", "Earth", "Air", "Cosmic", "Void", "Storm", "Spirit", "Metal", "Venom", "Plasma", "Crystal"];
-        const colors = ["#ef4444", "#3b82f6", "#10b981", "#f59e0b", "#8b5cf6", "#ec4899", "#06b6d4", "#f8fafc", "#475569", "#fbbf24"];
-        const randName = adjectives[Math.floor(Math.random()*adjectives.length)] + " " + elements[Math.floor(Math.random()*elements.length)] + " Orb";
-        const randColor = colors[Math.floor(Math.random()*colors.length)];
-        const randInc = Math.floor(Math.random() * 500) + 1;
-        await fs.updateDoc(fs.doc(db, "users", auth.currentUser.uid), { balance: fs.increment(-100), mysteryOrbs: fs.arrayUnion({ name: randName, inc: randInc, color: randColor, lastClaim: Date.now() }) });
-        alert(`UNBOXED: ${randName} (+$${randInc}/5s)`);
+        if(userData.mysteryOrbs && userData.mysteryOrbs.length >= 10) return alert("LIMIT REACHED! SELL AN ORB.");
+        const configs = {
+            bronze: { cost: 100, min: 0, max: 100, color: '#cd7f32', name: 'Bronze Orb' },
+            silver: { cost: 1000, min: 100, max: 1000, color: '#c0c0c0', name: 'Silver Orb' },
+            gold: { cost: 100000, min: 1000, max: 5000, color: '#ffd700', name: 'Gold Orb' },
+            champion: { cost: 1000000, min: 5000, max: 10000, color: '#ff00ff', name: 'Champion Orb' }
+        };
+        const config = configs[rank];
+        if(userData.balance < config.cost) return alert("NOT ENOUGH CASH!");
+        const randInc = Math.floor(Math.random() * (config.max - config.min + 1)) + config.min;
+        await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-config.cost), mysteryOrbs: arrayUnion({ name: config.name, inc: randInc, color: config.color, lastClaim: Date.now() }) });
+        alert(`UNBOXED: ${config.name} (+$${randInc}/10s)`);
     };
 
     window.sellMystery = async (index) => {
-        if(!userData || !userData.mysteryOrbs) return;
-        if(!confirm("Sell this orb for $50?")) return;
         const updatedOrbs = [...userData.mysteryOrbs];
         updatedOrbs.splice(index, 1);
-        if(window['mystery_'+index+'_timer']) { clearInterval(window['mystery_'+index+'_timer']); delete window['mystery_'+index+'_timer']; }
-        await fs.updateDoc(fs.doc(db, "users", auth.currentUser.uid), { balance: fs.increment(50), mysteryOrbs: updatedOrbs });
+        await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(50), mysteryOrbs: updatedOrbs });
     };
 
-    window.buyOrb = async (id, cost) => { if(userData && (userData.orbs?.[id] || 0) < 100 && userData.balance >= cost) await fs.updateDoc(fs.doc(db, "users", auth.currentUser.uid), { balance: fs.increment(-cost), [`orbs.${id}`]: fs.increment(1) }); };
-    window.sellOrb = async (id, refund) => { if(userData?.orbs?.[id] > 0) await fs.updateDoc(fs.doc(db, "users", auth.currentUser.uid), { balance: fs.increment(refund), [`orbs.${id}`]: fs.increment(-1) }); };
-    window.upgradeClicker = async () => { const cost = (userData.clickLevel || 1) * 200; if(userData.balance >= cost) await fs.updateDoc(fs.doc(db, "users", auth.currentUser.uid), { balance: fs.increment(-cost), clickLevel: fs.increment(1) }); };
+    window.buyOrb = async (id, cost) => { if(userData.balance >= cost) await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-cost), [`orbs.${id}`]: increment(1) }); };
+    window.upgradeClicker = async () => { const cost = (userData.clickLevel || 1) * 200; if(userData.balance >= cost) await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-cost), clickLevel: increment(1) }); };
 
-    document.getElementById('mainClicker').addEventListener('click', (e) => {
-        if (!userData) return;
+    document.getElementById('mainClicker').addEventListener('click', () => {
         const p = getPower(userData.clickLevel || 1);
-        fs.updateDoc(fs.doc(db, "users", auth.currentUser.uid), { balance: fs.increment(p), totalClicks: fs.increment(1) });
-        const pop = document.createElement('div'); pop.className = 'popup-anim'; pop.innerText = `+$${p}`; pop.style.position = 'fixed'; pop.style.left = e.clientX + 'px'; pop.style.top = e.clientY + 'px';
-        document.body.appendChild(pop); setTimeout(() => pop.remove(), 1200);
+        updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(p), totalClicks: increment(1) });
     });
 
     window.handleAuth = async () => {
         const userNm = document.getElementById('loginUser').value.trim().toLowerCase();
         const pass = document.getElementById('authPass').value;
+        const btn = document.getElementById('authBtn');
+        if(!userNm || !pass) return alert("Enter credentials");
+        btn.disabled = true; btn.innerText = "Processing...";
         try {
             if(isReg) {
                 const email = document.getElementById('regEmail').value;
                 const res = await createUserWithEmailAndPassword(auth, email, pass);
-                await fs.setDoc(fs.doc(db, "users", res.user.uid), { username: userNm, email, balance: 1000, orbs: {}, clickLevel: 1, totalClicks: 0, pfpSeed: userNm, mysteryOrbs: [] });
+                await setDoc(doc(db, "users", res.user.uid), { username: userNm, email, balance: 500, orbs: {}, clickLevel: 1, mysteryOrbs: [] });
             } else {
-                const s = await fs.getDocs(fs.query(fs.collection(db, "users"), fs.where("username", "==", userNm)));
-                if(s.empty) throw new Error("USER NOT FOUND");
+                const s = await getDocs(query(collection(db, "users"), where("username", "==", userNm)));
+                if(s.empty) throw new Error("User not found");
                 await signInWithEmailAndPassword(auth, s.docs[0].data().email, pass);
             }
-        } catch (e) { alert(e.message); }
+        } catch (e) { alert(e.message); btn.disabled = false; btn.innerText = "Enter Game"; }
     };
 
     window.sendAction = async (type) => {
         const to = document.getElementById(type === 'text' ? 'msgTo' : 'payTo').value.trim().toLowerCase();
-        const amt = type === 'money' ? parseFloat(document.getElementById('payAmt').value || 0) : 0;
-        const s = await fs.getDocs(fs.query(fs.collection(db, "users"), fs.where("username", "==", to)));
+        const s = await getDocs(query(collection(db, "users"), where("username", "==", to)));
         if(s.empty) return alert("USER NOT FOUND");
-        if(type === 'money') {
-            if(userData.balance < amt) return alert("NO CASH");
-            await fs.updateDoc(fs.doc(db, "users", auth.currentUser.uid), { balance: fs.increment(-amt) });
-            await fs.updateDoc(fs.doc(db, "users", s.docs[0].id), { balance: fs.increment(amt) });
-        }
-        await fs.addDoc(fs.collection(db, "messages"), { to, from: userData.username, body: type === 'money' ? `Sent $${amt}` : document.getElementById('msgBody').value, date: Date.now() });
+        await addDoc(collection(db, "messages"), { to, from: userData.username, body: document.getElementById('msgBody').value, date: Date.now() });
         alert("SENT!");
     };
 
@@ -352,38 +321,31 @@
         document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
         document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
         document.getElementById(t + 'View').classList.remove('hidden');
-        const m = {earn:'tEar', collection:'tCol', marketplace:'tMkt', inbox:'tIn', message:'tMsg', transfer:'tPay'};
-        document.getElementById(m[t]).classList.add('active');
+        document.getElementById('t' + t.charAt(0).toUpperCase() + t.slice(1,3)).classList.add('active');
     };
 
     const loadInbox = () => {
-        fs.onSnapshot(fs.query(fs.collection(db, "messages"), fs.where("to", "==", userData.username)), s => {
-            const sorted = s.docs.map(d => ({id: d.id, ...d.data()})).sort((a,b) => b.date - a.date);
-            if (!initialMailLoad && sorted.length > 0) { const b = document.getElementById('notifBanner'); document.getElementById('notifText').innerText = `@${sorted[0].from} sent mail!`; b.classList.add('active'); setTimeout(() => b.classList.remove('active'), 5000); }
-            document.getElementById('mailBox').innerHTML = sorted.map(d => `<div class="msg-card"><b>@${d.from}</b><p>${d.body}</p></div>`).join('') || "NO MESSAGES.";
+        onSnapshot(query(collection(db, "messages"), where("to", "==", userData.username)), s => {
+            document.getElementById('mailBox').innerHTML = s.docs.map(d => `<div class="msg-card"><b>@${d.data().from}</b><p>${d.data().body}</p></div>`).join('') || "NO MAIL.";
         });
     };
 
     setInterval(() => {
         if(!userData) return;
-        [...ORB_DATA, ...MARKET_ORB_DATA].forEach(orb => {
-            if((userData.orbs?.[orb.id] || 0) > 0) {
-                if(!window[orb.id+'_timer']) { window[orb.id+'_start'] = Date.now(); window[orb.id+'_timer'] = setInterval(() => { fs.updateDoc(fs.doc(db, "users", auth.currentUser.uid), { balance: fs.increment(calcIncome(orb, userData.orbs[orb.id])) }); window[orb.id+'_start'] = Date.now(); }, orb.time); }
-                const bar = document.getElementById(`bar-${orb.id}`); if(bar) bar.style.width = Math.min(((Date.now() - window[orb.id+'_start']) / orb.time) * 100, 100) + "%";
-            }
-        });
-        if (userData.mysteryOrbs) {
+        if(userData.mysteryOrbs) {
             userData.mysteryOrbs.forEach((mOrb, idx) => {
-                if(!window['mystery_'+idx+'_timer']) { window['mystery_'+idx+'_start'] = Date.now(); window['mystery_'+idx+'_timer'] = setInterval(() => { if(userData.mysteryOrbs[idx]) { fs.updateDoc(fs.doc(db, "users", auth.currentUser.uid), { balance: fs.increment(userData.mysteryOrbs[idx].inc) }); window['mystery_'+idx+'_start'] = Date.now(); } }, 5000); }
-                const bar = document.getElementById(`bar-mystery-${idx}`); if(bar) bar.style.width = Math.min(((Date.now() - window['mystery_'+idx+'_start']) / 5000) * 100, 100) + "%";
+                if(!window['m_'+idx]) {
+                    window['m_'+idx] = setInterval(() => {
+                        updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(mOrb.inc) });
+                    }, 10000);
+                }
             });
         }
-    }, 100);
+    }, 1000);
 
     window.toggleSettings = () => document.getElementById('settingsMenu').classList.toggle('hidden');
     window.toggleAuthMode = () => { isReg = !isReg; document.getElementById('regArea').classList.toggle('hidden', !isReg); };
     window.logout = () => signOut(auth).then(() => location.reload());
-    window.clearInbox = async () => { const s = await fs.getDocs(fs.query(fs.collection(db, "messages"), fs.where("to", "==", userData.username))); s.forEach(d => fs.deleteDoc(fs.doc(db, "messages", d.id))); };
 </script>
 </body>
 </html>
