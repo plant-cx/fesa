@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MailCash | Ultimate Edition</title>
+    <title>MailCash | Buffed Edition</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background: #0f172a; color: #f8fafc; padding: 20px; overflow-x: hidden; }
@@ -69,10 +69,8 @@
                 <div class="balance-pill">$<span id="userBal">0</span></div>
                 <button onclick="toggleSettings()" style="width:40px; height:40px; padding:0; background:#334155;">⚙️</button>
             </div>
-
             <div id="settingsMenu" class="card hidden">
                 <h3 style="margin-bottom:15px;">Settings</h3>
-                <label style="font-size:12px; color:#94a3b8;">Change Username</label>
                 <input type="text" id="setNewUser" placeholder="New Username">
                 <button onclick="updateProfile()" style="background:#10b981; margin-bottom:15px;">Update Profile</button>
                 <button onclick="logout()" style="background:#ef4444;">Logout</button>
@@ -96,7 +94,7 @@
                             <p style="font-size: 12px; color: #94a3b8;">Current: +$<span id="clickPowerVal">1</span></p>
                         </div>
                         <button id="upgradeClickBtn" onclick="upgradeClicker()" style="width: auto; padding: 8px 15px; font-size: 12px;">
-                            Upgrade $<span id="clickCost">250</span>
+                            Upgrade $<span id="clickCost">100</span>
                         </button>
                     </div>
                 </div>
@@ -107,23 +105,21 @@
         <div id="inboxView" class="tab-view hidden">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                 <h3>Your Mail</h3>
-                <button onclick="clearInbox()" style="width:auto; padding:5px 12px; background:#ef4444; font-size:11px;">Clear Inbox</button>
+                <button onclick="clearInbox()" style="width:auto; padding:5px 12px; background:#ef4444; font-size:11px;">Clear</button>
             </div>
             <div id="mailBox">Loading...</div>
         </div>
 
         <div id="messageView" class="tab-view hidden card">
-            <h3>Send Message</h3>
             <input type="text" id="msgTo" placeholder="To @username">
-            <textarea id="msgBody" rows="4" placeholder="Type message..."></textarea>
+            <textarea id="msgBody" rows="4" placeholder="Message..."></textarea>
             <button onclick="sendAction('text')">Send Mail</button>
         </div>
 
         <div id="transferView" class="tab-view hidden card">
-            <h3>Send Cash</h3>
             <input type="text" id="payTo" placeholder="Recipient @username">
             <input type="number" id="payAmt" placeholder="Amount ($)">
-            <button onclick="sendAction('money')" style="background:#10b981">Transfer Cash</button>
+            <button onclick="sendAction('money')" style="background:#10b981">Transfer</button>
         </div>
     </div>
 </div>
@@ -149,17 +145,18 @@
     let userData = null;
     let isReg = false;
 
+    // BUFFED ORB DATA
     const ORB_DATA = [
-        { id: 'orb1', name: 'Blue Orb', baseCost: 500, baseInc: 10, time: 5000, color: '#3b82f6' },
-        { id: 'orb2', name: 'Red Orb', baseCost: 5000, baseInc: 150, time: 7000, color: '#ef4444' },
-        { id: 'orb3', name: 'Green Orb', baseCost: 20000, baseInc: 600, time: 6000, color: '#10b981' },
-        { id: 'orb4', name: 'Gold Orb', baseCost: 75000, baseInc: 2500, time: 4000, color: '#f59e0b' },
-        { id: 'orb5', name: 'Purple Orb', baseCost: 200000, baseInc: 8000, time: 5000, color: '#8b5cf6' },
-        { id: 'orb6', name: 'Cyan Orb', baseCost: 500000, baseInc: 25000, time: 5000, color: '#06b6d4' },
-        { id: 'orb7', name: 'Pink Orb', baseCost: 1200000, baseInc: 75000, time: 8000, color: '#ec4899' },
-        { id: 'orb8', name: 'White Orb', baseCost: 5000000, baseInc: 300000, time: 10000, color: '#f8fafc' },
-        { id: 'orb9', name: 'Void Orb', baseCost: 25000000, baseInc: 1500000, time: 12000, color: '#475569' },
-        { id: 'orb10', name: 'Solar Orb', baseCost: 100000000, baseInc: 8000000, time: 15000, color: '#fbbf24' }
+        { id: 'orb1', name: 'Blue Orb', baseCost: 350, baseInc: 15, time: 5000, color: '#3b82f6' },
+        { id: 'orb2', name: 'Red Orb', baseCost: 3000, baseInc: 200, time: 7000, color: '#ef4444' },
+        { id: 'orb3', name: 'Green Orb', baseCost: 15000, baseInc: 850, time: 6000, color: '#10b981' },
+        { id: 'orb4', name: 'Gold Orb', baseCost: 50000, baseInc: 3500, time: 4000, color: '#f59e0b' },
+        { id: 'orb5', name: 'Purple Orb', baseCost: 150000, baseInc: 12000, time: 5000, color: '#8b5cf6' },
+        { id: 'orb6', name: 'Cyan Orb', baseCost: 400000, baseInc: 40000, time: 5000, color: '#06b6d4' },
+        { id: 'orb7', name: 'Pink Orb', baseCost: 1000000, baseInc: 120000, time: 8000, color: '#ec4899' },
+        { id: 'orb8', name: 'White Orb', baseCost: 4000000, baseInc: 500000, time: 10000, color: '#f8fafc' },
+        { id: 'orb9', name: 'Void Orb', baseCost: 20000000, baseInc: 3000000, time: 12000, color: '#475569' },
+        { id: 'orb10', name: 'Solar Orb', baseCost: 80000000, baseInc: 15000000, time: 15000, color: '#fbbf24' }
     ];
 
     onAuthStateChanged(auth, u => {
@@ -177,44 +174,35 @@
         }
     });
 
-    window.toggleAuthMode = () => { isReg = !isReg; document.getElementById('regArea').classList.toggle('hidden', !isReg); };
-
-    window.handleAuth = async () => {
-        const userNm = document.getElementById('loginUser').value.trim().toLowerCase();
-        const pass = document.getElementById('authPass').value;
-        try {
-            if(isReg) {
-                const email = document.getElementById('regEmail').value;
-                const res = await createUserWithEmailAndPassword(auth, email, pass);
-                await setDoc(doc(db, "users", res.user.uid), { username: userNm, email: email, balance: 1000, orbs: {}, clickLevel: 1, pfpSeed: userNm });
-            } else {
-                const s = await getDocs(query(collection(db, "users"), where("username", "==", userNm)));
-                if(s.empty) throw new Error("No user found");
-                await signInWithEmailAndPassword(auth, s.docs[0].data().email, pass);
-            }
-        } catch (e) { alert(e.message); }
+    // CLICK POWER LOGIC
+    const getPower = (lvl) => {
+        const sequence = [1, 5, 25, 50, 100, 250, 500, 1000, 2500, 5000];
+        if (lvl <= sequence.length) return sequence[lvl - 1];
+        return lvl * 500; // Scaling after max sequence
     };
 
     function updateUI() {
         if (!userData) return;
         const bal = userData.balance || 0;
-        const clickLvl = userData.clickLevel || 1;
-        const clickCost = clickLvl * 250;
+        const lvl = userData.clickLevel || 1;
+        const power = getPower(lvl);
+        const cost = lvl * 200; // Buffed cost for power
 
         document.getElementById('userBal').innerText = Math.floor(bal).toLocaleString();
         document.getElementById('userDisplay').innerText = "@" + (userData.username || "User");
         document.getElementById('userPfp').src = `https://api.dicebear.com/7.x/identicon/svg?seed=${userData.pfpSeed || userData.username}`;
         
-        document.getElementById('clickPowerVal').innerText = clickLvl.toLocaleString();
-        document.getElementById('clickCost').innerText = clickCost.toLocaleString();
+        document.getElementById('clickPowerVal').innerText = power.toLocaleString();
+        document.getElementById('clickCost').innerText = cost.toLocaleString();
         
         const upBtn = document.getElementById('upgradeClickBtn');
-        upBtn.className = (bal >= clickCost) ? "btn-available" : "btn-locked";
+        upBtn.className = (bal >= cost) ? "btn-available" : "btn-locked";
     }
 
     const calcIncome = (orb, owned) => {
         if(!owned || owned <= 0) return 0;
-        return Math.floor(orb.baseInc * (Math.pow(1.8, owned) - 1) / (1.8 - 1));
+        // Buffed yield multiplier (2.0 instead of 1.8)
+        return Math.floor(orb.baseInc * (Math.pow(2.0, owned) - 1) / (2.0 - 1));
     };
 
     function renderOrbs() {
@@ -224,7 +212,8 @@
         ORB_DATA.forEach((orb, index) => {
             const owned = userData.orbs?.[orb.id] || 0;
             const isUnlocked = index === 0 || (userData.orbs?.[ORB_DATA[index-1].id] > 0);
-            const cost = Math.floor(orb.baseCost * Math.pow(1.5, owned));
+            // Buffed cost scaling (1.3 instead of 1.5)
+            const cost = Math.floor(orb.baseCost * Math.pow(1.3, owned));
             const div = document.createElement('div');
             div.className = 'orb-item';
             
@@ -259,8 +248,8 @@
     };
 
     window.upgradeClicker = async () => {
-        const clickLvl = userData.clickLevel || 1;
-        const cost = clickLvl * 250;
+        const lvl = userData.clickLevel || 1;
+        const cost = lvl * 200;
         if(userData.balance >= cost) {
             await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-cost), clickLevel: increment(1) });
         }
@@ -268,15 +257,29 @@
 
     document.getElementById('mainClicker').addEventListener('click', (e) => {
         if (!userData) return;
-        // SAFETY CHECK: Ensure clickLevel is at least 1
-        const power = userData.clickLevel || 1;
+        const power = getPower(userData.clickLevel || 1);
         updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(power) });
         spawnPop(e.clientX, e.clientY, `+$${power}`);
     });
 
+    window.handleAuth = async () => {
+        const userNm = document.getElementById('loginUser').value.trim().toLowerCase();
+        const pass = document.getElementById('authPass').value;
+        try {
+            if(isReg) {
+                const email = document.getElementById('regEmail').value;
+                const res = await createUserWithEmailAndPassword(auth, email, pass);
+                await setDoc(doc(db, "users", res.user.uid), { username: userNm, email: email, balance: 1000, orbs: {}, clickLevel: 1, pfpSeed: userNm });
+            } else {
+                const s = await getDocs(query(collection(db, "users"), where("username", "==", userNm)));
+                if(s.empty) throw new Error("No user found");
+                await signInWithEmailAndPassword(auth, s.docs[0].data().email, pass);
+            }
+        } catch (e) { alert(e.message); }
+    };
+
     window.sendAction = async (type) => {
         const to = document.getElementById(type === 'text' ? 'msgTo' : 'payTo').value.trim().toLowerCase();
-        const body = type === 'text' ? document.getElementById('msgBody').value : `Sent you $${document.getElementById('payAmt').value}`;
         const amt = type === 'money' ? parseFloat(document.getElementById('payAmt').value || 0) : 0;
         const s = await getDocs(query(collection(db, "users"), where("username", "==", to)));
         if(s.empty) return alert("User not found");
@@ -285,7 +288,7 @@
             await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-amt) });
             await updateDoc(doc(db, "users", s.docs[0].id), { balance: increment(amt) });
         }
-        await addDoc(collection(db, "messages"), { to, from: userData.username, body, date: Date.now() });
+        await addDoc(collection(db, "messages"), { to, from: userData.username, body: type === 'money' ? `Sent $${amt}` : document.getElementById('msgBody').value, date: Date.now() });
         alert("Sent!");
     };
 
@@ -302,10 +305,7 @@
 
     window.updateProfile = async () => {
         const newUser = document.getElementById('setNewUser').value.trim().toLowerCase();
-        if(newUser) {
-            await updateDoc(doc(db, "users", auth.currentUser.uid), { username: newUser, pfpSeed: newUser });
-            alert("Updated!");
-        }
+        if(newUser) await updateDoc(doc(db, "users", auth.currentUser.uid), { username: newUser, pfpSeed: newUser });
     };
 
     setInterval(() => {
@@ -338,6 +338,7 @@
     };
 
     window.toggleSettings = () => document.getElementById('settingsMenu').classList.toggle('hidden');
+    window.toggleAuthMode = () => { isReg = !isReg; document.getElementById('regArea').classList.toggle('hidden', !isReg); };
     window.logout = () => signOut(auth);
 
     function spawnPop(x, y, text) {
