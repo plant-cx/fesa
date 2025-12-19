@@ -186,6 +186,12 @@
                     document.getElementById('appScreen').classList.remove('hidden');
                 }
             });
+        } else {
+            // This ensures if the user logs out, we switch back to the login screen instantly
+            userData = null;
+            document.getElementById('appScreen').classList.add('hidden');
+            document.getElementById('authScreen').classList.remove('hidden');
+            document.getElementById('settingsMenu').classList.add('hidden');
         }
     });
 
@@ -354,7 +360,14 @@
 
     window.toggleSettings = () => document.getElementById('settingsMenu').classList.toggle('hidden');
     window.toggleAuthMode = () => { isReg = !isReg; document.getElementById('regArea').classList.toggle('hidden', !isReg); };
-    window.logout = () => signOut(auth);
+    
+    // Updated Logout Function
+    window.logout = () => {
+        signOut(auth).then(() => {
+            // Force a clean state reset immediately
+            location.reload(); 
+        });
+    };
 
     function spawnPop(x, y, text) {
         const p = document.createElement('div');
