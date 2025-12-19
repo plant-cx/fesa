@@ -3,39 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MailCash | Secure Messaging & Finance</title>
+    <title>MailCash | Username Access</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', -apple-system, sans-serif; background: #0f172a; color: #f8fafc; padding: 20px; }
         .container { max-width: 600px; margin: 0 auto; }
         
-        /* Custom Notifications */
         #notifier { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 16px 32px; border-radius: 12px; font-weight: 700; opacity: 0; transition: 0.4s; z-index: 9999; box-shadow: 0 10px 40px rgba(0,0,0,0.6); pointer-events: none; text-align: center; min-width: 280px; }
         .ntf-err { background: #ef4444; border: 1px solid #fca5a5; color: white; }
         .ntf-ok { background: #10b981; border: 1px solid #6ee7b7; color: white; }
 
-        /* Components */
-        .card { background: #1e293b; border-radius: 16px; padding: 25px; border: 1px solid #334155; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+        .card { background: #1e293b; border-radius: 16px; padding: 25px; border: 1px solid #334155; margin-bottom: 20px; }
         .hidden { display: none !important; }
-        input, textarea { width: 100%; padding: 14px; background: #0f172a; border: 1px solid #334155; border-radius: 10px; color: white; margin-bottom: 12px; outline: none; font-size: 16px; transition: 0.2s; }
-        input:focus { border-color: #6366f1; }
-        button { width: 100%; padding: 14px; background: #6366f1; color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 16px; }
-        button:hover { background: #4f46e5; }
+        input, textarea { width: 100%; padding: 14px; background: #0f172a; border: 1px solid #334155; border-radius: 10px; color: white; margin-bottom: 12px; outline: none; font-size: 16px; }
+        button { width: 100%; padding: 14px; background: #6366f1; color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; }
         
-        /* App UI */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-        .balance-pill { background: #064e3b; color: #34d399; padding: 12px 24px; border-radius: 50px; font-weight: 800; border: 1px solid #059669; font-size: 1.2rem; }
-        .user-meta { display: flex; flex-direction: column; }
+        .balance-pill { background: #064e3b; color: #34d399; padding: 12px 24px; border-radius: 50px; font-weight: 800; border: 1px solid #059669; }
         .logout-btn { background: #ef4444; width: auto; padding: 6px 14px; font-size: 11px; margin-top: 8px; border-radius: 6px; }
 
         .tabs { display: flex; gap: 8px; margin-bottom: 20px; background: #0f172a; padding: 6px; border-radius: 14px; }
-        .tab { flex: 1; text-align: center; padding: 12px; cursor: pointer; border-radius: 10px; color: #94a3b8; font-size: 14px; font-weight: 700; transition: 0.2s; }
-        .tab.active { background: #334155; color: white; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+        .tab { flex: 1; text-align: center; padding: 12px; cursor: pointer; border-radius: 10px; color: #94a3b8; font-weight: 700; }
+        .tab.active { background: #334155; color: white; }
 
-        /* Inbox Items */
-        .msg-card { background: #1e293b; padding: 18px; border-radius: 14px; margin-bottom: 12px; border: 1px solid #334155; border-left: 5px solid #6366f1; animation: slideIn 0.3s ease-out; }
-        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .cash-tag { display: inline-block; background: #064e3b; color: #34d399; padding: 4px 10px; border-radius: 6px; font-size: 12px; margin-top: 10px; font-weight: 800; border: 1px solid #059669; }
+        .msg-card { background: #1e293b; padding: 18px; border-radius: 14px; margin-bottom: 12px; border: 1px solid #334155; border-left: 5px solid #6366f1; }
+        .cash-tag { display: inline-block; background: #064e3b; color: #34d399; padding: 4px 10px; border-radius: 6px; font-size: 12px; margin-top: 10px; font-weight: 800; }
     </style>
 </head>
 <body>
@@ -44,24 +36,28 @@
 
 <div class="container">
     <div id="authScreen" class="card">
-        <h2 id="authTitle" style="margin-bottom: 20px;">Secure Login</h2>
+        <h2 id="authTitle" style="margin-bottom: 20px;">MailCash Login</h2>
+        
+        <input type="text" id="loginUser" placeholder="Username">
+        
         <div id="regArea" class="hidden">
-            <input type="text" id="regUser" placeholder="Choose Username (No spaces)">
+            <input type="email" id="regEmail" placeholder="Email Address (Required for recovery)">
         </div>
-        <input type="email" id="authEmail" placeholder="Email Address">
+        
         <input type="password" id="authPass" placeholder="Password">
+        
         <button id="authBtn" onclick="handleAuth()">Sign In</button>
+        
         <p style="text-align: center; margin-top: 18px; font-size: 14px;">
-            <a href="javascript:void(0)" onclick="toggleAuth()" style="color:#818cf8; text-decoration: none;">New here? Create an account</a>
+            <a href="javascript:void(0)" onclick="toggleAuth()" id="toggleLink" style="color:#818cf8; text-decoration: none;">New here? Create an account</a>
         </p>
     </div>
 
     <div id="appScreen" class="hidden">
         <div class="header">
-            <div class="user-meta">
-                <h2 style="font-size: 1.1rem; color: #94a3b8;">Welcome back,</h2>
+            <div>
                 <p id="userDisplay" style="color:#fff; font-weight: 900; font-size: 1.4rem;">@loading...</p>
-                <button class="logout-btn" onclick="logout()">DISCONNECT</button>
+                <button class="logout-btn" onclick="logout()">LOGOUT</button>
             </div>
             <div class="balance-pill">$<span id="userBal">0.00</span></div>
         </div>
@@ -72,25 +68,22 @@
             <div id="tPay" class="tab" onclick="showTab('transfer')">Transfer</div>
         </div>
 
-        <div id="inboxView" class="tab-view">
-            <div id="mailBox">Synchronizing mail...</div>
-        </div>
+        <div id="inboxView" class="tab-view"><div id="mailBox">Loading...</div></div>
 
         <div id="messageView" class="tab-view hidden card">
-            <h3 style="margin-bottom: 15px;">Compose Message</h3>
+            <h3>New Message</h3>
             <input type="text" id="msgTo" placeholder="Recipient @username">
             <input type="text" id="msgSub" placeholder="Subject">
-            <textarea id="msgBody" rows="5" placeholder="Write your message here..."></textarea>
+            <textarea id="msgBody" rows="5" placeholder="Message..."></textarea>
             <button onclick="sendAction('text')">Send Message</button>
         </div>
 
         <div id="transferView" class="tab-view hidden card">
-            <h3 style="margin-bottom: 15px;">Financial Transfer</h3>
-            <p style="font-size: 13px; color: #94a3b8; margin-bottom: 15px;">Funds are transferred instantly via secure ledger.</p>
+            <h3>Execute Transfer</h3>
             <input type="text" id="payTo" placeholder="Recipient @username">
-            <input type="number" id="payAmt" placeholder="Amount to Send ($)">
-            <input type="text" id="payNote" placeholder="Transaction Note (Optional)">
-            <button onclick="sendAction('money')" style="background: #10b981;">Execute Transfer</button>
+            <input type="number" id="payAmt" placeholder="Amount ($)">
+            <input type="text" id="payNote" placeholder="Note (Optional)">
+            <button onclick="sendAction('money')" style="background: #10b981;">Send Funds</button>
         </div>
     </div>
 </div>
@@ -98,7 +91,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, updateDoc, collection, addDoc, query, where, onSnapshot, orderBy, runTransaction, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, collection, addDoc, query, where, onSnapshot, orderBy, runTransaction, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBo2zhESYzv1OChHSAfSb2GLiP6XtI6q1s",
@@ -115,46 +108,56 @@
     let userData = null;
     let isReg = false;
 
-    // --- NOTIFICATION SYSTEM ---
     function notify(msg, type = 'ok') {
         const n = document.getElementById('notifier');
         n.innerText = msg;
         n.className = type === 'ok' ? 'ntf-ok' : 'ntf-err';
         n.style.opacity = '1';
-        n.style.bottom = '40px';
-        setTimeout(() => { 
-            n.style.opacity = '0'; 
-            n.style.bottom = '20px';
-        }, 3000);
+        setTimeout(() => n.style.opacity = '0', 3000);
     }
 
-    // --- AUTHENTICATION ---
     window.toggleAuth = () => {
         isReg = !isReg;
-        document.getElementById('authTitle').innerText = isReg ? "Create Account" : "Secure Login";
+        document.getElementById('authTitle').innerText = isReg ? "Create Account" : "MailCash Login";
         document.getElementById('regArea').classList.toggle('hidden');
-        document.getElementById('authBtn').innerText = isReg ? "Register Now" : "Sign In";
+        document.getElementById('loginUser').placeholder = isReg ? "Choose Username" : "Username";
+        document.getElementById('authBtn').innerText = isReg ? "Register" : "Sign In";
+        document.getElementById('toggleLink').innerText = isReg ? "Already have an account? Login" : "New here? Create an account";
     };
 
     window.handleAuth = async () => {
-        const e = document.getElementById('authEmail').value.trim();
-        const p = document.getElementById('authPass').value;
-        const u = document.getElementById('regUser').value.trim().toLowerCase();
+        const userInput = document.getElementById('loginUser').value.trim().toLowerCase();
+        const pass = document.getElementById('authPass').value;
         
         try {
             if (isReg) {
-                if (u.length < 3) throw new Error("Username must be 3+ characters");
-                if (u.includes(" ")) throw new Error("Username cannot have spaces");
+                const email = document.getElementById('regEmail').value.trim();
+                if (userInput.length < 3) throw new Error("Username too short");
                 
-                const q = query(collection(db, "users"), where("username", "==", u));
+                // Check if username exists
+                const q = query(collection(db, "users"), where("username", "==", userInput));
                 const s = await getDocs(q);
-                if (!s.empty) throw new Error("Username already taken");
+                if (!s.empty) throw new Error("Username taken");
                 
-                const res = await createUserWithEmailAndPassword(auth, e, p);
-                await setDoc(doc(db, "users", res.user.uid), { username: u, balance: 1000 });
-                notify("Welcome to MailCash!");
+                const res = await createUserWithEmailAndPassword(auth, email, pass);
+                await setDoc(doc(db, "users", res.user.uid), { 
+                    username: userInput, 
+                    email: email, 
+                    balance: 1000 
+                });
             } else {
-                await signInWithEmailAndPassword(auth, e, p);
+                // LOGIN VIA USERNAME LOOKUP
+                let finalEmail = userInput;
+                
+                // If the input doesn't look like an email, find the email linked to this username
+                if (!userInput.includes('@')) {
+                    const q = query(collection(db, "users"), where("username", "==", userInput));
+                    const s = await getDocs(q);
+                    if (s.empty) throw new Error("Username not found");
+                    finalEmail = s.docs[0].data().email;
+                }
+                
+                await signInWithEmailAndPassword(auth, finalEmail, pass);
             }
         } catch (err) { notify(err.message, 'err'); }
     };
@@ -177,90 +180,62 @@
         }
     });
 
-    // --- CORE ENGINE (INBOX & SENDING) ---
     function loadInbox() {
-        if (!userData || !userData.username) return;
-
-        // Strictly filter by current user's username
-        const q = query(
-            collection(db, "messages"), 
-            where("to", "==", userData.username), 
-            orderBy("date", "desc")
-        );
-
+        if (!userData) return;
+        const q = query(collection(db, "messages"), where("to", "==", userData.username), orderBy("date", "desc"));
         onSnapshot(q, s => {
             const box = document.getElementById('mailBox');
-            if(s.empty) {
-                box.innerHTML = "<div style='text-align:center; margin-top:40px; color:#64748b;'>No messages found in your inbox.</div>";
-                return;
-            }
+            if(s.empty) { box.innerHTML = "<p style='text-align:center;color:#64748b;margin-top:20px;'>Inbox Empty</p>"; return; }
             box.innerHTML = s.docs.map(d => {
                 const m = d.data();
                 return `
                     <div class="msg-card">
                         <b style="color:#818cf8; font-size:12px;">FROM: @${m.from}</b>
-                        <h4 style="margin:5px 0;">${m.subject || 'No Subject'}</h4>
-                        <p style="color:#cbd5e1; font-size:14px; line-height:1.5;">${m.body}</p>
+                        <h4 style="margin:5px 0;">${m.subject}</h4>
+                        <p style="color:#cbd5e1; font-size:14px;">${m.body}</p>
                         ${m.cash > 0 ? `<span class="cash-tag">+$${m.cash.toFixed(2)} RECEIVED</span>` : ''}
                     </div>
                 `;
             }).join('');
-        }, err => {
-            console.error(err);
-            notify("Inbox error: Check Firestore Indexes", "err");
         });
     }
 
     window.sendAction = async (type) => {
-        if (!userData) return;
-
-        const toInput = type === 'text' ? document.getElementById('msgTo') : document.getElementById('payTo');
-        const to = toInput.value.trim().toLowerCase();
-        const amtVal = type === 'money' ? document.getElementById('payAmt').value : 0;
-        const amt = parseFloat(amtVal) || 0;
-        const sub = type === 'text' ? document.getElementById('msgSub').value : "Payment Transfer";
+        const to = (type === 'text' ? document.getElementById('msgTo') : document.getElementById('payTo')).value.trim().toLowerCase();
+        const amt = type === 'money' ? (parseFloat(document.getElementById('payAmt').value) || 0) : 0;
+        const sub = type === 'text' ? document.getElementById('msgSub').value : "Payment";
         const body = type === 'text' ? document.getElementById('msgBody').value : document.getElementById('payNote').value;
-
-        if (!to) return notify("Missing recipient", "err");
-        if (to === userData.username) return notify("Cannot send to yourself", "err");
 
         try {
             const q = query(collection(db, "users"), where("username", "==", to));
             const snap = await getDocs(q);
-            if (snap.empty) throw new Error("Recipient @" + to + " not found");
+            if (snap.empty) throw new Error("Recipient not found");
             const recId = snap.docs[0].id;
-            const recData = snap.docs[0].data();
 
             if (amt > 0) {
-                if (userData.balance < amt) throw new Error("Insufficient funds");
+                if (userData.balance < amt) throw new Error("Low balance");
                 await runTransaction(db, async t => {
                     const myRef = doc(db, "users", auth.currentUser.uid);
                     const theirRef = doc(db, "users", recId);
-                    const myFresh = await t.get(myRef);
-                    t.update(myRef, { balance: myFresh.data().balance - amt });
-                    t.update(theirRef, { balance: recData.balance + amt });
+                    const myD = await t.get(myRef);
+                    const theirD = await t.get(theirRef);
+                    t.update(myRef, { balance: myD.data().balance - amt });
+                    t.update(theirRef, { balance: theirD.data().balance + amt });
                 });
             }
 
-            await addDoc(collection(db, "messages"), {
-                to, from: userData.username, subject: sub || "(No Subject)", body: body || "", cash: amt, date: new Date()
-            });
-
-            notify(amt > 0 ? "Transfer Successful" : "Message Delivered");
-            toInput.value = "";
+            await addDoc(collection(db, "messages"), { to, from: userData.username, subject: sub || "No Subject", body: body || "", cash: amt, date: new Date() });
+            notify("Sent!");
             document.querySelectorAll('input, textarea').forEach(i => i.value = "");
             showTab('inbox');
         } catch (e) { notify(e.message, 'err'); }
     };
 
-    // --- UI CONTROLS ---
     window.showTab = (t) => {
         document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
         document.querySelectorAll('.tab').forEach(btn => btn.classList.remove('active'));
         document.getElementById(t + 'View').classList.remove('hidden');
-        if(t === 'inbox') document.getElementById('tIn').classList.add('active');
-        if(t === 'message') document.getElementById('tMsg').classList.add('active');
-        if(t === 'transfer') document.getElementById('tPay').classList.add('active');
+        document.getElementById('t' + t.charAt(0).toUpperCase() + t.slice(1)).classList.add('active');
     };
 
     window.logout = () => signOut(auth);
