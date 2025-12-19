@@ -9,32 +9,262 @@
         body { font-family: 'Inter', -apple-system, sans-serif; background: #0f172a; color: #f8fafc; padding: 20px; }
         .container { max-width: 600px; margin: 0 auto; }
         
-        #notifier { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 16px 32px; border-radius: 12px; font-weight: 700; opacity: 0; transition: 0.4s; z-index: 9999; box-shadow: 0 10px 40px rgba(0,0,0,0.6); pointer-events: none; text-align: center; min-width: 280px; }
+        /* Notifier Styles */
+        #notifier { 
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); 
+            padding: 16px 32px; border-radius: 12px; font-weight: 700; 
+            opacity: 0; transition: all 0.5s ease-in-out; z-index: 9999; 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6); pointer-events: none; 
+            text-align: center; min-width: 280px; 
+            font-size: 1.1em;
+        }
         .ntf-err { background: #ef4444; border: 1px solid #fca5a5; color: white; }
         .ntf-ok { background: #10b981; border: 1px solid #6ee7b7; color: white; }
 
+        /* Card & Input Styles */
         .card { background: #1e293b; border-radius: 16px; padding: 25px; border: 1px solid #334155; margin-bottom: 20px; }
         .hidden { display: none !important; }
         input, textarea { width: 100%; padding: 14px; background: #0f172a; border: 1px solid #334155; border-radius: 10px; color: white; margin-bottom: 12px; outline: none; font-size: 16px; }
-        button { width: 100%; padding: 14px; background: #6366f1; color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+        button { width: 100%; padding: 14px; background: #6366f1; color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
         button:active { transform: scale(0.98); }
+        button:disabled { background: #475569; cursor: not-allowed; }
         
+        /* Header & Balance */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
         .balance-pill { background: #064e3b; color: #34d399; padding: 12px 24px; border-radius: 50px; font-weight: 800; border: 1px solid #059669; }
         .logout-btn { background: #ef4444; width: auto; padding: 6px 14px; font-size: 11px; margin-top: 8px; border-radius: 6px; }
 
+        /* Tabs */
         .tabs { display: flex; gap: 8px; margin-bottom: 20px; background: #0f172a; padding: 6px; border-radius: 14px; overflow-x: auto; }
         .tab { flex: 1; text-align: center; padding: 12px; cursor: pointer; border-radius: 10px; color: #94a3b8; font-weight: 700; white-space: nowrap; }
         .tab.active { background: #334155; color: white; }
 
+        /* Message Card */
         .msg-card { background: #1e293b; padding: 18px; border-radius: 14px; margin-bottom: 12px; border: 1px solid #334155; border-left: 5px solid #6366f1; }
         .cash-tag { display: inline-block; background: #064e3b; color: #34d399; padding: 4px 10px; border-radius: 6px; font-size: 12px; margin-top: 10px; font-weight: 800; }
         
-        /* Casino Styles */
+        /* Casino Common Styles */
         .game-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
         .btn-red { background: #ef4444; }
         .btn-green { background: #10b981; }
         .btn-black { background: #000; border: 1px solid #334155; }
+        
+        /* Game Specific - Animations & Visuals */
+        .game-area { 
+            position: relative; 
+            min-height: 150px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            margin-bottom: 20px; 
+            border-radius: 10px; 
+            overflow: hidden;
+            background: #0f172a; /* Darker background for games */
+            border: 1px solid #334155;
+        }
+
+        /* Coin Flip Animation */
+        #coinFlipResult {
+            font-size: 3em;
+            font-weight: bold;
+            color: #f8fafc;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease-out;
+            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+        #coinFlipResult.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .coin-animation {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, gold, darkgoldenrod);
+            position: absolute;
+            animation: flip 0.8s ease-out forwards;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            perspective: 1000px;
+            transform-style: preserve-3d;
+        }
+        .coin-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            font-weight: bold;
+            color: white;
+        }
+        .coin-heads { transform: rotateY(0deg); }
+        .coin-tails { transform: rotateY(180deg); }
+
+        @keyframes flip {
+            0% { transform: rotateX(0deg) rotateY(0deg); opacity: 1; }
+            50% { transform: rotateX(360deg) rotateY(360deg); opacity: 1; }
+            100% { transform: rotateX(720deg) rotateY(720deg); opacity: 0; }
+        }
+        .coin-animation.show-heads .coin-heads {
+            animation: showFaceHeads 0.5s forwards ease-out 0.8s;
+        }
+        .coin-animation.show-tails .coin-tails {
+            animation: showFaceTails 0.5s forwards ease-out 0.8s;
+        }
+        @keyframes showFaceHeads {
+            from { transform: rotateY(0deg) scale(0.5); opacity: 0; }
+            to { transform: rotateY(0deg) scale(1); opacity: 1; }
+        }
+        @keyframes showFaceTails {
+            from { transform: rotateY(180deg) scale(0.5); opacity: 0; }
+            to { transform: rotateY(180deg) scale(1); opacity: 1; }
+        }
+
+
+        /* Roulette Animation */
+        #rouletteWheelContainer {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: conic-gradient(
+                #ef4444 0% 46.66%, /* Red (7/15) */
+                #000 46.66% 93.33%, /* Black (7/15) */
+                #10b981 93.33% 100% /* Green (1/15) */
+            );
+            position: relative;
+            margin: 0 auto;
+            border: 5px solid #334155;
+            box-shadow: 0 0 20px rgba(0,0,0,0.7);
+        }
+        #rouletteMarker {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-bottom: 20px solid gold;
+            z-index: 10;
+        }
+        .roulette-spinning {
+            animation: spinRoulette 2s ease-out forwards;
+        }
+        @keyframes spinRoulette {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(720deg); } /* Spin twice */
+        }
+        #rouletteResult {
+            font-size: 2em;
+            font-weight: bold;
+            margin-top: 15px;
+            opacity: 0;
+            transition: opacity 0.5s ease-out;
+            color: #f8fafc;
+        }
+        #rouletteResult.show { opacity: 1; }
+
+        /* Blackjack Styles */
+        .blackjack-table {
+            background: #042f2e; /* Dark green felt */
+            border-radius: 10px;
+            padding: 20px;
+            color: white;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .player-hand, .dealer-hand {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 15px;
+            min-height: 100px; /* To prevent layout jumps */
+            position: relative;
+        }
+        .card-slot {
+            width: 60px;
+            height: 90px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 6px;
+            margin: 0 5px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8em;
+            color: #ccc;
+            border: 1px dashed rgba(255,255,255,0.2);
+        }
+        .card {
+            width: 60px;
+            height: 90px;
+            background: white;
+            border: 1px solid #333;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            padding: 5px;
+            margin: 0 5px;
+            position: relative;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+            transition: all 0.3s ease-out;
+            transform-origin: center;
+        }
+        .card.red { color: #ef4444; }
+        .card.black { color: #1e293b; }
+        .card-back {
+            background: linear-gradient(45deg, #6366f1, #3b82f6);
+            border: 1px solid #333;
+            border-radius: 6px;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+        .card-value { font-size: 0.7em; }
+        .card-suit { font-size: 1.5em; }
+
+        .card-deal-animation {
+            animation: dealCard 0.5s ease-out forwards;
+        }
+        @keyframes dealCard {
+            0% { opacity: 0; transform: translateY(-50px) scale(0.5) rotate(15deg); }
+            100% { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); }
+        }
+
+        .player-score, .dealer-score {
+            margin-top: 5px;
+            font-weight: bold;
+            color: #bbb;
+            min-height: 20px; /* Prevent layout jump */
+        }
+        .blackjack-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .blackjack-actions button {
+            flex: 1;
+            padding: 10px;
+            font-size: 1.1em;
+        }
+        .blackjack-status {
+            margin-top: 20px;
+            font-size: 1.3em;
+            font-weight: bold;
+            min-height: 30px;
+        }
     </style>
 </head>
 <body>
@@ -92,26 +322,58 @@
         </div>
 
         <div id="gamesView" class="tab-view hidden card">
-            <h3>MailCash Casino</h3>
+            <h3 style="margin-bottom: 10px;">MailCash Casino</h3>
             <p style="font-size: 14px; color: #94a3b8; margin-bottom: 15px;">Enter bet amount and choose a game:</p>
             <input type="number" id="betAmt" placeholder="Bet Amount ($)" min="1">
             
-            <div style="margin-bottom: 20px;">
+            <div class="card" style="margin-top: 20px;">
                 <label style="font-size: 12px; font-weight: bold; color: #818cf8;">COIN FLIP (2x Payout)</label>
+                <div class="game-area">
+                    <div id="coinAnimationArea"></div>
+                    <div id="coinFlipResult"></div>
+                </div>
                 <div class="game-grid">
-                    <button onclick="playCoinFlip('heads')">Heads</button>
-                    <button onclick="playCoinFlip('tails')">Tails</button>
+                    <button id="btnFlipHeads" onclick="playCoinFlip('heads')">Heads</button>
+                    <button id="btnFlipTails" onclick="playCoinFlip('tails')">Tails</button>
                 </div>
             </div>
 
-            <div style="border-top: 1px solid #334155; padding-top: 15px;">
+            <div class="card" style="margin-top: 20px;">
                 <label style="font-size: 12px; font-weight: bold; color: #818cf8;">MINI ROULETTE</label>
+                <div class="game-area">
+                    <div id="rouletteWheelContainer">
+                        <div id="rouletteMarker"></div>
+                    </div>
+                    <div id="rouletteResult"></div>
+                </div>
                 <div style="display: flex; gap: 8px; margin-top: 10px;">
-                    <button onclick="playRoulette('red')" class="btn-red" style="flex:2">Red (2x)</button>
-                    <button onclick="playRoulette('black')" class="btn-black" style="flex:2">Black (2x)</button>
-                    <button onclick="playRoulette('green')" class="btn-green" style="flex:1">0 (14x)</button>
+                    <button id="btnRouletteRed" onclick="playRoulette('red')" class="btn-red" style="flex:2">Red (2x)</button>
+                    <button id="btnRouletteBlack" onclick="playRoulette('black')" class="btn-black" style="flex:2">Black (2x)</button>
+                    <button id="btnRouletteGreen" onclick="playRoulette('green')" class="btn-green" style="flex:1">0 (14x)</button>
                 </div>
             </div>
+
+            <div class="card" style="margin-top: 20px;">
+                <label style="font-size: 12px; font-weight: bold; color: #818cf8;">BLACKJACK (Classic 3:2 Payout)</label>
+                <div class="blackjack-table">
+                    <p style="font-size: 0.9em; color: #bbb;">Dealer's Hand (<span id="dealerScore">0</span>)</p>
+                    <div id="dealerHand" class="dealer-hand">
+                        </div>
+                    
+                    <p style="font-size: 0.9em; color: #bbb; margin-top: 20px;">Your Hand (<span id="playerScore">0</span>)</p>
+                    <div id="playerHand" class="player-hand">
+                        </div>
+
+                    <div id="blackjackStatus" class="blackjack-status"></div>
+
+                    <div class="blackjack-actions">
+                        <button id="btnDealBlackjack" onclick="dealBlackjack()">Deal</button>
+                        <button id="btnHit" onclick="hit()" disabled>Hit</button>
+                        <button id="btnStand" onclick="stand()" disabled>Stand</button>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
@@ -140,10 +402,16 @@
     function notify(msg, type = 'ok') {
         const n = document.getElementById('notifier');
         n.innerText = msg;
-        n.className = type === 'ok' ? 'ntf-ok' : 'ntf-err';
+        n.className = `ntf-${type} show`; // Add show class for transition
         n.style.opacity = '1';
-        setTimeout(() => n.style.opacity = '0', 3000);
+        setTimeout(() => {
+            n.style.opacity = '0';
+            n.classList.remove('show');
+        }, 3000);
     }
+
+    // Delay helper for animations
+    const delay = ms => new Promise(res => setTimeout(res, ms));
 
     // --- AUTH LOGIC ---
     window.toggleAuth = () => {
@@ -207,90 +475,4 @@
             if(s.empty) { box.innerHTML = "<p style='text-align:center;color:#64748b;margin-top:20px;'>Inbox Empty</p>"; return; }
             box.innerHTML = s.docs.map(d => {
                 const m = d.data();
-                return `<div class="msg-card"><b style="color:#818cf8; font-size:12px;">FROM: @${m.from}</b><h4 style="margin:5px 0;">${m.subject}</h4><p style="color:#cbd5e1; font-size:14px;">${m.body}</p>${m.cash > 0 ? `<span class="cash-tag">+$${m.cash.toFixed(2)} RECEIVED</span>` : ''}</div>`;
-            }).join('');
-        });
-    }
-
-    window.sendAction = async (type) => {
-        const to = (type === 'text' ? document.getElementById('msgTo') : document.getElementById('payTo')).value.trim().toLowerCase();
-        const amt = type === 'money' ? (parseFloat(document.getElementById('payAmt').value) || 0) : 0;
-        const sub = type === 'text' ? document.getElementById('msgSub').value : "Payment";
-        const body = type === 'text' ? document.getElementById('msgBody').value : document.getElementById('payNote').value;
-        try {
-            const q = query(collection(db, "users"), where("username", "==", to));
-            const snap = await getDocs(q);
-            if (snap.empty) throw new Error("Recipient not found");
-            const recId = snap.docs[0].id;
-            if (amt > 0) {
-                await runTransaction(db, async t => {
-                    const myRef = doc(db, "users", auth.currentUser.uid);
-                    const theirRef = doc(db, "users", recId);
-                    const myD = await t.get(myRef);
-                    if (myD.data().balance < amt) throw new Error("Low balance");
-                    t.update(myRef, { balance: myD.data().balance - amt });
-                    t.update(theirRef, { balance: (await t.get(theirRef)).data().balance + amt });
-                });
-            }
-            await addDoc(collection(db, "messages"), { to, from: userData.username, subject: sub || "No Subject", body: body || "", cash: amt, date: new Date() });
-            notify("Sent!");
-            document.querySelectorAll('input, textarea').forEach(i => i.value = "");
-            showTab('inbox');
-        } catch (e) { notify(e.message, 'err'); }
-    };
-
-    // --- CASINO LOGIC ---
-    window.playCoinFlip = async (choice) => {
-        const amt = parseFloat(document.getElementById('betAmt').value);
-        if (isNaN(amt) || amt <= 0) return notify("Enter a valid bet", "err");
-        try {
-            await runTransaction(db, async t => {
-                const userRef = doc(db, "users", auth.currentUser.uid);
-                const userDoc = await t.get(userRef);
-                const currentBal = userDoc.data().balance;
-                if (currentBal < amt) throw new Error("Insufficient funds");
-                
-                const win = Math.random() < 0.5;
-                const result = win ? choice : (choice === 'heads' ? 'tails' : 'heads');
-                const newBal = win ? currentBal + amt : currentBal - amt;
-                
-                t.update(userRef, { balance: newBal });
-                notify(win ? `Win! It was ${result}. +$${amt}` : `Lost! It was ${result}. -$${amt}`, win ? 'ok' : 'err');
-            });
-        } catch (e) { notify(e.message, 'err'); }
-    };
-
-    window.playRoulette = async (betOn) => {
-        const amt = parseFloat(document.getElementById('betAmt').value);
-        if (isNaN(amt) || amt <= 0) return notify("Enter a valid bet", "err");
-        try {
-            await runTransaction(db, async t => {
-                const userRef = doc(db, "users", auth.currentUser.uid);
-                const userDoc = await t.get(userRef);
-                const currentBal = userDoc.data().balance;
-                if (currentBal < amt) throw new Error("Insufficient funds");
-
-                const roll = Math.floor(Math.random() * 15);
-                let color = roll === 0 ? "green" : (roll <= 7 ? "red" : "black");
-                
-                let win = betOn === color;
-                let payout = win ? (color === 'green' ? amt * 14 : amt) : -amt;
-                
-                t.update(userRef, { balance: currentBal + payout });
-                notify(win ? `Rolled ${color}! Won $${payout.toFixed(2)}` : `Rolled ${color}. Lost $${amt}`, win ? 'ok' : 'err');
-            });
-        } catch (e) { notify(e.message, 'err'); }
-    };
-
-    // --- NAVIGATION ---
-    window.showTab = (t) => {
-        document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
-        document.querySelectorAll('.tab').forEach(btn => btn.classList.remove('active'));
-        document.getElementById(t + 'View').classList.remove('hidden');
-        document.getElementById('t' + t.charAt(0).toUpperCase() + t.slice(1)).classList.add('active');
-    };
-
-    window.logout = () => signOut(auth);
-</script>
-</body>
-</html>
+                return `<div class="msg-card"><b style="color:#818cf8; font-size:12px;">FROM: @${m.from}</b><h4 style="margin:5px 0;">${m.subject}</h4><p style="color:#cbd5e1; font-size:14
