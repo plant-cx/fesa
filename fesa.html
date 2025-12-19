@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MailCash - Email & Money Transfer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .auth-card, .app-container {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .auth-card {
+            max-width: 400px;
+            margin: 50px auto;
+        }
+        
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .link-btn {
+            background: none;
+            color: #667eea;
+            text-decoration: underline;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .balance {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+        
+        .logout-btn {
+            width: auto;
+            padding: 10px 20px;
+            background: #ff4757;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            background: none;
+            color: #666;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .message-list, .transaction-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .message-item, .transaction-item {
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .message-item:hover, .transaction-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+        }
+        
+        .message-item.unread {
+            background: #f0f4ff;
+            border-color: #667eea;
+        }
+        
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .message-from {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .message-date {
+            color: #999;
+            font-size: 12px;
+        }
+        
+        .message-subject {
+            font-weight: 500;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+        
+        .message-body {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .transaction-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .transaction-type {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .transaction-amount {
+            font-size: 18px;
+            font-weight: 700;
+        }
+        
+        .transaction-amount.received {
+            color: #2ecc71;
+        }
+        
+        .transaction-amount.sent {
+            color: #e74c3c;
+        }
+        
+        .transaction-date {
+            color: #999;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+        
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+        
+        .alert {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .alert-error {
+            background: #ffe5e5;
+            color: #c00;
+            border: 1px solid #ffcccc;
+        }
+        
+        .alert-success {
+            background: #e5ffe5;
+            color: #0c0;
+            border: 1px solid #ccffcc;
+        }
+        
+        .compose-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            font-size: 24px;
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+            z-index: 1000;
+        }
+        
+        @media (max-width: 768px) {
+            .auth-card, .app-container {
+                padding: 20px;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .tabs {
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Login Screen -->
+        <div id="loginScreen" class="auth-card">
+            <h1>MailCash</h1>
+            <p class="subtitle">Email & Money Transfer Platform</p>
+            
+            <div id="loginAlert"></div>
+            
+            <div class="form-group">
+                <label for="loginEmail">Email</label>
+                <input type="email" id="loginEmail" placeholder="your@email.com">
+            </div>
+            
+            <div class="form-group">
+                <label for="loginPassword">Password</label>
+                <input type="password" id="loginPassword" placeholder="Enter your password">
+            </div>
+            
+            <button onclick="login()">Login</button>
+            <button class="link-btn" onclick="showRegister()">Don't have an account? Register</button>
+        </div>
+        
+        <!-- Register Screen -->
+        <div id="registerScreen" class="auth-card hidden">
+            <h1>Create Account</h1>
+            <p class="subtitle">Join MailCash today</p>
+            
+            <div id="registerAlert"></div>
+            
+            <div class="form-group">
+                <label for="regName">Full Name</label>
+                <input type="text" id="regName" placeholder="John Doe">
+            </div>
+            
+            <div class="form-group">
+                <label for="regEmail">Email</label>
+                <input type="email" id="regEmail" placeholder="your@email.com">
+            </div>
+            
+            <div class="form-group">
+                <label for="regPassword">Password</label>
+                <input type="password" id="regPassword" placeholder="Create a password">
+            </div>
+            
+            <button onclick="register()">Create Account</button>
+            <button class="link-btn" onclick="showLogin()">Already have an account? Login</button>
+        </div>
+        
+        <!-- Main App -->
+        <div id="appScreen" class="app-container hidden">
+            <div class="header">
+                <div>
+                    <h1>MailCash</h1>
+                </div>
+                <div class="user-info">
+                    <div class="balance">Balance: $<span id="userBalance">1000.00</span></div>
+                    <span id="userName"></span>
+                    <button class="logout-btn" onclick="logout()">Logout</button>
+                </div>
+            </div>
+            
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('inbox')">Inbox</button>
+                <button class="tab" onclick="switchTab('sent')">Sent</button>
+                <button class="tab" onclick="switchTab('compose')">Compose Email</button>
+                <button class="tab" onclick="switchTab('transfer')">Send Money</button>
+                <button class="tab" onclick="switchTab('transactions')">Transactions</button>
+            </div>
+            
+            <!-- Inbox Tab -->
+            <div id="inboxTab" class="tab-content active">
+                <h2>Inbox</h2>
+                <div id="inboxMessages" class="message-list"></div>
+            </div>
+            
+            <!-- Sent Tab -->
+            <div id="sentTab" class="tab-content">
+                <h2>Sent Messages</h2>
+                <div id="sentMessages" class="message-list"></div>
+            </div>
+            
+            <!-- Compose Tab -->
+            <div id="composeTab" class="tab-content">
+                <h2>Compose Email</h2>
+                <div id="composeAlert"></div>
+                
+                <div class="form-group">
+                    <label for="emailTo">To (email address)</label>
+                    <input type="email" id="emailTo" placeholder="recipient@email.com">
+                </div>
+                
+                <div class="form-group">
+                    <label for="emailSubject">Subject</label>
+                    <input type="text" id="emailSubject" placeholder="Email subject">
+                </div>
+                
+                <div class="form-group">
+                    <label for="emailBody">Message</label>
+                    <textarea id="emailBody" rows="6" placeholder="Write your message here..."></textarea>
+                </div>
+                
+                <button onclick="sendEmail()">Send Email</button>
+            </div>
+            
+            <!-- Transfer Tab -->
+            <div id="transferTab" class="tab-content">
+                <h2>Send Money</h2>
+                <div id="transferAlert"></div>
+                
+                <div class="form-group">
+                    <label for="transferTo">To (email address)</label>
+                    <input type="email" id="transferTo" placeholder="recipient@email.com">
+                </div>
+                
+                <div class="form-group">
+                    <label for="transferAmount">Amount ($)</label>
+                    <input type="number" id="transferAmount" placeholder="0.00" min="0.01" step="0.01">
+                </div>
+                
+                <div class="form-group">
+                    <label for="transferNote">Note (optional)</label>
+                    <input type="text" id="transferNote" placeholder="What's this for?">
+                </div>
+                
+                <button onclick="sendMoney()">Send Money</button>
+            </div>
+            
+            <!-- Transactions Tab -->
+            <div id="transactionsTab" class="tab-content">
+                <h2>Transaction History</h2>
+                <div id="transactionsList" class="transaction-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // In-memory data store (resets on page refresh)
+        const data = {
+            users: [],
+            messages: [],
+            transactions: [],
+            currentUser: null
+        };
+        
+        // Initialize with demo users
+        function initDemoData() {
+            data.users = [
+                { 
+                    id: 1, 
+                    name: 'Demo User', 
+                    email: 'demo@mail.com', 
+                    password: 'demo123', 
+                    balance: 1000 
+                },
+                { 
+                    id: 2, 
+                    name: 'Alice Smith', 
+                    email: 'alice@mail.com', 
+                    password: 'alice123', 
+                    balance: 500 
+                },
+                { 
+                    id: 3, 
+                    name: 'Bob Johnson', 
+                    email: 'bob@mail.com', 
+                    password: 'bob123', 
+                    balance: 750 
+                }
+            ];
+            
+            // Demo messages
+            data.messages = [
+                {
+                    id: 1,
+                    from: 'alice@mail.com',
+                    to: 'demo@mail.com',
+                    subject: 'Welcome to MailCash!',
+                    body: 'Hi! Welcome to our platform. Feel free to send me an email or money transfer.',
+                    date: new Date('2024-01-15T10:30:00'),
+                    read: false
+                }
+            ];
+        }
+        
+        initDemoData();
+        
+        // Authentication functions
+        function showLogin() {
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('registerScreen').classList.add('hidden');
+        }
+        
+        function showRegister() {
+            document.getElementById('registerScreen').classList.remove('hidden');
+            document.getElementById('loginScreen').classList.add('hidden');
+        }
+        
+        function login() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!email || !password) {
+                showAlert('loginAlert', 'Please enter both email and password', 'error');
+                return;
+            }
+            
+            const user = data.users.find(u => u.email === email && u.password === password);
+            
+            if (user) {
+                data.currentUser = user;
+                showApp();
+            } else {
+                showAlert('loginAlert', 'Invalid email or password', 'error');
+            }
+        }
+        
+        function register() {
+            const name = document.getElementById('regName').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const password = document.getElementById('regPassword').value;
+            
+            if (!name || !email || !password) {
+                showAlert('registerAlert', 'Please fill in all fields', 'error');
+                return;
+            }
+            
+            if (data.users.find(u => u.email === email)) {
+                showAlert('registerAlert', 'Email already registered', 'error');
+                return;
+            }
+            
+            const newUser = {
+                id: data.users.length + 1,
+                name,
+                email,
+                password,
+                balance: 1000 // Starting balance
+            };
+            
+            data.users.push(newUser);
+            data.currentUser = newUser;
+            showApp();
+        }
+        
+        function logout() {
+            data.currentUser = null;
+            document.getElementById('appScreen').classList.add('hidden');
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPassword').value = '';
+        }
+        
+        function showApp() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('registerScreen').classList.add('hidden');
+            document.getElementById('appScreen').classList.remove('hidden');
+            document.getElementById('userName').textContent = data.currentUser.name;
+            updateBalance();
+            loadInbox();
+            loadSent();
+            loadTransactions();
+        }
+        
+        // Tab switching
+        function switchTab(tabName) {
+            const tabs = document.querySelectorAll('.tab');
+            const contents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => tab.classList.remove('active'));
+            contents.forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName + 'Tab').classList.add('active');
+            
+            if (tabName === 'inbox') loadInbox();
+            if (tabName === 'sent') loadSent();
+            if (tabName === 'transactions') loadTransactions();
+        }
+        
+        // Email functions
+        function sendEmail() {
+            const to = document.getElementById('emailTo').value.trim();
+            const subject = document.getElementById('emailSubject').value.trim();
+            const body = document.getElementById('emailBody').value.trim();
+            
+            if (!to || !subject || !body) {
+                showAlert('composeAlert', 'Please fill in all fields', 'error');
+                return;
+            }
+            
+            const recipient = data.users.find(u => u.email === to);
+            if (!recipient) {
+                showAlert('composeAlert', 'Recipient not found. User must be registered.', 'error');
+                return;
+            }
+            
+            const message = {
+                id: data.messages.length + 1,
+                from: data.currentUser.email,
+                to: to,
+                subject: subject,
+                body: body,
+                date: new Date(),
+                read: false
+            };
+            
+            data.messages.push(message);
+            
+            showAlert('composeAlert', 'Email sent successfully!', 'success');
+            document.getElementById('emailTo').value = '';
+            document.getElementById('emailSubject').value = '';
+            document.getElementById('emailBody').value = '';
+            
+            setTimeout(() => {
+                document.getElementById('composeAlert').innerHTML = '';
+            }, 3000);
+        }
+        
+        function loadInbox() {
+            const inbox = data.messages.filter(m => m.to === data.currentUser.email);
+            const container = document.getElementById('inboxMessages');
+            
+            if (inbox.length === 0) {
+                container.innerHTML = '<div class="empty-state"><p>No messages yet</p></div>';
+                return;
+            }
+            
+            container.innerHTML = inbox.map(msg => {
+                const sender = data.users.find(u => u.email === msg.from);
+                return `
+                    <div class="message-item ${!msg.read ? 'unread' : ''}">
+                        <div class="message-header">
+                            <span class="message-from">${sender ? sender.name : msg.from}</span>
+                            <span class="message-date">${formatDate(msg.date)}</span>
+                        </div>
+                        <div class="message-subject">${msg.subject}</div>
+                        <div class="message-body">${msg.body}</div>
+                    </div>
+                `;
+            }).reverse().join('');
+        }
+        
+        function loadSent() {
+            const sent = data.messages.filter(m => m.from === data.currentUser.email);
+            const container = document.getElementById('sentMessages');
+            
+            if (sent.length === 0) {
+                container.innerHTML = '<div class="empty-state"><p>No sent messages yet</p></div>';
+                return;
+            }
+            
+            container.innerHTML = sent.map(msg => {
+                const recipient = data.users.find(u => u.email === msg.to);
+                return `
+                    <div class="message-item">
+                        <div class="message-header">
+                            <span class="message-from">To: ${recipient ? recipient.name : msg.to}</span>
+                            <span class="message-date">${formatDate(msg.date)}</span>
+                        </div>
+                        <div class="message-subject">${msg.subject}</div>
+                        <div class="message-body">${msg.body}</div>
+                    </div>
+                `;
+            }).reverse().join('');
+        }
+        
+        // Money transfer functions
+        function sendMoney() {
+            const to = document.getElementById('transferTo').value.trim();
+            const amount = parseFloat(document.getElementById('transferAmount').value);
+            const note = document.getElementById('transferNote').value.trim();
+            
+            if (!to || !amount || amount <= 0) {
+                showAlert('transferAlert', 'Please enter a valid recipient and amount', 'error');
+                return;
+            }
+            
+            const recipient = data.users.find(u => u.email === to);
+            if (!recipient) {
+                showAlert('transferAlert', 'Recipient not found. User must be registered.', 'error');
+                return;
+            }
+            
+            if (recipient.email === data.currentUser.email) {
+                showAlert('transferAlert', 'You cannot send money to yourself', 'error');
+                return;
+            }
+            
+            if (data.currentUser.balance < amount) {
+                showAlert('transferAlert', 'Insufficient balance', 'error');
+                return;
+            }
+            
+            // Process transaction
+            data.currentUser.balance -= amount;
+            recipient.balance += amount;
+            
+            const transaction = {
+                id: data.transactions.length + 1,
+                from: data.currentUser.email,
+                to: to,
+                amount: amount,
+                note: note,
+                date: new Date()
+            };
+            
+            data.transactions.push(transaction);
+            
+            updateBalance();
+            showAlert('transferAlert', `Successfully sent $${amount.toFixed(2)} to ${recipient.name}!`, 'success');
+            document.getElementById('transferTo').value = '';
+            document.getElementById('transferAmount').value = '';
+            document.getElementById('transferNote').value = '';
+            
+            setTimeout(() => {
+                document.getElementById('transferAlert').innerHTML = '';
+            }, 3000);
+        }
+        
+        function loadTransactions() {
+            const userTransactions = data.transactions.filter(
+                t => t.from === data.currentUser.email || t.to === data.currentUser.email
+            );
+            
+            const container = document.getElementById('transactionsList');
+            
+            if (userTransactions.length === 0) {
+                container.innerHTML = '<div class="empty-state"><p>No transactions yet</p></div>';
+                return;
+            }
+            
+            container.innerHTML = userTransactions.map(txn => {
+                const isReceived = txn.to === data.currentUser.email;
+                const otherUser = data.users.find(u => u.email === (isReceived ? txn.from : txn.to));
+                
+                return `
+                    <div class="transaction-item">
+                        <div class="transaction-header">
+                            <div>
+                                <div class="transaction-type">
+                                    ${isReceived ? 'Received from' : 'Sent to'}: ${otherUser ? otherUser.name : (isReceived ? txn.from : txn.to)}
+                                </div>
+                                ${txn.note ? `<div style="font-size: 14px; color: #666; margin-top: 5px;">${txn.note}</div>` : ''}
+                                <div class="transaction-date">${formatDate(txn.date)}</div>
+                            </div>
+                            <div class="transaction-amount ${isReceived ? 'received' : 'sent'}">
+                                ${isReceived ? '+' : '-'}$${txn.amount.toFixed(2)}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).reverse().join('');
+        }
+        
+        // Helper functions
+        function updateBalance() {
+            document.getElementById('userBalance').textContent = data.currentUser.balance.toFixed(2);
+        }
+        
+        function formatDate(date) {
+            const d = new Date(date);
+            const now = new Date();
+            const diff = now - d;
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+            
+            if (minutes < 1) return 'Just now';
+            if (minutes < 60) return `${minutes}m ago`;
+            if (hours < 24) return `${hours}h ago`;
+            if (days < 7) return `${days}d ago`;
+            
+            return d.toLocaleDateString();
+        }
+        
+        function showAlert(containerId, message, type) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+        }
+    </script>
+</body>
+</html>
