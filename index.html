@@ -3,17 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MailCash | Full Version</title>
+    <title>MailCash | Live Yields</title>
     <style>
         /* --- CORE BRAND STYLES --- */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background: #0f172a; color: #f8fafc; padding: 20px; overflow-x: hidden; }
         .container { max-width: 600px; margin: 0 auto; position: relative; }
         
-        #notifier { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 16px 32px; border-radius: 12px; font-weight: 700; opacity: 0; transition: 0.4s; z-index: 9999; pointer-events: none; text-align: center; min-width: 280px; }
-        .ntf-err { background: #ef4444; color: white; }
-        .ntf-ok { background: #10b981; color: white; }
-
         .card { background: #1e293b; border-radius: 16px; padding: 25px; border: 1px solid #334155; margin-bottom: 20px; }
         .hidden { display: none !important; }
         input, textarea { width: 100%; padding: 14px; background: #0f172a; border: 1px solid #334155; border-radius: 10px; color: white; margin-bottom: 12px; outline: none; font-size: 16px; }
@@ -24,7 +20,6 @@
         .pfp-circle { width: 44px; height: 44px; border-radius: 50%; border: 2px solid #6366f1; background: #334155; cursor: pointer; }
         
         #settingsMenu { position: absolute; right: 0; top: 60px; width: 260px; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #475569; }
-        .settings-btn { background: #334155; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 18px; }
 
         .tabs { display: flex; gap: 8px; margin-bottom: 20px; background: #0f172a; padding: 6px; border-radius: 14px; }
         .tab { flex: 1; text-align: center; padding: 12px; cursor: pointer; border-radius: 10px; color: #94a3b8; font-weight: 700; font-size: 14px; }
@@ -34,7 +29,7 @@
 
         /* ORB MARKET */
         .orb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
-        .orb-item { background: #0f172a; border: 1px solid #334155; padding: 15px; border-radius: 12px; position: relative; text-align: center; min-height: 190px; }
+        .orb-item { background: #0f172a; border: 1px solid #334155; padding: 15px; border-radius: 12px; position: relative; text-align: center; min-height: 200px; display: flex; flex-direction: column; }
         .orb-visual { width: 50px; height: 50px; border-radius: 50%; margin: 0 auto 10px; box-shadow: 0 0 15px currentColor; filter: brightness(1.2); }
         
         /* THE LOCK OVERLAY */
@@ -45,20 +40,22 @@
             z-index: 10; border-radius: 12px;
         }
         .lock-q { font-size: 32px; font-weight: 900; color: #f8fafc; }
-        .lock-hint { font-size: 9px; color: #94a3b8; text-transform: uppercase; font-weight: 800; padding: 0 5px; }
+        .lock-hint { font-size: 9px; color: #94a3b8; text-transform: uppercase; font-weight: 800; padding: 0 5px; text-align: center; }
 
-        .buy-btn { font-size: 12px; padding: 8px; margin-top: 10px; }
+        /* PROGRESS BAR */
+        .progress-bg { width: 100%; height: 4px; background: #1e293b; border-radius: 10px; margin-top: 10px; overflow: hidden; }
+        .progress-fill { height: 100%; background: #6366f1; width: 0%; transition: width 0.1s linear; }
+
+        .buy-btn { font-size: 12px; padding: 8px; margin-top: auto; }
         .btn-locked { background: #475569 !important; color: #94a3b8 !important; cursor: not-allowed; }
         .btn-available { background: #10b981 !important; color: white !important; }
         
-        .clicker-btn { width: 130px; height: 130px; border-radius: 50%; background: radial-gradient(circle, #6366f1, #4338ca); border: 8px solid #312e81; font-size: 40px; margin: 10px auto; display: block; box-shadow: 0 0 20px rgba(99, 102, 241, 0.4); }
+        .clicker-btn { width: 110px; height: 110px; border-radius: 50%; background: radial-gradient(circle, #6366f1, #4338ca); border: 8px solid #312e81; font-size: 35px; margin: 0 auto 10px; display: block; cursor: pointer; }
         .popup-anim { position: absolute; color: #34d399; font-weight: 900; animation: floatUpOrb 1.2s ease-out forwards; pointer-events: none; z-index: 10000; font-size: 18px; }
         @keyframes floatUpOrb { 0% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -70px); } }
     </style>
 </head>
 <body>
-
-<div id="notifier">Notification</div>
 
 <div class="container">
     <div id="authScreen" class="card">
@@ -67,7 +64,7 @@
         <div id="regArea" class="hidden"><input type="email" id="regEmail" placeholder="Email"></div>
         <input type="password" id="authPass" placeholder="Password">
         <button onclick="handleAuth()">Enter MailCash</button>
-        <p style="text-align: center; margin-top: 15px;"><a href="javascript:void(0)" onclick="toggleAuthMode()">Switch Mode (Login/Sign-up)</a></p>
+        <p style="text-align: center; margin-top: 15px;"><a href="javascript:void(0)" onclick="toggleAuthMode()">Switch Login/Register</a></p>
     </div>
 
     <div id="appScreen" class="hidden">
@@ -76,13 +73,9 @@
                 <img id="userPfp" class="pfp-circle" src="" onclick="toggleSettings()">
                 <b id="userDisplay">@user</b>
             </div>
-            <div style="display:flex; gap:10px; align-items:center;">
-                <div class="balance-pill">$<span id="userBal">0.00</span></div>
-                <button class="settings-btn" onclick="toggleSettings()">⚙️</button>
-            </div>
+            <div class="balance-pill">$<span id="userBal">0</span></div>
             <div id="settingsMenu" class="card hidden">
-                <h4>Settings</h4>
-                <button onclick="logout()" style="background: #ef4444; margin-top:10px;">Logout</button>
+                <button onclick="logout()" style="background: #ef4444;">Logout</button>
             </div>
         </div>
 
@@ -97,27 +90,18 @@
             <div style="text-align:center">
                 <button class="clicker-btn" id="mainClicker">💰</button>
             </div>
-            <h3 style="margin: 20px 0 10px; border-bottom: 1px solid #334155; padding-bottom: 5px;">Orb Market</h3>
             <div class="orb-grid" id="orbGrid"></div>
         </div>
 
-        <div id="inboxView" class="tab-view hidden">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                <h3>Inbox</h3>
-                <button onclick="clearInbox()" style="width:auto; padding:5px 12px; background:#ef4444; font-size:11px;">Clear</button>
-            </div>
-            <div id="mailBox">Loading...</div>
-        </div>
+        <div id="inboxView" class="tab-view hidden"><div id="mailBox">Loading...</div></div>
         
         <div id="messageView" class="tab-view hidden card">
-            <h3>Send Mail</h3>
             <input type="text" id="msgTo" placeholder="To @username">
             <textarea id="msgBody" rows="4" placeholder="Message content..."></textarea>
             <button onclick="sendAction('text')">Send</button>
         </div>
 
         <div id="transferView" class="tab-view hidden card">
-            <h3>Transfer Cash</h3>
             <input type="text" id="payTo" placeholder="Recipient @username">
             <input type="number" id="payAmt" placeholder="Amount ($)">
             <button onclick="sendAction('money')" style="background:#10b981">Confirm Transfer</button>
@@ -171,16 +155,10 @@
                     document.getElementById('appScreen').classList.remove('hidden');
                 }
             });
-        } else {
-            document.getElementById('appScreen').classList.add('hidden');
-            document.getElementById('authScreen').classList.remove('hidden');
         }
     });
 
-    window.toggleAuthMode = () => {
-        isReg = !isReg;
-        document.getElementById('regArea').classList.toggle('hidden', !isReg);
-    };
+    window.toggleAuthMode = () => { isReg = !isReg; document.getElementById('regArea').classList.toggle('hidden', !isReg); };
 
     window.handleAuth = async () => {
         const userNm = document.getElementById('loginUser').value.trim().toLowerCase();
@@ -192,15 +170,10 @@
                 await setDoc(doc(db, "users", res.user.uid), { username: userNm, email: email, balance: 1000, orbs: {} });
             } else {
                 const s = await getDocs(query(collection(db, "users"), where("username", "==", userNm)));
-                if(s.empty) throw new Error("No user found");
+                if(s.empty) throw new Error("User not found");
                 await signInWithEmailAndPassword(auth, s.docs[0].data().email, pass);
             }
         } catch (e) { alert(e.message); }
-    };
-
-    const calcIncome = (orb, owned) => {
-        if(owned <= 0) return 0;
-        return Math.floor(orb.baseInc * (Math.pow(1.8, owned) - 1) / (1.8 - 1));
     };
 
     function updateUI() {
@@ -211,6 +184,7 @@
 
     function renderOrbs() {
         const grid = document.getElementById('orbGrid');
+        const scrollPos = grid.scrollTop;
         grid.innerHTML = '';
         ORB_DATA.forEach((orb, index) => {
             const owned = userData.orbs?.[orb.id] || 0;
@@ -222,9 +196,15 @@
             div.innerHTML = `
                 <div class="orb-visual" style="color:${orb.color}; background:currentColor"></div>
                 <b>${orb.name}</b>
-                ${isUnlocked ? `<p style="font-size:10px">Yield: $${calcIncome(orb, owned).toLocaleString()}</p>` : ''}
+                ${isUnlocked ? `
+                    <div style="font-size:10px; margin:5px 0;">
+                        <span style="color:#10b981">+$${Math.floor(orb.baseInc * (Math.pow(1.8, owned) - 1) / (1.8 - 1)).toLocaleString()}</span>
+                        <br><span style="color:#94a3b8">Every ${orb.time/1000}s</span>
+                    </div>
+                    <div class="progress-bg"><div class="progress-fill" id="bar-${orb.id}"></div></div>
+                ` : ''}
                 <button onclick="buyOrb('${orb.id}', ${cost})" class="buy-btn ${userData.balance >= cost && isUnlocked ? 'btn-available' : 'btn-locked'}">
-                    ${isUnlocked ? `Buy $${cost.toLocaleString()}` : 'LOCKED'}
+                    ${isUnlocked ? `Upgrade $${cost.toLocaleString()}` : 'LOCKED'}
                 </button>
             `;
 
@@ -236,6 +216,7 @@
             }
             grid.appendChild(div);
         });
+        grid.scrollTop = scrollPos;
     }
 
     window.buyOrb = async (id, cost) => {
@@ -252,12 +233,8 @@
         const to = document.getElementById(type === 'text' ? 'msgTo' : 'payTo').value.trim().toLowerCase();
         const body = type === 'text' ? document.getElementById('msgBody').value : `Sent you $${document.getElementById('payAmt').value}`;
         const amt = type === 'money' ? parseFloat(document.getElementById('payAmt').value) : 0;
-
-        if (type === 'money' && userData.balance < amt) return alert("Poor.");
-        
         const s = await getDocs(query(collection(db, "users"), where("username", "==", to)));
-        if(s.empty) return alert("No user");
-
+        if(s.empty) return alert("User not found");
         if(type === 'money') {
             await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-amt) });
             await updateDoc(doc(db, "users", s.docs[0].id), { balance: increment(amt) });
@@ -268,14 +245,34 @@
 
     const loadInbox = () => {
         onSnapshot(query(collection(db, "messages"), where("to", "==", userData.username), orderBy("date", "desc")), s => {
-            document.getElementById('mailBox').innerHTML = s.docs.map(d => `<div class="msg-card"><b>@${d.data().from}</b><p>${d.data().body}</p></div>`).join('') || "Empty.";
+            document.getElementById('mailBox').innerHTML = s.docs.map(d => `<div class="msg-card"><b>@${d.data().from}</b><p>${d.data().body}</p></div>`).join('') || "No mail.";
         });
     };
 
-    window.clearInbox = async () => {
-        const s = await getDocs(query(collection(db, "messages"), where("to", "==", userData.username)));
-        s.docs.forEach(d => deleteDoc(d.ref));
-    };
+    // INCOME AND PROGRESS BAR LOGIC
+    setInterval(() => {
+        if(!userData) return;
+        ORB_DATA.forEach(orb => {
+            const owned = userData.orbs?.[orb.id] || 0;
+            if(owned > 0) {
+                if(!window[orb.id+'_timer']) {
+                    window[orb.id+'_start'] = Date.now();
+                    window[orb.id+'_timer'] = setInterval(() => {
+                        const inc = Math.floor(orb.baseInc * (Math.pow(1.8, userData.orbs[orb.id]) - 1) / (1.8 - 1));
+                        updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(inc) });
+                        window[orb.id+'_start'] = Date.now();
+                    }, orb.time);
+                }
+                // Update Progress Bar UI
+                const bar = document.getElementById(`bar-${orb.id}`);
+                if(bar) {
+                    const elapsed = Date.now() - window[orb.id+'_start'];
+                    const pct = Math.min((elapsed / orb.time) * 100, 100);
+                    bar.style.width = pct + "%";
+                }
+            }
+        });
+    }, 100);
 
     window.showTab = (t) => {
         document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
@@ -286,17 +283,6 @@
 
     window.toggleSettings = () => document.getElementById('settingsMenu').classList.toggle('hidden');
     window.logout = () => signOut(auth);
-
-    setInterval(() => {
-        if(!userData) return;
-        ORB_DATA.forEach(orb => {
-            if((userData.orbs?.[orb.id] || 0) > 0 && !window[orb.id+'_t']) {
-                window[orb.id+'_t'] = setInterval(() => {
-                    updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(calcIncome(orb, userData.orbs[orb.id])) });
-                }, orb.time);
-            }
-        });
-    }, 2000);
 
     function spawnPop(x, y, text) {
         const p = document.createElement('div');
