@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MailCash - Secure Messaging & Payments</title>
+    <title>MailCash - Secure Messaging & Games</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; color: #333; }
@@ -21,39 +21,35 @@
         /* Forms */
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; }
-        input, textarea { width: 100%; padding: 12px; border: 2px solid #f0f0f0; border-radius: 8px; font-size: 15px; transition: border-color 0.3s; }
-        input:focus { border-color: #667eea; outline: none; }
+        input, textarea { width: 100%; padding: 12px; border: 2px solid #f0f0f0; border-radius: 8px; font-size: 15px; }
         
         /* Buttons */
-        button { width: 100%; padding: 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
-        button:hover { opacity: 0.9; }
-        .link-btn { background: none; color: #667eea; text-decoration: underline; font-size: 14px; margin-top: 10px; }
+        button { width: 100%; padding: 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .link-btn { background: none; color: #667eea; text-decoration: underline; font-size: 14px; }
         
-        /* App Layout */
+        /* Layout */
         .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f0f0f0; padding-bottom: 20px; margin-bottom: 20px; }
         .balance-pill { background: #eef2ff; color: #4c51bf; padding: 8px 16px; border-radius: 50px; font-weight: 700; border: 1px solid #c3dafe; }
         .hidden { display: none !important; }
 
         /* Tabs */
-        .tabs { display: flex; gap: 5px; margin-bottom: 25px; background: #f8f9fa; padding: 5px; border-radius: 12px; }
-        .tab { flex: 1; text-align: center; padding: 10px; cursor: pointer; border-radius: 8px; font-weight: 500; color: #666; transition: all 0.2s; }
+        .tabs { display: flex; gap: 5px; margin-bottom: 25px; background: #f8f9fa; padding: 5px; border-radius: 12px; overflow-x: auto; }
+        .tab { flex: 1; text-align: center; padding: 10px; cursor: pointer; border-radius: 8px; font-weight: 500; min-width: 100px; }
         .tab.active { background: white; color: #667eea; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        /* Smart Send Box */
-        .payment-addon { background: #fff9eb; border: 2px dashed #f6ad55; padding: 15px; border-radius: 12px; margin-top: 15px; }
+        /* Game UI */
+        .game-card { background: #1a202c; color: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; }
+        .game-controls { display: flex; gap: 10px; margin-top: 15px; }
+        .playing-cards { font-size: 30px; letter-spacing: 5px; margin: 10px 0; }
+        .win-text { color: #48bb78; font-weight: bold; }
+        .loss-text { color: #f56565; font-weight: bold; }
         
-        /* Lists */
-        .message-item, .transaction-item { padding: 15px; border: 1px solid #eee; border-radius: 10px; margin-bottom: 12px; position: relative; }
-        .message-from { font-weight: bold; color: #667eea; font-size: 14px; }
-        .message-subject { font-weight: 600; margin: 4px 0; }
-        .message-body { font-size: 14px; color: #555; }
+        /* Messaging */
+        .message-item { padding: 15px; border: 1px solid #eee; border-radius: 10px; margin-bottom: 12px; }
         .cash-tag { background: #48bb78; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; float: right; }
-        
-        .transaction-header { display: flex; justify-content: space-between; align-items: center; }
-        .received { color: #38a169; font-weight: 800; }
-        .sent { color: #e53e3e; font-weight: 800; }
     </style>
 </head>
 <body>
@@ -61,87 +57,88 @@
 <div class="container">
     <div id="loginScreen" class="auth-card">
         <h1>MailCash</h1>
-        <p class="subtitle">Secure mail with instant payments</p>
-        <div class="form-group">
-            <label>Email</label>
-            <input type="email" id="loginEmail" placeholder="you@example.com">
-        </div>
-        <div class="form-group">
-            <label>Password</label>
-            <input type="password" id="loginPassword">
-        </div>
+        <p class="subtitle">Secure mail & Instant Gaming</p>
+        <div class="form-group"><input type="email" id="loginEmail" placeholder="Email"></div>
+        <div class="form-group"><input type="password" id="loginPassword" placeholder="Password"></div>
         <button onclick="login()">Sign In</button>
-        <button class="link-btn" onclick="showRegister()">Create an account</button>
+        <button class="link-btn" onclick="showRegister()">Create account</button>
     </div>
 
     <div id="registerScreen" class="auth-card hidden">
         <h1>Join Us</h1>
-        <div class="form-group">
-            <label>Full Name</label>
-            <input type="text" id="regName">
-        </div>
-        <div class="form-group">
-            <label>Email</label>
-            <input type="email" id="regEmail">
-        </div>
-        <div class="form-group">
-            <label>Password</label>
-            <input type="password" id="regPassword">
-        </div>
+        <div class="form-group"><input type="text" id="regName" placeholder="Full Name"></div>
+        <div class="form-group"><input type="email" id="regEmail" placeholder="Email"></div>
+        <div class="form-group"><input type="password" id="regPassword" placeholder="Password"></div>
         <button onclick="register()">Get Started</button>
-        <button class="link-btn" onclick="showLogin()">Already have an account?</button>
+        <button class="link-btn" onclick="showLogin()">Back to Login</button>
     </div>
 
     <div id="appScreen" class="app-container hidden">
         <div class="header">
-            <div>
-                <h1 style="font-size: 22px;">MailCash</h1>
-                <span id="userNameDisplay" style="font-size: 13px; color: #666;"></span>
-            </div>
+            <div><h1 style="font-size: 20px;">MailCash</h1><span id="userNameDisplay"></span></div>
             <div style="text-align: right;">
                 <div class="balance-pill">$<span id="userBalance">0.00</span></div>
-                <button onclick="logout()" style="width:auto; background:none; color:red; font-size:12px; padding:5px; text-decoration:underline;">Logout</button>
+                <button onclick="logout()" style="width:auto; background:none; color:red; font-size:12px;">Logout</button>
             </div>
         </div>
 
         <div class="tabs">
             <div class="tab active" id="tab-inbox" onclick="switchTab('inbox')">Inbox</div>
             <div class="tab" id="tab-compose" onclick="switchTab('compose')">Compose & Pay</div>
+            <div class="tab" id="tab-games" onclick="switchTab('games')">🎰 Games</div>
             <div class="tab" id="tab-history" onclick="switchTab('history')">History</div>
         </div>
 
-        <div id="inboxTab" class="tab-content active">
-            <div id="inboxMessages">Loading your mail...</div>
-        </div>
+        <div id="inboxTab" class="tab-content active"><div id="inboxMessages">Loading...</div></div>
 
         <div id="composeTab" class="tab-content">
             <h2>New Message</h2>
-            <div class="form-group">
-                <label>To (Email)</label>
-                <input type="email" id="sendTo" placeholder="recipient@mail.com">
+            <input type="email" id="sendTo" placeholder="Recipient Email" style="margin-bottom:10px">
+            <input type="text" id="sendSubject" placeholder="Subject" style="margin-bottom:10px">
+            <textarea id="sendBody" rows="4" placeholder="Message" style="margin-bottom:10px"></textarea>
+            <div style="background:#f0f4ff; padding:15px; border-radius:10px;">
+                <label>Attach Funds ($)</label>
+                <input type="number" id="sendAmount" placeholder="0.00">
             </div>
-            <div class="form-group">
-                <label>Subject</label>
-                <input type="text" id="sendSubject" placeholder="Quick update">
-            </div>
-            <div class="form-group">
-                <label>Message</label>
-                <textarea id="sendBody" rows="4" placeholder="Write your message here..."></textarea>
-            </div>
-            
-            <div class="payment-addon">
-                <label>💸 Attach Money (Optional)</label>
-                <input type="number" id="sendAmount" placeholder="0.00" step="0.01">
-                <p style="font-size: 11px; color: #856404; margin-top: 5px;">If you enter an amount, it will be deducted from your balance immediately.</p>
-            </div>
-            
-            <button onclick="handleSmartSend()" style="margin-top: 20px;">Send Message & Funds</button>
+            <button onclick="handleSmartSend()" style="margin-top:15px">Send Everything</button>
         </div>
 
-        <div id="historyTab" class="tab-content">
-            <h2>Transaction History</h2>
-            <div id="transactionsList"></div>
+        <div id="gamesTab" class="tab-content">
+            <h2>The Casino</h2>
+            
+            <div class="game-card">
+                <h3>🪙 Coin Flip (Double or Nothing)</h3>
+                <div class="form-group">
+                    <input type="number" id="coinBet" placeholder="Bet Amount" style="margin-top:10px">
+                </div>
+                <div class="game-controls">
+                    <button onclick="playCoinFlip('Heads')">Heads</button>
+                    <button onclick="playCoinFlip('Tails')">Tails</button>
+                </div>
+                <div id="coinResult" style="margin-top:10px"></div>
+            </div>
+
+            <div class="game-card">
+                <h3>🃏 Blackjack</h3>
+                <div id="bjSetup">
+                    <input type="number" id="bjBet" placeholder="Bet Amount">
+                    <button onclick="startBlackjack()" style="margin-top:10px">Deal Cards</button>
+                </div>
+                <div id="bjTable" class="hidden">
+                    <p>Dealer: <span id="dealerHandText">??</span></p>
+                    <div id="dealerCards" class="playing-cards"></div>
+                    <p>You: <span id="playerHandValue">0</span></p>
+                    <div id="playerCards" class="playing-cards"></div>
+                    <div class="game-controls">
+                        <button onclick="bjAction('hit')">Hit</button>
+                        <button onclick="bjAction('stand')" style="background:gray">Stand</button>
+                    </div>
+                </div>
+                <div id="bjResult" style="margin-top:10px"></div>
+            </div>
         </div>
+
+        <div id="historyTab" class="tab-content"><div id="transactionsList"></div></div>
     </div>
 </div>
 
@@ -163,145 +160,179 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // --- AUTH ---
+    let currentBalance = 0;
+
     onAuthStateChanged(auth, async (user) => {
         if (user) {
-            const userDoc = await getDoc(doc(db, "users", user.uid));
-            if (userDoc.exists()) {
-                document.getElementById('userNameDisplay').textContent = userDoc.data().name;
-                showApp();
-                setupListeners(user.email, user.uid);
-            }
+            showApp();
+            setupListeners(user.email, user.uid);
         } else {
             showLogin();
         }
     });
 
-    window.register = async () => {
-        const name = document.getElementById('regName').value;
-        const email = document.getElementById('regEmail').value;
-        const pass = document.getElementById('regPassword').value;
-        try {
-            const res = await createUserWithEmailAndPassword(auth, email, pass);
-            await setDoc(doc(db, "users", res.user.uid), { name, email, balance: 500.00 });
-        } catch (e) { alert(e.message); }
-    };
-
-    window.login = () => {
-        const email = document.getElementById('loginEmail').value;
-        const pass = document.getElementById('loginPassword').value;
-        signInWithEmailAndPassword(auth, email, pass).catch(e => alert(e.message));
-    };
-
-    window.logout = () => signOut(auth);
-
-    // --- SMART SEND LOGIC ---
-    window.handleSmartSend = async () => {
-        const to = document.getElementById('sendTo').value.trim();
-        const subject = document.getElementById('sendSubject').value.trim();
-        const body = document.getElementById('sendBody').value.trim();
-        const amount = parseFloat(document.getElementById('sendAmount').value) || 0;
-
-        if (!to || !subject || !body) return alert("Fill in recipient, subject and message");
-
-        try {
-            if (amount > 0) {
-                if (to === auth.currentUser.email) throw "You can't pay yourself!";
-                
-                const q = query(collection(db, "users"), where("email", "==", to));
-                const snap = await getDocs(q);
-                if (snap.empty) throw "Recipient doesn't have a MailCash account.";
-                
-                const recipientUid = snap.docs[0].id;
-
-                await runTransaction(db, async (txn) => {
-                    const senderRef = doc(db, "users", auth.currentUser.uid);
-                    const senderSnap = await txn.get(senderRef);
-                    if (senderSnap.data().balance < amount) throw "Insufficient balance";
-
-                    txn.update(senderRef, { balance: senderSnap.data().balance - amount });
-                    txn.update(doc(db, "users", recipientUid), { balance: snap.docs[0].data().balance + amount });
-                    
-                    txn.set(doc(collection(db, "transactions")), {
-                        from: auth.currentUser.email,
-                        to: to,
-                        amount: amount,
-                        participants: [auth.currentUser.email, to],
-                        date: new Date()
-                    });
-                });
-            }
-
-            await addDoc(collection(db, "messages"), {
-                from: auth.currentUser.email,
-                to: to,
-                subject: amount > 0 ? `💰 $${amount} - ${subject}` : subject,
-                body: body,
-                amountAttached: amount,
-                date: new Date()
-            });
-
-            alert("Sent!");
-            switchTab('inbox');
-            document.getElementById('sendAmount').value = "";
-            document.getElementById('sendBody').value = "";
-            document.getElementById('sendSubject').value = "";
-        } catch (e) { alert(e); }
-    };
-
-    // --- LISTENERS ---
-    function setupListeners(email, uid) {
-        onSnapshot(doc(db, "users", uid), (d) => {
-            if (d.exists()) document.getElementById('userBalance').textContent = d.data().balance.toFixed(2);
-        });
-
-        const mQuery = query(collection(db, "messages"), where("to", "==", email), orderBy("date", "desc"));
-        onSnapshot(mQuery, (snap) => {
-            const cont = document.getElementById('inboxMessages');
-            cont.innerHTML = snap.empty ? "No messages yet." : snap.docs.map(d => {
-                const data = d.data();
-                return `
-                    <div class="message-item">
-                        ${data.amountAttached > 0 ? `<span class="cash-tag">+$${data.amountAttached}</span>` : ''}
-                        <div class="message-from">${data.from}</div>
-                        <div class="message-subject">${data.subject}</div>
-                        <div class="message-body">${data.body}</div>
-                    </div>
-                `;
-            }).join('');
-        });
-
-        const tQuery = query(collection(db, "transactions"), where("participants", "array-contains", email), orderBy("date", "desc"));
-        onSnapshot(tQuery, (snap) => {
-            const cont = document.getElementById('transactionsList');
-            cont.innerHTML = snap.empty ? "No history." : snap.docs.map(d => {
-                const data = d.data();
-                const isRec = data.to === email;
-                return `
-                    <div class="transaction-item">
-                        <div class="transaction-header">
-                            <div>
-                                <b>${isRec ? 'From: ' + data.from : 'To: ' + data.to}</b><br>
-                                <small>${data.date.toDate().toLocaleDateString()}</small>
-                            </div>
-                            <div class="${isRec ? 'received' : 'sent'}">
-                                ${isRec ? '+' : '-'}$${data.amount.toFixed(2)}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
+    // --- UTILS ---
+    async function updateBalance(amount) {
+        const userRef = doc(db, "users", auth.currentUser.uid);
+        await runTransaction(db, async (transaction) => {
+            const snap = await transaction.get(userRef);
+            const newBal = snap.data().balance + amount;
+            if (newBal < 0) throw "Insufficient funds!";
+            transaction.update(userRef, { balance: newBal });
         });
     }
 
-    // --- NAVIGATION ---
-    window.switchTab = (tab) => {
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.getElementById(tab + 'Tab').classList.add('active');
-        document.getElementById('tab-' + tab).classList.add('active');
+    // --- COIN FLIP ---
+    window.playCoinFlip = async (choice) => {
+        const bet = parseFloat(document.getElementById('coinBet').value);
+        if (isNaN(bet) || bet <= 0 || bet > currentBalance) return alert("Invalid bet!");
+        
+        const win = Math.random() > 0.5;
+        const resultEl = document.getElementById('coinResult');
+        
+        try {
+            if (win) {
+                await updateBalance(bet);
+                resultEl.innerHTML = `<span class="win-text">You won $${bet}! It was ${choice}.</span>`;
+            } else {
+                await updateBalance(-bet);
+                resultEl.innerHTML = `<span class="loss-text">You lost $${bet}. Better luck next time.</span>`;
+            }
+        } catch(e) { alert(e); }
     };
 
+    // --- BLACKJACK LOGIC ---
+    let bjData = { deck: [], player: [], dealer: [], bet: 0 };
+    const createDeck = () => {
+        const suits = ['♠','♥','♦','♣'];
+        const values = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+        let deck = [];
+        for(let s of suits) for(let v of values) deck.push({v, s});
+        return deck.sort(() => Math.random() - 0.5);
+    };
+    const getVal = (hand) => {
+        let val = 0, aces = 0;
+        hand.forEach(c => {
+            if (c.v === 'A') aces++;
+            else if (['J','Q','K'].includes(c.v)) val += 10;
+            else val += parseInt(c.v);
+        });
+        for(let i=0; i<aces; i++) val += (val + 11 <= 21) ? 11 : 1;
+        return val;
+    };
+
+    window.startBlackjack = async () => {
+        const bet = parseFloat(document.getElementById('bjBet').value);
+        if (isNaN(bet) || bet <= 0 || bet > currentBalance) return alert("Invalid bet!");
+        
+        bjData.bet = bet;
+        bjData.deck = createDeck();
+        bjData.player = [bjData.deck.pop(), bjData.deck.pop()];
+        bjData.dealer = [bjData.deck.pop(), bjData.deck.pop()];
+        
+        document.getElementById('bjSetup').classList.add('hidden');
+        document.getElementById('bjTable').classList.remove('hidden');
+        document.getElementById('bjResult').innerHTML = "";
+        updateBJUI(false);
+    };
+
+    function updateBJUI(showDealer) {
+        document.getElementById('playerCards').innerText = bjData.player.map(c => c.v + c.s).join(' ');
+        document.getElementById('playerHandValue').innerText = getVal(bjData.player);
+        if (showDealer) {
+            document.getElementById('dealerCards').innerText = bjData.dealer.map(c => c.v + c.s).join(' ');
+            document.getElementById('dealerHandText').innerText = getVal(bjData.dealer);
+        } else {
+            document.getElementById('dealerCards').innerText = bjData.dealer[0].v + bjData.dealer[0].s + " 🎴";
+            document.getElementById('dealerHandText').innerText = "??";
+        }
+    }
+
+    window.bjAction = async (action) => {
+        if (action === 'hit') {
+            bjData.player.push(bjData.deck.pop());
+            updateBJUI(false);
+            if (getVal(bjData.player) > 21) finishBJ('bust');
+        } else {
+            while (getVal(bjData.dealer) < 17) bjData.dealer.push(bjData.deck.pop());
+            updateBJUI(true);
+            const p = getVal(bjData.player), d = getVal(bjData.dealer);
+            if (d > 21 || p > d) finishBJ('win');
+            else if (p === d) finishBJ('push');
+            else finishBJ('loss');
+        }
+    };
+
+    async function finishBJ(outcome) {
+        const res = document.getElementById('bjResult');
+        try {
+            if (outcome === 'win') {
+                await updateBalance(bjData.bet);
+                res.innerHTML = `<span class="win-text">Winner! +$${bjData.bet}</span>`;
+            } else if (outcome === 'loss' || outcome === 'bust') {
+                await updateBalance(-bjData.bet);
+                res.innerHTML = `<span class="loss-text">${outcome.toUpperCase()}! -$${bjData.bet}</span>`;
+            } else {
+                res.innerText = "PUSH - Money returned.";
+            }
+        } catch(e) { alert(e); }
+        document.getElementById('bjSetup').classList.remove('hidden');
+        document.getElementById('bjTable').classList.add('hidden');
+    }
+
+    // --- STANDARD SITE LOGIC ---
+    window.handleSmartSend = async () => {
+        const to = document.getElementById('sendTo').value.trim();
+        const sub = document.getElementById('sendSubject').value;
+        const body = document.getElementById('sendBody').value;
+        const amt = parseFloat(document.getElementById('sendAmount').value) || 0;
+        try {
+            if (amt > 0) {
+                const q = query(collection(db,"users"), where("email","==",to));
+                const s = await getDocs(q);
+                if (s.empty) throw "User not found";
+                await updateBalance(-amt);
+                await updateDoc(doc(db,"users",s.docs[0].id), { balance: s.docs[0].data().balance + amt });
+                await addDoc(collection(db,"transactions"), { from: auth.currentUser.email, to, amount: amt, participants: [auth.currentUser.email, to], date: new Date() });
+            }
+            await addDoc(collection(db, "messages"), { from: auth.currentUser.email, to, subject: amt > 0 ? "💰 "+sub : sub, body, amountAttached: amt, date: new Date() });
+            alert("Sent!"); switchTab('inbox');
+        } catch(e) { alert(e); }
+    };
+
+    function setupListeners(email, uid) {
+        onSnapshot(doc(db, "users", uid), (d) => {
+            if (d.exists()) {
+                currentBalance = d.data().balance;
+                document.getElementById('userBalance').textContent = currentBalance.toFixed(2);
+                document.getElementById('userNameDisplay').textContent = d.data().name;
+            }
+        });
+        const mQ = query(collection(db,"messages"), where("to","==",email), orderBy("date","desc"));
+        onSnapshot(mQ, (s) => {
+            document.getElementById('inboxMessages').innerHTML = s.docs.map(d => `
+                <div class="message-item">
+                    ${d.data().amountAttached > 0 ? `<span class="cash-tag">+$${d.data().amountAttached}</span>` : ''}
+                    <b>${d.data().from}</b><br>
+                    <i>${d.data().subject}</i><br>
+                    <p>${d.data().body}</p>
+                </div>
+            `).join('');
+        });
+    }
+
+    window.login = () => signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPassword').value);
+    window.register = async () => {
+        const res = await createUserWithEmailAndPassword(auth, document.getElementById('regEmail').value, document.getElementById('regPassword').value);
+        await setDoc(doc(db, "users", res.user.uid), { name: document.getElementById('regName').value, email: document.getElementById('regEmail').value, balance: 100.00 });
+    };
+    window.logout = () => signOut(auth);
+    window.switchTab = (t) => {
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+        document.getElementById(t+'Tab').classList.add('active');
+        document.getElementById('tab-'+t).classList.add('active');
+    };
     window.showRegister = () => { document.getElementById('loginScreen').classList.add('hidden'); document.getElementById('registerScreen').classList.remove('hidden'); };
     window.showLogin = () => { document.getElementById('registerScreen').classList.add('hidden'); document.getElementById('loginScreen').classList.remove('hidden'); };
     function showApp() { document.getElementById('loginScreen').classList.add('hidden'); document.getElementById('registerScreen').classList.add('hidden'); document.getElementById('appScreen').classList.remove('hidden'); }
