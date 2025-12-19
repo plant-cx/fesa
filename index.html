@@ -78,7 +78,7 @@
         <input type="text" id="loginUser" placeholder="Username">
         <div id="regArea" class="hidden"><input type="email" id="regEmail" placeholder="Email Address"></div>
         <input type="password" id="authPass" placeholder="Password">
-        <button onclick="handleAuth()">Enter Game</button>
+        <button id="authBtn" onclick="handleAuth()">Enter Game</button>
         <p style="text-align:center; margin-top:20px;"><a href="javascript:void(0)" onclick="toggleAuthMode()" style="color:#6366f1; font-weight:800;">Switch Login/Register</a></p>
     </div>
 
@@ -339,7 +339,6 @@
         const updatedOrbs = [...userData.mysteryOrbs];
         updatedOrbs.splice(index, 1);
         
-        // Clean up memory timers for the deleted index
         if(window['mystery_'+index+'_timer']) {
             clearInterval(window['mystery_'+index+'_timer']);
             delete window['mystery_'+index+'_timer'];
@@ -364,34 +363,73 @@
         document.body.appendChild(pop); setTimeout(() => pop.remove(), 1200);
     });
 
+    // FIXED AUTH FUNCTION
     window.handleAuth = async () => {
         const userNm = document.getElementById('loginUser').value.trim().toLowerCase();
         const pass = document.getElementById('authPass').value;
+        const btn = document.getElementById('authBtn');
+        btn.innerText = "Processing...";
+        
         try {
             if(isReg) {
-                const email = document.getElementById('regEmail').value;
+                const email = document.getElementById('regEmail').value.trim();
                 const res = await createUserWithEmailAndPassword(auth, email, pass);
-                await setDoc(doc(db, "users", res.user.uid), { username: userNm, email, balance: 1000, orbs: {}, clickLevel: 1, totalClicks: 0, pfpSeed: userNm, mysteryOrbs: [] });
+                await setDoc(doc(db, "users", res.user.uid), { 
+                    username: userNm, email, balance: 1000, orbs: {}, 
+                    clickLevel: 1, totalClicks: 0, pfpSeed: userNm, mysteryOrbs: [] 
+                });
             } else {
-                const s = await getDocs(query(collection(db, "users"), where("username", "==", userNm)));
-                if(s.empty) throw new Error("USER NOT FOUND");
-                await signInWithEmailAndPassword(auth, s.docs[0].data().email, pass);
+                // Perform user lookup by fetching ALL usernames to find the email
+                // Note: In production, consider a cloud function for better security
+                const usersCol = collection(db, "users");
+                const q = query(usersCol, where("username", "==", userNm));
+                const snapshot = await getDocs(q);
+                
+                if(snapshot.empty) throw new Error("USER NOT FOUND");
+                
+                const targetEmail = snapshot.docs[0].data().email;
+                await signInWithEmailAndPassword(auth, targetEmail, pass);
             }
-        } catch (e) { alert(e.message); }
+        } catch (e) { 
+            alert(e.message); 
+            btn.innerText = "Enter Game";
+        }
     };
 
+    // FIXED SEND FUNCTION
     window.sendAction = async (type) => {
-        const to = document.getElementById(type === 'text' ? 'msgTo' : 'payTo').value.trim().toLowerCase();
+        const toInput = type === 'text' ? 'msgTo' : 'payTo';
+        const rawTo = document.getElementById(toInput).value.trim();
+        const to = rawTo.startsWith('@') ? rawTo.slice(1).toLowerCase() : rawTo.toLowerCase();
         const amt = type === 'money' ? parseFloat(document.getElementById('payAmt').value || 0) : 0;
-        const s = await getDocs(query(collection(db, "users"), where("username", "==", to)));
-        if(s.empty) return alert("USER NOT FOUND");
-        if(type === 'money') {
-            if(userData.balance < amt) return alert("NO CASH");
-            await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-amt) });
-            await updateDoc(doc(db, "users", s.docs[0].id), { balance: increment(amt) });
-        }
-        await addDoc(collection(db, "messages"), { to, from: userData.username, body: type === 'money' ? `Sent $${amt}` : document.getElementById('msgBody').value, date: Date.now() });
-        alert("SENT!");
+        
+        if(!to) return alert("Enter a username");
+
+        try {
+            const s = await getDocs(query(collection(db, "users"), where("username", "==", to)));
+            if(s.empty) return alert("USER NOT FOUND");
+            
+            const targetId = s.docs[0].id;
+
+            if(type === 'money') {
+                if(userData.balance < amt || amt <= 0) return alert("INVALID AMOUNT");
+                await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-amt) });
+                await updateDoc(doc(db, "users", targetId), { balance: increment(amt) });
+            }
+
+            await addDoc(collection(db, "messages"), { 
+                to, 
+                from: userData.username, 
+                body: type === 'money' ? `Sent you $${amt.toLocaleString()}` : document.getElementById('msgBody').value, 
+                date: Date.now() 
+            });
+
+            alert("SENT!");
+            document.getElementById(toInput).value = "";
+            if(type === 'text') document.getElementById('msgBody').value = "";
+            if(type === 'money') document.getElementById('payAmt').value = "";
+            
+        } catch (e) { alert("Error: " + e.message); }
     };
 
     window.showTab = (t) => {
@@ -403,13 +441,28 @@
     };
 
     const loadInbox = () => {
-        onSnapshot(query(collection(db, "messages"), where("to", "==", userData.username), orderBy("date", "desc"), limit(1)), s => {
+        const qLatest = query(collection(db, "messages"), where("to", "==", userData.username), orderBy("date", "desc"), limit(1));
+        onSnapshot(qLatest, s => {
             if (initialMailLoad) { initialMailLoad = false; return; }
-            if (!s.empty) { const b = document.getElementById('notifBanner'); document.getElementById('notifText').innerText = `@${s.docs[0].data().from} sent mail!`; b.classList.add('active'); setTimeout(() => b.classList.remove('active'), 5000); }
+            if (!s.empty) { 
+                const b = document.getElementById('notifBanner'); 
+                document.getElementById('notifText').innerText = `@${s.docs[0].data().from} sent mail!`; 
+                b.classList.add('active'); 
+                setTimeout(() => b.classList.remove('active'), 5000); 
+            }
         });
-        onSnapshot(query(collection(db, "messages"), where("to", "==", userData.username), orderBy("date", "desc")), s => {
+        
+        const qAll = query(collection(db, "messages"), where("to", "==", userData.username), orderBy("date", "desc"));
+        onSnapshot(qAll, s => {
             document.getElementById('mailBox').innerHTML = s.docs.map(d => `<div class="msg-card"><b>@${d.data().from}</b><p>${d.data().body}</p></div>`).join('') || "NO MESSAGES.";
         });
+    };
+
+    window.clearInbox = async () => {
+        if(!confirm("Clear all mail?")) return;
+        const q = query(collection(db, "messages"), where("to", "==", userData.username));
+        const s = await getDocs(q);
+        s.forEach(async (d) => await deleteDoc(doc(db, "messages", d.id)));
     };
 
     setInterval(() => {
