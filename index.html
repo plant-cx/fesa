@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MailCash | Premium</title>
+    <title>MailCash | Fixed Balance</title>
     <style>
         /* --- CORE BRAND STYLES --- */
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -19,7 +19,7 @@
         .balance-pill { background: #064e3b; color: #34d399; padding: 10px 20px; border-radius: 50px; font-weight: 800; border: 1px solid #059669; }
         .pfp-circle { width: 44px; height: 44px; border-radius: 50%; border: 2px solid #6366f1; background: #334155; cursor: pointer; }
         
-        #settingsMenu { position: absolute; right: 0; top: 60px; width: 200px; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #475569; }
+        #settingsMenu { position: absolute; right: 0; top: 60px; width: 260px; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #475569; }
 
         .tabs { display: flex; gap: 8px; margin-bottom: 20px; background: #0f172a; padding: 6px; border-radius: 14px; }
         .tab { flex: 1; text-align: center; padding: 12px; cursor: pointer; border-radius: 10px; color: #94a3b8; font-weight: 700; font-size: 14px; }
@@ -27,7 +27,6 @@
 
         .msg-card { background: #1e293b; padding: 18px; border-radius: 14px; margin-bottom: 12px; border: 1px solid #334155; border-left: 5px solid #6366f1; }
 
-        /* MARKET STYLES */
         .orb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
         .orb-item { background: #0f172a; border: 1px solid #334155; padding: 15px; border-radius: 12px; position: relative; text-align: center; min-height: 200px; display: flex; flex-direction: column; }
         .orb-visual { width: 50px; height: 50px; border-radius: 50%; margin: 0 auto 10px; box-shadow: 0 0 15px currentColor; filter: brightness(1.2); }
@@ -43,8 +42,7 @@
         .btn-locked { background: #475569 !important; color: #94a3b8 !important; cursor: not-allowed; }
         .btn-available { background: #10b981 !important; color: white !important; }
         
-        .clicker-btn { width: 110px; height: 110px; border-radius: 50%; background: radial-gradient(circle, #6366f1, #4338ca); border: 8px solid #312e81; font-size: 35px; margin: 0 auto 10px; display: block; cursor: pointer; transition: transform 0.1s; }
-        .clicker-btn:active { transform: scale(0.95); }
+        .clicker-btn { width: 110px; height: 110px; border-radius: 50%; background: radial-gradient(circle, #6366f1, #4338ca); border: 8px solid #312e81; font-size: 35px; margin: 0 auto 10px; display: block; cursor: pointer; }
         .popup-anim { position: absolute; color: #34d399; font-weight: 900; animation: floatUpOrb 1.2s ease-out forwards; pointer-events: none; z-index: 10000; font-size: 18px; }
         @keyframes floatUpOrb { 0% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -70px); } }
     </style>
@@ -81,20 +79,7 @@
         </div>
 
         <div id="earnView" class="tab-view">
-            <div style="text-align:center">
-                <button class="clicker-btn" id="mainClicker">💰</button>
-                <div class="card" style="margin-top: 15px; padding: 15px; background: #0f172a; border: 1px solid #334155;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div style="text-align: left;">
-                            <b style="font-size: 14px; color: #6366f1;">Click Power</b>
-                            <p style="font-size: 12px; color: #94a3b8;">Current: +$<span id="clickPowerVal">1</span></p>
-                        </div>
-                        <button id="upgradeClickBtn" onclick="upgradeClicker()" style="width: auto; padding: 8px 15px; font-size: 12px; background: #10b981;">
-                            Upgrade $<span id="clickCost">250</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
+            <div style="text-align:center"><button class="clicker-btn" id="mainClicker">💰</button></div>
             <div class="orb-grid" id="orbGrid"></div>
         </div>
 
@@ -159,9 +144,6 @@
                     document.getElementById('appScreen').classList.remove('hidden');
                 }
             });
-        } else {
-            document.getElementById('appScreen').classList.add('hidden');
-            document.getElementById('authScreen').classList.remove('hidden');
         }
     });
 
@@ -169,4 +151,143 @@
 
     window.handleAuth = async () => {
         const userNm = document.getElementById('loginUser').value.trim().toLowerCase();
-        const pass = document.getElementById('authPass').value
+        const pass = document.getElementById('authPass').value;
+        try {
+            if(isReg) {
+                const email = document.getElementById('regEmail').value;
+                const res = await createUserWithEmailAndPassword(auth, email, pass);
+                // Explicitly set the balance to 1000 to prevent NaN
+                await setDoc(doc(db, "users", res.user.uid), { username: userNm, email: email, balance: 1000, orbs: {} });
+            } else {
+                const s = await getDocs(query(collection(db, "users"), where("username", "==", userNm)));
+                if(s.empty) throw new Error("User not found");
+                await signInWithEmailAndPassword(auth, s.docs[0].data().email, pass);
+            }
+        } catch (e) { alert(e.message); }
+    };
+
+    function updateUI() {
+        if (!userData) return;
+        const bal = userData.balance || 0;
+        document.getElementById('userBal').innerText = Math.floor(bal).toLocaleString();
+        document.getElementById('userDisplay').innerText = "@" + (userData.username || "User");
+        document.getElementById('userPfp').src = `https://api.dicebear.com/7.x/identicon/svg?seed=${userData.username}`;
+    }
+
+    const calcIncome = (orb, owned) => {
+        if(!owned || owned <= 0) return 0;
+        return Math.floor(orb.baseInc * (Math.pow(1.8, owned) - 1) / (1.8 - 1));
+    };
+
+    function renderOrbs() {
+        if (!userData) return;
+        const grid = document.getElementById('orbGrid');
+        grid.innerHTML = '';
+        ORB_DATA.forEach((orb, index) => {
+            const owned = userData.orbs?.[orb.id] || 0;
+            const isUnlocked = index === 0 || (userData.orbs?.[ORB_DATA[index-1].id] > 0);
+            const cost = Math.floor(orb.baseCost * Math.pow(1.5, owned));
+            const div = document.createElement('div');
+            div.className = 'orb-item';
+            
+            div.innerHTML = `
+                <div class="orb-visual" style="color:${orb.color}; background:currentColor"></div>
+                <b>${orb.name}</b>
+                ${isUnlocked ? `
+                    <div style="font-size:10px; margin:5px 0;">
+                        <span style="color:#10b981">+$${calcIncome(orb, owned).toLocaleString()}</span>
+                        <br><span style="color:#94a3b8">Every ${orb.time/1000}s</span>
+                    </div>
+                    <div class="progress-bg"><div class="progress-fill" id="bar-${orb.id}"></div></div>
+                ` : ''}
+                <button onclick="buyOrb('${orb.id}', ${cost})" class="buy-btn ${userData.balance >= cost && isUnlocked ? 'btn-available' : 'btn-locked'}">
+                    ${isUnlocked ? `Upgrade $${cost.toLocaleString()}` : 'LOCKED'}
+                </button>
+            `;
+
+            if (!isUnlocked) {
+                const lock = document.createElement('div');
+                lock.className = 'blur-lock';
+                lock.innerHTML = `<div class="lock-q">?</div><div class="lock-hint">Own 1 ${ORB_DATA[index-1].name}</div>`;
+                div.appendChild(lock);
+            }
+            grid.appendChild(div);
+        });
+    }
+
+    window.buyOrb = async (id, cost) => {
+        if(!userData || userData.balance < cost) return;
+        await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-cost), [`orbs.${id}`]: increment(1) });
+    };
+
+    document.getElementById('mainClicker').addEventListener('click', (e) => {
+        if (!userData) return;
+        updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(1) });
+        spawnPop(e.clientX, e.clientY, "+$1");
+    });
+
+    window.sendAction = async (type) => {
+        const to = document.getElementById(type === 'text' ? 'msgTo' : 'payTo').value.trim().toLowerCase();
+        const body = type === 'text' ? document.getElementById('msgBody').value : `Sent you $${document.getElementById('payAmt').value}`;
+        const amt = type === 'money' ? parseFloat(document.getElementById('payAmt').value || 0) : 0;
+        const s = await getDocs(query(collection(db, "users"), where("username", "==", to)));
+        if(s.empty) return alert("User not found");
+        if(type === 'money') {
+            if(userData.balance < amt) return alert("Insufficient funds");
+            await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-amt) });
+            await updateDoc(doc(db, "users", s.docs[0].id), { balance: increment(amt) });
+        }
+        await addDoc(collection(db, "messages"), { to, from: userData.username, body, date: Date.now() });
+        alert("Sent!");
+    };
+
+    const loadInbox = () => {
+        onSnapshot(query(collection(db, "messages"), where("to", "==", userData.username), orderBy("date", "desc")), s => {
+            document.getElementById('mailBox').innerHTML = s.docs.map(d => `<div class="msg-card"><b>@${d.data().from}</b><p>${d.data().body}</p></div>`).join('') || "No mail.";
+        });
+    };
+
+    setInterval(() => {
+        if(!userData) return;
+        ORB_DATA.forEach(orb => {
+            const owned = userData.orbs?.[orb.id] || 0;
+            if(owned > 0) {
+                if(!window[orb.id+'_timer']) {
+                    window[orb.id+'_start'] = Date.now();
+                    window[orb.id+'_timer'] = setInterval(() => {
+                        if (!userData) return;
+                        const latestOwned = userData.orbs[orb.id];
+                        updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(calcIncome(orb, latestOwned)) });
+                        window[orb.id+'_start'] = Date.now();
+                    }, orb.time);
+                }
+                const bar = document.getElementById(`bar-${orb.id}`);
+                if(bar) {
+                    const elapsed = Date.now() - (window[orb.id+'_start'] || Date.now());
+                    const pct = Math.min((elapsed / orb.time) * 100, 100);
+                    bar.style.width = pct + "%";
+                }
+            }
+        });
+    }, 100);
+
+    window.showTab = (t) => {
+        document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
+        document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+        document.getElementById(t + 'View').classList.remove('hidden');
+        document.getElementById('t' + (t === 'message' ? 'Msg' : t === 'earn' ? 'Ear' : t === 'inbox' ? 'In' : 'Pay')).classList.add('active');
+    };
+
+    window.toggleSettings = () => document.getElementById('settingsMenu').classList.toggle('hidden');
+    window.logout = () => signOut(auth);
+
+    function spawnPop(x, y, text) {
+        const p = document.createElement('div');
+        p.className = 'popup-anim'; p.innerText = text;
+        p.style.position = 'fixed'; p.style.left = x + 'px'; p.style.top = y + 'px';
+        document.body.appendChild(p);
+        setTimeout(() => p.remove(), 1200);
+    }
+</script>
+</body>
+</html>
