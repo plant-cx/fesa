@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MailCash | Restored Settings</title>
+    <title>MailCash | Compound Orbs</title>
     <style>
         /* --- CORE BRAND STYLES --- */
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -19,7 +19,6 @@
         input, textarea { width: 100%; padding: 14px; background: #0f172a; border: 1px solid #334155; border-radius: 10px; color: white; margin-bottom: 12px; outline: none; font-size: 16px; }
         button { width: 100%; padding: 14px; background: #6366f1; color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; transition: 0.2s; }
         
-        /* HEADER & SETTINGS MENU */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; position: relative; }
         .balance-pill { background: #064e3b; color: #34d399; padding: 10px 20px; border-radius: 50px; font-weight: 800; border: 1px solid #059669; }
         .pfp-circle { width: 44px; height: 44px; border-radius: 50%; border: 2px solid #6366f1; background: #334155; cursor: pointer; }
@@ -27,24 +26,24 @@
         #settingsMenu { position: absolute; right: 0; top: 60px; width: 260px; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #475569; }
         .settings-btn { background: #334155; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 18px; }
 
-        /* TABS */
         .tabs { display: flex; gap: 8px; margin-bottom: 20px; background: #0f172a; padding: 6px; border-radius: 14px; }
         .tab { flex: 1; text-align: center; padding: 12px; cursor: pointer; border-radius: 10px; color: #94a3b8; font-weight: 700; font-size: 14px; }
         .tab.active { background: #334155; color: white; }
 
-        /* MESSAGE/INBOX */
         .msg-card { background: #1e293b; padding: 18px; border-radius: 14px; margin-bottom: 12px; border: 1px solid #334155; border-left: 5px solid #6366f1; }
         .cash-tag { display: inline-block; background: #064e3b; color: #34d399; padding: 4px 10px; border-radius: 6px; font-size: 12px; margin-top: 10px; font-weight: 800; }
 
-        /* EARN & ORBS */
-        .clicker-btn { width: 140px; height: 140px; border-radius: 50%; background: radial-gradient(circle, #6366f1, #4338ca); border: 8px solid #312e81; font-size: 40px; margin: 10px auto; display: block; box-shadow: 0 0 20px rgba(99, 102, 241, 0.4); }
+        .clicker-btn { width: 140px; height: 140px; border-radius: 50%; background: radial-gradient(circle, #6366f1, #4338ca); border: 8px solid #312e81; font-size: 40px; margin: 10px auto; display: block; box-shadow: 0 0 20px rgba(99, 102, 241, 0.4); transition: transform 0.1s; }
+        .clicker-btn:active { transform: scale(0.9); }
+        
         .orb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
         .orb-item { background: #0f172a; border: 1px solid #334155; padding: 15px; border-radius: 12px; position: relative; text-align: center; }
         .orb-visual { width: 50px; height: 50px; border-radius: 50%; margin: 0 auto 10px; box-shadow: 0 0 15px currentColor; filter: brightness(1.2); }
         .btn-locked { background: #475569 !important; color: #94a3b8 !important; cursor: not-allowed; }
         .btn-available { background: #10b981 !important; color: white !important; }
-        .popup-anim { position: absolute; color: #34d399; font-weight: 900; animation: floatUpOrb 1.2s ease-out forwards; pointer-events: none; z-index: 10000; }
-        @keyframes floatUpOrb { 0% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -60px); } }
+        
+        .popup-anim { position: absolute; color: #34d399; font-weight: 900; animation: floatUpOrb 1.2s ease-out forwards; pointer-events: none; z-index: 10000; font-size: 18px; }
+        @keyframes floatUpOrb { 0% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -70px); } }
     </style>
 </head>
 <body>
@@ -121,13 +120,13 @@
                     <button id="upgradeBtn" onclick="buyUpgrade()" class="btn-locked" style="width:180px; padding:10px;">Upgrade Clicker</button>
                 </div>
             </div>
-            <h3 style="margin: 25px 0 10px; border-bottom: 1px solid #334155; padding-bottom: 5px;">Orb Market (x1.5 Growth)</h3>
+            <h3 style="margin: 25px 0 10px; border-bottom: 1px solid #334155; padding-bottom: 5px;">Orb Market (x1.8 Income Scaling)</h3>
             <div class="orb-grid" id="orbGrid"></div>
         </div>
 
         <div id="casinoView" class="tab-view hidden card">
-            <h3>🎰 MailCash Casino</h3>
-            <p style="color:#94a3b8; margin-bottom:20px;">Coming Soon: High-stakes betting!</p>
+            <h3>🎰 Casino</h3>
+            <p style="color:#94a3b8; margin-bottom:20px;">The high-stakes area is being built...</p>
             <button onclick="showTab('earn')">Back to Earning</button>
         </div>
     </div>
@@ -160,16 +159,16 @@
     ];
 
     const ORB_DATA = [
-        { id: 'orb1', name: 'Blue Orb', baseCost: 500, income: 10, time: 5000, color: '#3b82f6' },
-        { id: 'orb2', name: 'Red Orb', baseCost: 5000, income: 150, time: 7000, color: '#ef4444' },
-        { id: 'orb3', name: 'Green Orb', baseCost: 7500, income: 300, time: 6000, color: '#10b981' },
-        { id: 'orb4', name: 'Gold Orb', baseCost: 17500, income: 1000, time: 1000, color: '#f59e0b' },
-        { id: 'orb5', name: 'Purple Orb', baseCost: 37500, income: 2500, time: 3000, color: '#8b5cf6' },
-        { id: 'orb6', name: 'Cyan Orb', baseCost: 75000, income: 6000, time: 5000, color: '#06b6d4' },
-        { id: 'orb7', name: 'Pink Orb', baseCost: 150000, income: 15000, time: 8000, color: '#ec4899' },
-        { id: 'orb8', name: 'White Orb', baseCost: 375000, income: 40000, time: 10000, color: '#f8fafc' },
-        { id: 'orb9', name: 'Void Orb', baseCost: 750000, income: 100000, time: 12000, color: '#475569' },
-        { id: 'orb10', name: 'Solar Orb', baseCost: 2500000, income: 500000, time: 15000, color: '#fbbf24' }
+        { id: 'orb1', name: 'Blue Orb', baseCost: 500, baseIncome: 10, time: 5000, color: '#3b82f6' },
+        { id: 'orb2', name: 'Red Orb', baseCost: 5000, baseIncome: 150, time: 7000, color: '#ef4444' },
+        { id: 'orb3', name: 'Green Orb', baseCost: 7500, baseIncome: 300, time: 6000, color: '#10b981' },
+        { id: 'orb4', name: 'Gold Orb', baseCost: 17500, baseIncome: 1000, time: 1000, color: '#f59e0b' },
+        { id: 'orb5', name: 'Purple Orb', baseCost: 37500, baseIncome: 2500, time: 3000, color: '#8b5cf6' },
+        { id: 'orb6', name: 'Cyan Orb', baseCost: 75000, baseIncome: 6000, time: 5000, color: '#06b6d4' },
+        { id: 'orb7', name: 'Pink Orb', baseCost: 150000, baseIncome: 15000, time: 8000, color: '#ec4899' },
+        { id: 'orb8', name: 'White Orb', baseCost: 375000, baseIncome: 40000, time: 10000, color: '#f8fafc' },
+        { id: 'orb9', name: 'Void Orb', baseCost: 750000, baseIncome: 100000, time: 12000, color: '#475569' },
+        { id: 'orb10', name: 'Solar Orb', baseCost: 2500000, baseIncome: 500000, time: 15000, color: '#fbbf24' }
     ];
 
     onAuthStateChanged(auth, u => {
@@ -188,9 +187,16 @@
         }
     });
 
+    // Income Helper Logic
+    const calcIncome = (orb, owned) => {
+        if(owned <= 0) return 0;
+        // Geometric series for 1.8x income scaling
+        return Math.floor(orb.baseIncome * (Math.pow(1.8, owned) - 1) / (1.8 - 1));
+    };
+
     function updateUI() {
         if(!userData) return;
-        document.getElementById('userBal').innerText = userData.balance.toLocaleString();
+        document.getElementById('userBal').innerText = Math.floor(userData.balance).toLocaleString();
         document.getElementById('userDisplay').innerText = "@" + userData.username;
         document.getElementById('clickPowerText').innerText = userData.clickPower || 1;
         document.getElementById('userPfp').src = userData.pfp || `https://api.dicebear.com/7.x/identicon/svg?seed=${userData.username}`;
@@ -202,7 +208,7 @@
             document.getElementById('nextClickText').innerText = `Next: $${next.power}/click (Cost: $${next.cost.toLocaleString()})`;
             upBtn.className = userData.balance >= next.cost ? 'btn-available' : 'btn-locked';
         } else {
-            document.getElementById('nextClickText').innerText = "Max Level";
+            document.getElementById('nextClickText').innerText = "Max Click Level";
             upBtn.classList.add('hidden');
         }
     }
@@ -241,13 +247,17 @@
         ORB_DATA.forEach(orb => {
             const owned = userData.orbs?.[orb.id] || 0;
             const cost = Math.floor(orb.baseCost * Math.pow(1.5, owned));
+            const currentTotalIncome = calcIncome(orb, owned);
+            const nextIncome = calcIncome(orb, owned + 1) - currentTotalIncome;
+
             const div = document.createElement('div');
             div.className = 'orb-item';
             div.id = `orb-box-${orb.id}`;
             div.innerHTML = `
                 <div class="orb-visual" style="color:${orb.color}; background:currentColor"></div>
                 <b>${orb.name}</b><br>
-                <small>$${orb.income} / ${orb.time/1000}s</small><br>
+                <small>Income: $${currentTotalIncome.toLocaleString()}/cycle</small><br>
+                <small>Next: +$${Math.floor(nextIncome).toLocaleString()}</small><br>
                 <small>Owned: ${owned}</small>
                 <button onclick="buyOrb('${orb.id}', ${cost})" class="buy-btn ${userData.balance >= cost ? 'btn-available' : 'btn-locked'}">
                     Buy ($${cost.toLocaleString()})
@@ -291,12 +301,7 @@
                     t.update(theirRef, { balance: (await t.get(theirRef)).data().balance + amt });
                 });
             }
-            await addDoc(collection(db, "messages"), { 
-                to, from: userData.username, 
-                subject: type === 'text' ? document.getElementById('msgSub').value : "Payment",
-                body: type === 'text' ? document.getElementById('msgBody').value : "Funds transfer.",
-                cash: amt, date: new Date() 
-            });
+            await addDoc(collection(db, "messages"), { to, from: userData.username, subject: type === 'text' ? document.getElementById('msgSub').value : "Payment", body: type === 'text' ? document.getElementById('msgBody').value : "Funds.", cash: amt, date: new Date() });
             showTab('inbox');
         } catch (e) { alert(e.message); }
     };
@@ -305,29 +310,28 @@
         onSnapshot(query(collection(db, "messages"), where("to", "==", userData.username), orderBy("date", "desc")), s => {
             document.getElementById('mailBox').innerHTML = s.docs.map(d => {
                 const m = d.data();
-                return `<div class="msg-card">
-                    <b>@${m.from}</b><br><small>${m.subject}</small><p>${m.body}</p>
-                    ${m.cash > 0 ? `<span class="cash-tag">+$${m.cash}</span>` : ''}
-                </div>`;
+                return `<div class="msg-card"><b>@${m.from}</b><br><small>${m.subject}</small><p>${m.body}</p>${m.cash > 0 ? `<span class="cash-tag">+$${m.cash}</span>` : ''}</div>`;
             }).join('') || "Inbox empty.";
         });
     };
 
+    // Auto-Income Loop
     setInterval(() => {
         if(!userData || !userData.orbs) return;
         ORB_DATA.forEach(orb => {
-            if(userData.orbs[orb.id] > 0 && !window[orb.id+'_timer']) {
+            const owned = userData.orbs[orb.id] || 0;
+            if(owned > 0 && !window[orb.id+'_timer']) {
                 window[orb.id+'_timer'] = setInterval(() => {
-                    const count = userData.orbs[orb.id] || 0;
-                    const total = orb.income * count;
+                    const currentOwned = userData.orbs[orb.id] || 0;
+                    const totalIncome = calcIncome(orb, currentOwned);
                     if(document.getElementById('tEar').classList.contains('active')) {
                         const el = document.getElementById(`orb-box-${orb.id}`);
                         if(el) {
                             const rect = el.getBoundingClientRect();
-                            spawnPop(rect.left + rect.width/2, rect.top + 20, `+$${total}`);
+                            spawnPop(rect.left + rect.width/2, rect.top + 20, `+$${totalIncome.toLocaleString()}`);
                         }
                     }
-                    updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(total) });
+                    updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(totalIncome) });
                 }, orb.time);
             }
         });
@@ -335,8 +339,7 @@
 
     function spawnPop(x, y, text, isFixed = false) {
         const p = document.createElement('div');
-        p.className = 'popup-anim';
-        p.innerText = text;
+        p.className = 'popup-anim'; p.innerText = text;
         if(isFixed) { p.style.position = 'fixed'; p.style.left = x + 'px'; p.style.top = y + 'px'; }
         else { p.style.left = '50%'; p.style.top = '20%'; }
         document.body.appendChild(p);
@@ -356,7 +359,7 @@
                 const s = await getDocs(query(collection(db, "users"), where("username", "==", u)));
                 await signInWithEmailAndPassword(auth, s.docs[0].data().email, p);
             }
-        } catch (e) { alert("Auth fail"); }
+        } catch (e) { alert("Login failed"); }
     };
 </script>
 </body>
