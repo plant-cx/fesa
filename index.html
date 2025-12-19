@@ -447,47 +447,6 @@
     </div>
 
     <script type="module">
-        function initDemoData() {
-            data.users = [
-                { 
-                    id: 1, 
-                    name: 'Demo User', 
-                    email: 'demo@mail.com', 
-                    password: 'demo123', 
-                    balance: 1000 
-                },
-                { 
-                    id: 2, 
-                    name: 'Alice Smith', 
-                    email: 'alice@mail.com', 
-                    password: 'alice123', 
-                    balance: 500 
-                },
-                { 
-                    id: 3, 
-                    name: 'Bob Johnson', 
-                    email: 'bob@mail.com', 
-                    password: 'bob123', 
-                    balance: 750 
-                }
-            ];
-            
-            // Demo messages
-            data.messages = [
-                {
-                    id: 1,
-                    from: 'alice@mail.com',
-                    to: 'demo@mail.com',
-                    subject: 'Welcome to MailCash!',
-                    body: 'Hi! Welcome to our platform. Feel free to send me an email or money transfer.',
-                    date: new Date('2024-01-15T10:30:00'),
-                    read: false
-                }
-            ];
-        }
-        
-        initDemoData();
-        
         // Authentication functions
         function showLogin() {
             document.getElementById('loginScreen').classList.remove('hidden');
@@ -584,35 +543,27 @@ async function logout() {
             if (tabName === 'sent') loadSent();
             if (tabName === 'transactions') loadTransactions();
         }
-        
-        // Email functions
-        function sendEmail() {
-            const to = document.getElementById('emailTo').value.trim();
-            const subject = document.getElementById('emailSubject').value.trim();
-            const body = document.getElementById('emailBody').value.trim();
+        async function sendEmail() {
+
+     const q = query(collection(db, "users"), where("email", "==", to));
+const snap = await getDocs(q);
+
+if (snap.empty) {
+  showAlert("composeAlert", "User not found", "error");
+  return;
+}
+
+const recipientDoc = snap.docs[0];
+
             
-            if (!to || !subject || !body) {
-                showAlert('composeAlert', 'Please fill in all fields', 'error');
-                return;
-            }
-            
-            const recipient = data.users.find(u => u.email === to);
-            if (!recipient) {
-                showAlert('composeAlert', 'Recipient not found. User must be registered.', 'error');
-                return;
-            }
-            
-            const message = {
-                id: data.messages.length + 1,
-                from: data.currentUser.email,
-                to: to,
-                subject: subject,
-                body: body,
-                date: new Date(),
-                read: false
-            };
-            
-            data.messages.push(message);
+await addDoc(collection(db, "messages"), {
+  from: data.currentUser.email,
+  to,
+  subject,
+  body,
+  date: serverTimestamp()
+});
+
             
             showAlert('composeAlert', 'Email sent successfully!', 'success');
             document.getElementById('emailTo').value = '';
@@ -803,17 +754,6 @@ async function logout() {
   const auth = getAuth(app);
   const db = getFirestore(app);
 
-
-  await addDoc(collection(db, "messages"), {
-  from: data.currentUser.email,
-  to,
-  subject,
-  body,
-  date: serverTimestamp()
-});
-await updateDoc(doc(db, "users", data.currentUser.uid), {
-  balance: data.currentUser.balance - amount
-});
 
 </script>
 </body>
