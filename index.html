@@ -508,61 +508,65 @@
             document.getElementById('loginScreen').classList.add('hidden');
         }
         
-        function login() {
-            const email = document.getElementById('loginEmail').value.trim();
-            const password = document.getElementById('loginPassword').value;
-            
-            if (!email || !password) {
-                showAlert('loginAlert', 'Please enter both email and password', 'error');
-                return;
-            }
-            
-            const user = data.users.find(u => u.email === email && u.password === password);
-            
-            if (user) {
-                data.currentUser = user;
-                showApp();
-            } else {
-                showAlert('loginAlert', 'Invalid email or password', 'error');
-            }
-        }
+        async function login() {
+  const email = loginEmail.value.trim();
+  const password = loginPassword.value;
+
+  try {
+    const cred = await signInWithEmailAndPassword(auth, email, password);
+    const snap = await getDoc(doc(db, "users", cred.user.uid));
+
+    data.currentUser = {
+      uid: cred.user.uid,
+      ...snap.data()
+    };
+
+    showApp();
+  } catch (err) {
+    showAlert("loginAlert", "Invalid login", "error");
+  }
+}
+
+        async function register() {
+  const name = regName.value.trim();
+  const email = regEmail.value.trim();
+  const password = regPassword.value;
+
+  if (!name || !email || !password) {
+    showAlert("registerAlert", "Fill all fields", "error");
+    return;
+  }
+
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+
+    await setDoc(doc(db, "users", cred.user.uid), {
+      name,
+      email,
+      balance: 1000,
+      createdAt: serverTimestamp()
+    });
+
+    data.currentUser = {
+      uid: cred.user.uid,
+      name,
+      email,
+      balance: 1000
+    };
+
+    showApp();
+  } catch (err) {
+    showAlert("registerAlert", err.message, "error");
+  }
+}
+
         
-        function register() {
-            const name = document.getElementById('regName').value.trim();
-            const email = document.getElementById('regEmail').value.trim();
-            const password = document.getElementById('regPassword').value;
-            
-            if (!name || !email || !password) {
-                showAlert('registerAlert', 'Please fill in all fields', 'error');
-                return;
-            }
-            
-            if (data.users.find(u => u.email === email)) {
-                showAlert('registerAlert', 'Email already registered', 'error');
-                return;
-            }
-            
-            const newUser = {
-                id: data.users.length + 1,
-                name,
-                email,
-                password,
-                balance: 1000 // Starting balance
-            };
-            
-            data.users.push(newUser);
-            data.currentUser = newUser;
-            showApp();
-        }
-        
-        function logout() {
-            data.currentUser = null;
-            document.getElementById('appScreen').classList.add('hidden');
-            document.getElementById('loginScreen').classList.remove('hidden');
-            document.getElementById('loginEmail').value = '';
-            document.getElementById('loginPassword').value = '';
-        }
-        
+async function logout() {
+  await signOut(auth);
+  data.currentUser = null;
+  location.reload();
+}
+
         function showApp() {
             document.getElementById('loginScreen').classList.add('hidden');
             document.getElementById('registerScreen').classList.add('hidden');
@@ -807,6 +811,19 @@
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
-    </script>
+
+
+  await addDoc(collection(db, "messages"), {
+  from: data.currentUser.email,
+  to,
+  subject,
+  body,
+  date: serverTimestamp()
+});
+await updateDoc(doc(db, "users", data.currentUser.uid), {
+  balance: data.currentUser.balance - amount
+});
+
+</script>
 </body>
 </html>
