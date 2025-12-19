@@ -9,46 +9,45 @@
         body { font-family: 'Inter', 'Segoe UI', sans-serif; background: #0f172a; color: #f8fafc; padding: 20px; }
         .container { max-width: 600px; margin: 0 auto; }
         
-        /* Cards & Elements */
-        .card { background: #1e293b; border-radius: 16px; padding: 25px; border: 1px solid #334155; margin-bottom: 20px; }
-        .hidden { display: none !important; }
-        input, textarea { width: 100%; padding: 14px; background: #0f172a; border: 1px solid #334155; border-radius: 10px; color: white; margin-bottom: 12px; outline: none; transition: 0.2s; }
-        input:focus { border-color: #6366f1; }
-        button { width: 100%; padding: 14px; background: #6366f1; color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; }
-        button:hover { background: #4f46e5; }
-        
-        /* Custom Notification System */
+        /* Notifications */
         #notifier { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 15px 30px; border-radius: 12px; font-weight: 600; opacity: 0; transition: 0.4s; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); pointer-events: none; }
         .ntf-err { background: #ef4444; color: white; }
         .ntf-ok { background: #10b981; color: white; }
 
-        /* App UI */
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-        .balance-pill { background: #064e3b; color: #34d399; padding: 12px 20px; border-radius: 50px; font-weight: 800; border: 1px solid #059669; }
+        /* UI Components */
+        .card { background: #1e293b; border-radius: 16px; padding: 25px; border: 1px solid #334155; margin-bottom: 20px; }
+        .hidden { display: none !important; }
+        input, textarea { width: 100%; padding: 14px; background: #0f172a; border: 1px solid #334155; border-radius: 10px; color: white; margin-bottom: 12px; outline: none; }
+        button { width: 100%; padding: 14px; background: #6366f1; color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; }
+        button:hover { background: #4f46e5; }
+        
+        .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; }
+        .balance-pill { background: #064e3b; color: #34d399; padding: 12px 20px; border-radius: 50px; font-weight: 800; border: 1px solid #059669; font-size: 1.1rem; }
+        .logout-btn { background: #ef4444; width: auto; padding: 6px 15px; font-size: 11px; margin-top: 10px; }
+
         .tabs { display: flex; gap: 8px; margin-bottom: 20px; background: #0f172a; padding: 5px; border-radius: 12px; }
         .tab { flex: 1; text-align: center; padding: 12px; cursor: pointer; border-radius: 8px; color: #94a3b8; font-size: 14px; font-weight: bold; }
         .tab.active { background: #334155; color: white; }
 
         .msg-card { background: #1e293b; padding: 15px; border-radius: 12px; margin-bottom: 10px; border-left: 4px solid #6366f1; }
-        .cash-received { color: #10b981; font-weight: bold; font-size: 0.9rem; margin-top: 10px; }
-        .logout-btn { width: auto; background: #ef4444; padding: 6px 15px; font-size: 12px; margin-top: 8px; }
+        .cash-tag { color: #10b981; font-weight: bold; font-size: 0.9rem; margin-top: 8px; display: block; }
     </style>
 </head>
 <body>
 
-<div id="notifier">Notification Message</div>
+<div id="notifier">Notification</div>
 
 <div class="container">
     <div id="authScreen" class="card">
         <h2 id="authTitle" style="margin-bottom: 15px;">Login</h2>
-        <div id="regExtra" class="hidden">
-            <input type="text" id="regUser" placeholder="Choose Unique Username">
+        <div id="regFields" class="hidden">
+            <input type="text" id="regUser" placeholder="Unique Username (lowercase)">
         </div>
         <input type="email" id="authEmail" placeholder="Email">
         <input type="password" id="authPass" placeholder="Password">
         <button id="authBtn" onclick="handleAuth()">Sign In</button>
-        <p style="text-align: center; margin-top: 15px; font-size: 14px;">
-            <a href="#" onclick="toggleAuth()" style="color:#818cf8">Toggle Register/Login</a>
+        <p style="text-align:center; margin-top:15px; font-size:14px;">
+            <a href="#" onclick="toggleAuth()" style="color:#818cf8">Switch to Register/Login</a>
         </p>
     </div>
 
@@ -56,38 +55,36 @@
         <div class="header">
             <div>
                 <h2 style="font-size: 1.2rem;">MailCash</h2>
-                <p id="userDisplay" style="color:#818cf8; font-weight: bold;"></p>
+                <p id="userDisplay" style="color:#818cf8; font-weight: bold;">@loading...</p>
                 <button class="logout-btn" onclick="logout()">LOGOUT</button>
             </div>
             <div class="balance-pill">$<span id="userBal">0.00</span></div>
         </div>
 
         <div class="tabs">
-            <div class="tab active" id="tabIn" onclick="showTab('inbox')">Inbox</div>
-            <div class="tab" id="tabMsg" onclick="showTab('message')">Message</div>
-            <div class="tab" id="tabPay" onclick="showTab('transfer')">Transfer</div>
+            <div id="tIn" class="tab active" onclick="showTab('inbox')">Inbox</div>
+            <div id="tMsg" class="tab" onclick="showTab('message')">Message</div>
+            <div id="tPay" class="tab" onclick="showTab('transfer')">Transfer</div>
         </div>
 
         <div id="inboxView" class="tab-view">
-            <div id="mailBox">Loading...</div>
+            <div id="mailBox">Loading mail...</div>
         </div>
 
         <div id="messageView" class="tab-view hidden card">
             <h3>New Message</h3>
-            <p style="color:#94a3b8; font-size: 12px; margin-bottom: 10px;">Send a basic text message.</p>
-            <input type="text" id="msgTo" placeholder="Recipient Username">
+            <input type="text" id="msgTo" placeholder="To Username">
             <input type="text" id="msgSub" placeholder="Subject">
-            <textarea id="msgBody" rows="4" placeholder="Type your message..."></textarea>
+            <textarea id="msgBody" rows="4" placeholder="Your message..."></textarea>
             <button onclick="sendAction('text')">Send Message</button>
         </div>
 
         <div id="transferView" class="tab-view hidden card">
-            <h3>Secure Transfer</h3>
-            <p style="color:#94a3b8; font-size: 12px; margin-bottom: 10px;">Send money with an optional note.</p>
-            <input type="text" id="payTo" placeholder="Recipient Username">
+            <h3>Send Funds</h3>
+            <input type="text" id="payTo" placeholder="To Username">
             <input type="number" id="payAmt" placeholder="Amount ($)">
             <input type="text" id="payNote" placeholder="Note (Optional)">
-            <button onclick="sendAction('money')" style="background: #10b981;">Transfer Funds</button>
+            <button onclick="sendAction('money')" style="background: #10b981;">Confirm Transfer</button>
         </div>
     </div>
 </div>
@@ -112,10 +109,10 @@
     let userData = null;
     let isReg = false;
 
-    // --- CUSTOM NOTIFICATIONS ---
-    function notify(text, type = 'ok') {
+    // --- NOTIFICATIONS ---
+    function notify(msg, type = 'ok') {
         const n = document.getElementById('notifier');
-        n.innerText = text;
+        n.innerText = msg;
         n.className = type === 'ok' ? 'ntf-ok' : 'ntf-err';
         n.style.opacity = '1';
         setTimeout(() => { n.style.opacity = '0'; }, 3000);
@@ -125,22 +122,23 @@
     window.toggleAuth = () => {
         isReg = !isReg;
         document.getElementById('authTitle').innerText = isReg ? "Register" : "Login";
-        document.getElementById('regExtra').classList.toggle('hidden');
+        document.getElementById('regFields').classList.toggle('hidden');
         document.getElementById('authBtn').innerText = isReg ? "Create Account" : "Sign In";
     };
 
     window.handleAuth = async () => {
-        const e = document.getElementById('authEmail').value;
+        const e = document.getElementById('authEmail').value.trim();
         const p = document.getElementById('authPass').value;
         const u = document.getElementById('regUser').value.trim().toLowerCase();
         try {
             if (isReg) {
                 if (u.length < 3) throw new Error("Username too short");
-                const snap = await getDocs(query(collection(db, "users"), where("username", "==", u)));
-                if (!snap.empty) throw new Error("Username taken");
-                const r = await createUserWithEmailAndPassword(auth, e, p);
-                await setDoc(doc(db, "users", r.user.uid), { username: u, balance: 1000 });
-                notify("Account Created!");
+                const q = query(collection(db, "users"), where("username", "==", u));
+                const s = await getDocs(q);
+                if (!s.empty) throw new Error("Username taken");
+                const res = await createUserWithEmailAndPassword(auth, e, p);
+                await setDoc(doc(db, "users", res.user.uid), { username: u, balance: 1000 });
+                notify("Welcome!");
             } else {
                 await signInWithEmailAndPassword(auth, e, p);
             }
@@ -148,14 +146,17 @@
     };
 
     onAuthStateChanged(auth, u => {
+        const uDisp = document.getElementById('userDisplay');
         if(u) {
             onSnapshot(doc(db, "users", u.uid), d => {
-                userData = d.data();
-                document.getElementById('userBal').innerText = (userData.balance || 0).toFixed(2);
-                document.getElementById('userDisplay').innerText = "@" + userData.username;
-                document.getElementById('authScreen').classList.add('hidden');
-                document.getElementById('appScreen').classList.remove('hidden');
-                loadMail();
+                if(d.exists()) {
+                    userData = d.data();
+                    uDisp.innerText = "@" + (userData.username || "user");
+                    document.getElementById('userBal').innerText = (userData.balance || 0).toFixed(2);
+                    document.getElementById('authScreen').classList.add('hidden');
+                    document.getElementById('appScreen').classList.remove('hidden');
+                    loadInbox();
+                }
             });
         } else {
             document.getElementById('appScreen').classList.add('hidden');
@@ -163,59 +164,62 @@
         }
     });
 
-    // --- SEND LOGIC ---
+    // --- ACTIONS ---
     window.sendAction = async (type) => {
         const to = (type === 'text' ? document.getElementById('msgTo').value : document.getElementById('payTo').value).trim().toLowerCase();
         const amt = type === 'money' ? (parseFloat(document.getElementById('payAmt').value) || 0) : 0;
-        const sub = type === 'text' ? document.getElementById('msgSub').value : "Money Transfer";
+        const sub = type === 'text' ? document.getElementById('msgSub').value : "Payment";
         const body = type === 'text' ? document.getElementById('msgBody').value : document.getElementById('payNote').value;
 
         if (!to) return notify("Enter a username", "err");
-        if (amt < 0) return notify("Invalid amount", "err");
+        if (to === userData.username) return notify("Can't send to self", "err");
 
         try {
-            const snap = await getDocs(query(collection(db, "users"), where("username", "==", to)));
+            const q = query(collection(db, "users"), where("username", "==", to));
+            const snap = await getDocs(q);
             if (snap.empty) throw new Error("User not found");
             const recId = snap.docs[0].id;
+            const recData = snap.docs[0].data();
 
             if (amt > 0) {
-                if (userData.balance < amt) throw new Error("Insufficient balance");
+                if (userData.balance < amt) throw new Error("Insufficient funds");
                 await runTransaction(db, async t => {
-                    const me = await t.get(doc(db, "users", auth.currentUser.uid));
-                    t.update(doc(db, "users", auth.currentUser.uid), { balance: me.data().balance - amt });
-                    t.update(doc(db, "users", recId), { balance: snap.docs[0].data().balance + amt });
+                    const myRef = doc(db, "users", auth.currentUser.uid);
+                    const theirRef = doc(db, "users", recId);
+                    t.update(myRef, { balance: userData.balance - amt });
+                    t.update(theirRef, { balance: recData.balance + amt });
                 });
             }
 
-            await addDoc(collection(db, "messages"), { 
-                to, from: userData.username, subject: sub, body, cash: amt, date: new Date() 
+            await addDoc(collection(db, "messages"), {
+                to, from: userData.username, subject: sub || "No Subject", body: body || "", cash: amt, date: new Date()
             });
-            notify(amt > 0 ? "Transfer Complete" : "Message Sent");
+            notify("Sent Successfully!");
+            document.querySelectorAll('input, textarea').forEach(i => i.value = "");
             showTab('inbox');
         } catch (e) { notify(e.message, 'err'); }
     };
 
-    function loadMail() {
+    function loadInbox() {
         onSnapshot(query(collection(db, "messages"), where("to", "==", userData.username), orderBy("date", "desc")), s => {
             document.getElementById('mailBox').innerHTML = s.docs.map(d => `
                 <div class="msg-card">
                     <b>@${d.data().from}</b>
                     <h4 style="margin:5px 0;">${d.data().subject}</h4>
-                    <p style="color:#cbd5e1; font-size:14px;">${d.data().body}</p>
-                    ${d.data().cash > 0 ? `<div class="cash-received">+$${d.data().cash.toFixed(2)}</div>` : ''}
+                    <p style="color:#94a3b8; font-size:14px;">${d.data().body}</p>
+                    ${d.data().cash > 0 ? `<span class="cash-tag">+$${d.data().cash.toFixed(2)} RECEIVED</span>` : ''}
                 </div>
-            `).join('') || "No messages.";
+            `).join('') || "No messages yet.";
         });
     }
 
-    // --- UI ---
-    window.showTab = (tab) => {
+    window.showTab = (t) => {
         document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.getElementById(tab + 'View').classList.remove('hidden');
-        if(tab === 'inbox') document.getElementById('tabIn').classList.add('active');
-        if(tab === 'message') document.getElementById('tabMsg').classList.add('active');
-        if(tab === 'transfer') document.getElementById('tabPay').classList.add('active');
+        document.querySelectorAll('.tab').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(t + 'View').classList.remove('hidden');
+        if(t === 'inbox') document.getElementById('tIn').classList.add('active');
+        if(t === 'message') document.getElementById('tMsg').classList.add('active');
+        if(t === 'transfer') document.getElementById('tPay').classList.add('active');
     };
     window.logout = () => signOut(auth);
 </script>
