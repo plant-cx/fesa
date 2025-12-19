@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MailCash | Premium</title>
+    <title>MailCash | Ultimate Edition</title>
     <style>
-        /* --- CORE BRAND STYLES --- */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background: #0f172a; color: #f8fafc; padding: 20px; overflow-x: hidden; }
         .container { max-width: 600px; margin: 0 auto; position: relative; }
@@ -19,15 +18,14 @@
         .balance-pill { background: #064e3b; color: #34d399; padding: 10px 20px; border-radius: 50px; font-weight: 800; border: 1px solid #059669; }
         .pfp-circle { width: 44px; height: 44px; border-radius: 50%; border: 2px solid #6366f1; background: #334155; cursor: pointer; }
         
-        #settingsMenu { position: absolute; right: 0; top: 60px; width: 200px; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #475569; }
+        #settingsMenu { position: absolute; right: 0; top: 60px; width: 280px; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #475569; }
 
         .tabs { display: flex; gap: 8px; margin-bottom: 20px; background: #0f172a; padding: 6px; border-radius: 14px; }
         .tab { flex: 1; text-align: center; padding: 12px; cursor: pointer; border-radius: 10px; color: #94a3b8; font-weight: 700; font-size: 14px; }
         .tab.active { background: #334155; color: white; }
 
-        .msg-card { background: #1e293b; padding: 18px; border-radius: 14px; margin-bottom: 12px; border: 1px solid #334155; border-left: 5px solid #6366f1; }
+        .msg-card { background: #1e293b; padding: 18px; border-radius: 14px; margin-bottom: 12px; border: 1px solid #334155; border-left: 5px solid #6366f1; position: relative; }
 
-        /* MARKET STYLES */
         .orb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
         .orb-item { background: #0f172a; border: 1px solid #334155; padding: 15px; border-radius: 12px; position: relative; text-align: center; min-height: 200px; display: flex; flex-direction: column; }
         .orb-visual { width: 50px; height: 50px; border-radius: 50%; margin: 0 auto 10px; box-shadow: 0 0 15px currentColor; filter: brightness(1.2); }
@@ -37,7 +35,7 @@
         .lock-hint { font-size: 9px; color: #94a3b8; text-transform: uppercase; font-weight: 800; padding: 0 5px; text-align: center; }
 
         .progress-bg { width: 100%; height: 4px; background: #1e293b; border-radius: 10px; margin-top: 10px; overflow: hidden; }
-        .progress-fill { height: 100%; background: #6366f1; width: 0%; }
+        .progress-fill { height: 100%; background: #6366f1; width: 0%; transition: width 0.1s linear; }
 
         .buy-btn { font-size: 12px; padding: 8px; margin-top: auto; }
         .btn-locked { background: #475569 !important; color: #94a3b8 !important; cursor: not-allowed; }
@@ -45,20 +43,20 @@
         
         .clicker-btn { width: 110px; height: 110px; border-radius: 50%; background: radial-gradient(circle, #6366f1, #4338ca); border: 8px solid #312e81; font-size: 35px; margin: 0 auto 10px; display: block; cursor: pointer; transition: transform 0.1s; }
         .clicker-btn:active { transform: scale(0.95); }
-        .popup-anim { position: absolute; color: #34d399; font-weight: 900; animation: floatUpOrb 1.2s ease-out forwards; pointer-events: none; z-index: 10000; font-size: 18px; }
-        @keyframes floatUpOrb { 0% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -70px); } }
+        .popup-anim { position: absolute; color: #34d399; font-weight: 900; animation: floatUp 1.2s ease-out forwards; pointer-events: none; z-index: 10000; font-size: 18px; }
+        @keyframes floatUp { 0% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -70px); } }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div id="authScreen" class="card">
-        <h2>MailCash</h2>
+        <h2 style="margin-bottom: 20px;">MailCash</h2>
         <input type="text" id="loginUser" placeholder="Username">
-        <div id="regArea" class="hidden"><input type="email" id="regEmail" placeholder="Email"></div>
+        <div id="regArea" class="hidden"><input type="email" id="regEmail" placeholder="Email Address"></div>
         <input type="password" id="authPass" placeholder="Password">
-        <button onclick="handleAuth()">Enter MailCash</button>
-        <p style="text-align: center; margin-top: 15px;"><a href="javascript:void(0)" onclick="toggleAuthMode()">Switch Login/Register</a></p>
+        <button onclick="handleAuth()">Enter Game</button>
+        <p style="text-align: center; margin-top: 15px;"><a href="javascript:void(0)" onclick="toggleAuthMode()" style="color:#6366f1; font-size:14px;">Switch Login/Register</a></p>
     </div>
 
     <div id="appScreen" class="hidden">
@@ -67,9 +65,17 @@
                 <img id="userPfp" class="pfp-circle" src="" onclick="toggleSettings()">
                 <b id="userDisplay">@user</b>
             </div>
-            <div class="balance-pill">$<span id="userBal">0</span></div>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <div class="balance-pill">$<span id="userBal">0</span></div>
+                <button onclick="toggleSettings()" style="width:40px; height:40px; padding:0; background:#334155;">⚙️</button>
+            </div>
+
             <div id="settingsMenu" class="card hidden">
-                <button onclick="logout()" style="background: #ef4444;">Logout</button>
+                <h3 style="margin-bottom:15px;">Settings</h3>
+                <label style="font-size:12px; color:#94a3b8;">Change Username</label>
+                <input type="text" id="setNewUser" placeholder="New Username">
+                <button onclick="updateProfile()" style="background:#10b981; margin-bottom:15px;">Update Profile</button>
+                <button onclick="logout()" style="background:#ef4444;">Logout</button>
             </div>
         </div>
 
@@ -89,7 +95,7 @@
                             <b style="font-size: 14px; color: #6366f1;">Click Power</b>
                             <p style="font-size: 12px; color: #94a3b8;">Current: +$<span id="clickPowerVal">1</span></p>
                         </div>
-                        <button id="upgradeClickBtn" onclick="upgradeClicker()" style="width: auto; padding: 8px 15px; font-size: 12px; background: #10b981;">
+                        <button id="upgradeClickBtn" onclick="upgradeClicker()" style="width: auto; padding: 8px 15px; font-size: 12px;">
                             Upgrade $<span id="clickCost">250</span>
                         </button>
                     </div>
@@ -98,16 +104,26 @@
             <div class="orb-grid" id="orbGrid"></div>
         </div>
 
-        <div id="inboxView" class="tab-view hidden"><div id="mailBox">Loading...</div></div>
-        <div id="messageView" class="tab-view hidden card">
-            <input type="text" id="msgTo" placeholder="To @username">
-            <textarea id="msgBody" rows="4" placeholder="Content..."></textarea>
-            <button onclick="sendAction('text')">Send</button>
+        <div id="inboxView" class="tab-view hidden">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h3>Your Mail</h3>
+                <button onclick="clearInbox()" style="width:auto; padding:5px 12px; background:#ef4444; font-size:11px;">Clear Inbox</button>
+            </div>
+            <div id="mailBox">Loading...</div>
         </div>
+
+        <div id="messageView" class="tab-view hidden card">
+            <h3>Send Message</h3>
+            <input type="text" id="msgTo" placeholder="To @username">
+            <textarea id="msgBody" rows="4" placeholder="Type message..."></textarea>
+            <button onclick="sendAction('text')">Send Mail</button>
+        </div>
+
         <div id="transferView" class="tab-view hidden card">
-            <input type="text" id="payTo" placeholder="To @username">
+            <h3>Send Cash</h3>
+            <input type="text" id="payTo" placeholder="Recipient @username">
             <input type="number" id="payAmt" placeholder="Amount ($)">
-            <button onclick="sendAction('money')" style="background:#10b981">Confirm</button>
+            <button onclick="sendAction('money')" style="background:#10b981">Transfer Cash</button>
         </div>
     </div>
 </div>
@@ -115,7 +131,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, updateDoc, onSnapshot, query, collection, where, getDocs, increment, orderBy, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, updateDoc, onSnapshot, query, collection, where, getDocs, increment, orderBy, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBo2zhESYzv1OChHSAfSb2GLiP6XtI6q1s",
@@ -149,9 +165,8 @@
     onAuthStateChanged(auth, u => {
         if(u) {
             onSnapshot(doc(db, "users", u.uid), d => {
-                const data = d.data();
-                if(data) {
-                    userData = data;
+                if(d.exists()) {
+                    userData = d.data();
                     updateUI();
                     renderOrbs();
                     loadInbox();
@@ -174,10 +189,10 @@
             if(isReg) {
                 const email = document.getElementById('regEmail').value;
                 const res = await createUserWithEmailAndPassword(auth, email, pass);
-                await setDoc(doc(db, "users", res.user.uid), { username: userNm, email: email, balance: 1000, orbs: {}, clickLevel: 1 });
+                await setDoc(doc(db, "users", res.user.uid), { username: userNm, email: email, balance: 1000, orbs: {}, clickLevel: 1, pfpSeed: userNm });
             } else {
                 const s = await getDocs(query(collection(db, "users"), where("username", "==", userNm)));
-                if(s.empty) throw new Error("User not found");
+                if(s.empty) throw new Error("No user found");
                 await signInWithEmailAndPassword(auth, s.docs[0].data().email, pass);
             }
         } catch (e) { alert(e.message); }
@@ -191,7 +206,7 @@
 
         document.getElementById('userBal').innerText = Math.floor(bal).toLocaleString();
         document.getElementById('userDisplay').innerText = "@" + (userData.username || "User");
-        document.getElementById('userPfp').src = `https://api.dicebear.com/7.x/identicon/svg?seed=${userData.username}`;
+        document.getElementById('userPfp').src = `https://api.dicebear.com/7.x/identicon/svg?seed=${userData.pfpSeed || userData.username}`;
         
         document.getElementById('clickPowerVal').innerText = clickLvl.toLocaleString();
         document.getElementById('clickCost').innerText = clickCost.toLocaleString();
@@ -280,6 +295,19 @@
         onSnapshot(query(collection(db, "messages"), where("to", "==", userData.username), orderBy("date", "desc")), s => {
             document.getElementById('mailBox').innerHTML = s.docs.map(d => `<div class="msg-card"><b>@${d.data().from}</b><p>${d.data().body}</p></div>`).join('') || "No mail.";
         });
+    };
+
+    window.clearInbox = async () => {
+        const s = await getDocs(query(collection(db, "messages"), where("to", "==", userData.username)));
+        s.docs.forEach(d => deleteDoc(d.ref));
+    };
+
+    window.updateProfile = async () => {
+        const newUser = document.getElementById('setNewUser').value.trim().toLowerCase();
+        if(newUser) {
+            await updateDoc(doc(db, "users", auth.currentUser.uid), { username: newUser, pfpSeed: newUser });
+            alert("Updated!");
+        }
     };
 
     setInterval(() => {
