@@ -3,85 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MailCash - Secure Transfers</title>
+    <title>MailCash | Secure Hub</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: #f8fafc; padding: 20px; }
+        body { font-family: 'Inter', 'Segoe UI', sans-serif; background: #0f172a; color: #f8fafc; padding: 20px; }
         .container { max-width: 600px; margin: 0 auto; }
         
-        /* Containers */
-        .card { background: #1e293b; border-radius: 16px; padding: 25px; border: 1px solid #334155; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        /* Cards & Elements */
+        .card { background: #1e293b; border-radius: 16px; padding: 25px; border: 1px solid #334155; margin-bottom: 20px; }
         .hidden { display: none !important; }
-
-        /* Form Elements */
-        input, textarea { width: 100%; padding: 12px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: white; margin-bottom: 12px; font-size: 15px; }
-        button { width: 100%; padding: 12px; background: #6366f1; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+        input, textarea { width: 100%; padding: 14px; background: #0f172a; border: 1px solid #334155; border-radius: 10px; color: white; margin-bottom: 12px; outline: none; transition: 0.2s; }
+        input:focus { border-color: #6366f1; }
+        button { width: 100%; padding: 14px; background: #6366f1; color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; }
         button:hover { background: #4f46e5; }
-        .logout-btn { background: #ef4444; width: auto; padding: 8px 15px; font-size: 12px; }
-
-        /* Header & Balance */
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #334155; }
-        .balance-pill { background: #064e3b; color: #34d399; padding: 10px 20px; border-radius: 50px; font-weight: 800; border: 1px solid #059669; font-size: 1.2rem; }
-
-        /* Navigation */
-        .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
-        .tab { flex: 1; text-align: center; padding: 12px; cursor: pointer; border-radius: 8px; background: #0f172a; color: #94a3b8; transition: 0.3s; font-weight: 600; }
-        .tab.active { background: #334155; color: white; border: 1px solid #6366f1; }
-
-        /* Message List */
-        .msg { background: #1e293b; padding: 20px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #334155; border-left: 5px solid #6366f1; }
-        .msg b { color: #818cf8; font-size: 0.9rem; }
-        .msg h3 { margin: 5px 0; font-size: 1.1rem; }
-        .cash-tag { display: inline-block; background: #064e3b; color: #34d399; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; margin-top: 10px; font-weight: bold; }
         
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
+        /* Custom Notification System */
+        #notifier { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 15px 30px; border-radius: 12px; font-weight: 600; opacity: 0; transition: 0.4s; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); pointer-events: none; }
+        .ntf-err { background: #ef4444; color: white; }
+        .ntf-ok { background: #10b981; color: white; }
+
+        /* App UI */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .balance-pill { background: #064e3b; color: #34d399; padding: 12px 20px; border-radius: 50px; font-weight: 800; border: 1px solid #059669; }
+        .tabs { display: flex; gap: 8px; margin-bottom: 20px; background: #0f172a; padding: 5px; border-radius: 12px; }
+        .tab { flex: 1; text-align: center; padding: 12px; cursor: pointer; border-radius: 8px; color: #94a3b8; font-size: 14px; font-weight: bold; }
+        .tab.active { background: #334155; color: white; }
+
+        .msg-card { background: #1e293b; padding: 15px; border-radius: 12px; margin-bottom: 10px; border-left: 4px solid #6366f1; }
+        .cash-received { color: #10b981; font-weight: bold; font-size: 0.9rem; margin-top: 10px; }
+        .logout-btn { width: auto; background: #ef4444; padding: 6px 15px; font-size: 12px; margin-top: 8px; }
     </style>
 </head>
 <body>
 
+<div id="notifier">Notification Message</div>
+
 <div class="container">
     <div id="authScreen" class="card">
-        <h1 id="authTitle" style="margin-bottom: 20px;">Welcome to MailCash</h1>
-        <div id="regFields" class="hidden">
-            <input type="text" id="regUser" placeholder="Choose a Unique Username">
+        <h2 id="authTitle" style="margin-bottom: 15px;">Login</h2>
+        <div id="regExtra" class="hidden">
+            <input type="text" id="regUser" placeholder="Choose Unique Username">
         </div>
-        <input type="email" id="authEmail" placeholder="Email Address">
+        <input type="email" id="authEmail" placeholder="Email">
         <input type="password" id="authPass" placeholder="Password">
-        <button id="mainAuthBtn" onclick="handleAuth()">Sign In</button>
-        <p style="text-align: center; margin-top: 15px;">
-            <a href="#" id="toggleAuth" onclick="toggleAuthMode()" style="color: #818cf8; font-size: 14px;">Need an account? Register</a>
+        <button id="authBtn" onclick="handleAuth()">Sign In</button>
+        <p style="text-align: center; margin-top: 15px; font-size: 14px;">
+            <a href="#" onclick="toggleAuth()" style="color:#818cf8">Toggle Register/Login</a>
         </p>
     </div>
 
     <div id="appScreen" class="hidden">
         <div class="header">
             <div>
-                <h1 style="font-size: 1.2rem;">MailCash</h1>
-                <p id="userLabel" style="color:#818cf8; font-size: 0.9rem; font-weight: bold;"></p>
-            </div>
-            <div style="text-align:right">
-                <div class="balance-pill">$<span id="userBal">0.00</span></div><br>
+                <h2 style="font-size: 1.2rem;">MailCash</h2>
+                <p id="userDisplay" style="color:#818cf8; font-weight: bold;"></p>
                 <button class="logout-btn" onclick="logout()">LOGOUT</button>
             </div>
+            <div class="balance-pill">$<span id="userBal">0.00</span></div>
         </div>
 
         <div class="tabs">
-            <div class="tab active" id="btn-inbox" onclick="switchTab('inbox')">Inbox</div>
-            <div class="tab" id="btn-send" onclick="switchTab('send')">Send Money</div>
+            <div class="tab active" id="tabIn" onclick="showTab('inbox')">Inbox</div>
+            <div class="tab" id="tabMsg" onclick="showTab('message')">Message</div>
+            <div class="tab" id="tabPay" onclick="showTab('transfer')">Transfer</div>
         </div>
 
-        <div id="inboxTab" class="tab-content active">
-            <div id="messageList">Loading your mail...</div>
+        <div id="inboxView" class="tab-view">
+            <div id="mailBox">Loading...</div>
         </div>
 
-        <div id="sendTab" class="tab-content card">
-            <h2 style="margin-bottom: 15px; font-size: 1.1rem;">New Transfer</h2>
-            <input type="text" id="sendTo" placeholder="Recipient Username">
-            <input type="text" id="sendSub" placeholder="Subject">
-            <textarea id="sendBody" rows="4" placeholder="Your message..."></textarea>
-            <input type="number" id="sendAmt" placeholder="Amount to Send ($)">
-            <button onclick="sendMail()">Confirm & Send</button>
+        <div id="messageView" class="tab-view hidden card">
+            <h3>New Message</h3>
+            <p style="color:#94a3b8; font-size: 12px; margin-bottom: 10px;">Send a basic text message.</p>
+            <input type="text" id="msgTo" placeholder="Recipient Username">
+            <input type="text" id="msgSub" placeholder="Subject">
+            <textarea id="msgBody" rows="4" placeholder="Type your message..."></textarea>
+            <button onclick="sendAction('text')">Send Message</button>
+        </div>
+
+        <div id="transferView" class="tab-view hidden card">
+            <h3>Secure Transfer</h3>
+            <p style="color:#94a3b8; font-size: 12px; margin-bottom: 10px;">Send money with an optional note.</p>
+            <input type="text" id="payTo" placeholder="Recipient Username">
+            <input type="number" id="payAmt" placeholder="Amount ($)">
+            <input type="text" id="payNote" placeholder="Note (Optional)">
+            <button onclick="sendAction('money')" style="background: #10b981;">Transfer Funds</button>
         </div>
     </div>
 </div>
@@ -91,7 +97,6 @@
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, updateDoc, collection, addDoc, query, where, onSnapshot, orderBy, runTransaction, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    // Firebase Configuration
     const firebaseConfig = {
         apiKey: "AIzaSyBo2zhESYzv1OChHSAfSb2GLiP6XtI6q1s",
         authDomain: "mailcash-3da79.firebaseapp.com",
@@ -105,55 +110,52 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
     let userData = null;
-    let isRegMode = false;
+    let isReg = false;
 
-    // --- AUTHENTICATION ---
-    window.toggleAuthMode = () => {
-        isRegMode = !isRegMode;
-        document.getElementById('authTitle').innerText = isRegMode ? "Create Account" : "Sign In";
-        document.getElementById('regFields').classList.toggle('hidden');
-        document.getElementById('mainAuthBtn').innerText = isRegMode ? "Register Now" : "Sign In";
-        document.getElementById('toggleAuth').innerText = isRegMode ? "Already have an account? Login" : "Need an account? Register";
+    // --- CUSTOM NOTIFICATIONS ---
+    function notify(text, type = 'ok') {
+        const n = document.getElementById('notifier');
+        n.innerText = text;
+        n.className = type === 'ok' ? 'ntf-ok' : 'ntf-err';
+        n.style.opacity = '1';
+        setTimeout(() => { n.style.opacity = '0'; }, 3000);
+    }
+
+    // --- AUTH ---
+    window.toggleAuth = () => {
+        isReg = !isReg;
+        document.getElementById('authTitle').innerText = isReg ? "Register" : "Login";
+        document.getElementById('regExtra').classList.toggle('hidden');
+        document.getElementById('authBtn').innerText = isReg ? "Create Account" : "Sign In";
     };
 
     window.handleAuth = async () => {
-        const email = document.getElementById('authEmail').value.trim();
-        const pass = document.getElementById('authPass').value;
-        const username = document.getElementById('regUser').value.trim().toLowerCase();
-
-        if (!email || !pass) return alert("Please fill in all fields.");
-
+        const e = document.getElementById('authEmail').value;
+        const p = document.getElementById('authPass').value;
+        const u = document.getElementById('regUser').value.trim().toLowerCase();
         try {
-            if (isRegMode) {
-                if (username.length < 3) return alert("Username must be at least 3 characters.");
-                // Check if username is taken
-                const q = query(collection(db, "users"), where("username", "==", username));
-                const snap = await getDocs(q);
-                if (!snap.empty) return alert("Username already taken!");
-
-                const res = await createUserWithEmailAndPassword(auth, email, pass);
-                await setDoc(doc(db, "users", res.user.uid), { 
-                    username: username, 
-                    balance: 1000,
-                    email: email 
-                });
+            if (isReg) {
+                if (u.length < 3) throw new Error("Username too short");
+                const snap = await getDocs(query(collection(db, "users"), where("username", "==", u)));
+                if (!snap.empty) throw new Error("Username taken");
+                const r = await createUserWithEmailAndPassword(auth, e, p);
+                await setDoc(doc(db, "users", r.user.uid), { username: u, balance: 1000 });
+                notify("Account Created!");
             } else {
-                await signInWithEmailAndPassword(auth, email, pass);
+                await signInWithEmailAndPassword(auth, e, p);
             }
-        } catch (e) { 
-            alert("Auth Error: " + e.message); 
-        }
+        } catch (err) { notify(err.message, 'err'); }
     };
 
     onAuthStateChanged(auth, u => {
         if(u) {
             onSnapshot(doc(db, "users", u.uid), d => {
                 userData = d.data();
-                document.getElementById('userBal').innerText = (userData.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2});
-                document.getElementById('userLabel').innerText = "@" + userData.username;
+                document.getElementById('userBal').innerText = (userData.balance || 0).toFixed(2);
+                document.getElementById('userDisplay').innerText = "@" + userData.username;
                 document.getElementById('authScreen').classList.add('hidden');
                 document.getElementById('appScreen').classList.remove('hidden');
-                loadInbox();
+                loadMail();
             });
         } else {
             document.getElementById('appScreen').classList.add('hidden');
@@ -161,89 +163,60 @@
         }
     });
 
-    // --- CORE MESSAGING & TRANSFERS ---
-    window.sendMail = async () => {
-        const to = document.getElementById('sendTo').value.trim().toLowerCase();
-        const subject = document.getElementById('sendSub').value.trim() || "No Subject";
-        const body = document.getElementById('sendBody').value.trim();
-        const amtInput = document.getElementById('sendAmt').value;
-        const amount = parseFloat(amtInput) || 0; // Fixes $NaN issues
+    // --- SEND LOGIC ---
+    window.sendAction = async (type) => {
+        const to = (type === 'text' ? document.getElementById('msgTo').value : document.getElementById('payTo').value).trim().toLowerCase();
+        const amt = type === 'money' ? (parseFloat(document.getElementById('payAmt').value) || 0) : 0;
+        const sub = type === 'text' ? document.getElementById('msgSub').value : "Money Transfer";
+        const body = type === 'text' ? document.getElementById('msgBody').value : document.getElementById('payNote').value;
 
-        if (!to) return alert("Enter a recipient username.");
-        if (to === userData.username) return alert("You cannot send money to yourself.");
-        if (amount < 0) return alert("Amount cannot be negative.");
+        if (!to) return notify("Enter a username", "err");
+        if (amt < 0) return notify("Invalid amount", "err");
 
         try {
-            const q = query(collection(db, "users"), where("username", "==", to));
-            const s = await getDocs(q);
-            if (s.empty) return alert("User @" + to + " does not exist.");
-            const recipientId = s.docs[0].id;
+            const snap = await getDocs(query(collection(db, "users"), where("username", "==", to)));
+            if (snap.empty) throw new Error("User not found");
+            const recId = snap.docs[0].id;
 
-            if (amount > 0) {
-                if (userData.balance < amount) return alert("Insufficient funds!");
-                
-                await runTransaction(db, async (transaction) => {
-                    const senderRef = doc(db, "users", auth.currentUser.uid);
-                    const receiverRef = doc(db, "users", recipientId);
-                    
-                    const senderDoc = await transaction.get(senderRef);
-                    const receiverDoc = await transaction.get(receiverRef);
-
-                    transaction.update(senderRef, { balance: senderDoc.data().balance - amount });
-                    transaction.update(receiverRef, { balance: receiverDoc.data().balance + amount });
+            if (amt > 0) {
+                if (userData.balance < amt) throw new Error("Insufficient balance");
+                await runTransaction(db, async t => {
+                    const me = await t.get(doc(db, "users", auth.currentUser.uid));
+                    t.update(doc(db, "users", auth.currentUser.uid), { balance: me.data().balance - amt });
+                    t.update(doc(db, "users", recId), { balance: snap.docs[0].data().balance + amt });
                 });
             }
 
-            await addDoc(collection(db, "messages"), {
-                to: to,
-                from: userData.username,
-                subject: subject,
-                body: body,
-                cash: amount,
-                date: new Date()
+            await addDoc(collection(db, "messages"), { 
+                to, from: userData.username, subject: sub, body, cash: amt, date: new Date() 
             });
-
-            alert("Message Sent Successfully!");
-            document.getElementById('sendTo').value = "";
-            document.getElementById('sendSub').value = "";
-            document.getElementById('sendBody').value = "";
-            document.getElementById('sendAmt').value = "";
-            switchTab('inbox');
-        } catch (e) {
-            alert("Transfer Failed: " + e.message);
-        }
+            notify(amt > 0 ? "Transfer Complete" : "Message Sent");
+            showTab('inbox');
+        } catch (e) { notify(e.message, 'err'); }
     };
 
-    function loadInbox() {
-        const q = query(collection(db, "messages"), where("to", "==", userData.username), orderBy("date", "desc"));
-        onSnapshot(q, s => {
-            const list = document.getElementById('messageList');
-            if (s.empty) {
-                list.innerHTML = "<p style='text-align:center; color:#94a3b8;'>Your inbox is empty.</p>";
-                return;
-            }
-            list.innerHTML = s.docs.map(d => {
-                const data = d.data();
-                return `
-                    <div class="msg">
-                        <b>FROM: @${data.from}</b>
-                        <h3>${data.subject}</h3>
-                        <p>${data.body}</p>
-                        ${data.cash > 0 ? `<div class="cash-tag">+$${data.cash.toFixed(2)} RECEIVED</div>` : ''}
-                    </div>
-                `;
-            }).join('');
+    function loadMail() {
+        onSnapshot(query(collection(db, "messages"), where("to", "==", userData.username), orderBy("date", "desc")), s => {
+            document.getElementById('mailBox').innerHTML = s.docs.map(d => `
+                <div class="msg-card">
+                    <b>@${d.data().from}</b>
+                    <h4 style="margin:5px 0;">${d.data().subject}</h4>
+                    <p style="color:#cbd5e1; font-size:14px;">${d.data().body}</p>
+                    ${d.data().cash > 0 ? `<div class="cash-received">+$${d.data().cash.toFixed(2)}</div>` : ''}
+                </div>
+            `).join('') || "No messages.";
         });
     }
 
-    // --- UI HELPERS ---
-    window.switchTab = (id) => {
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    // --- UI ---
+    window.showTab = (tab) => {
+        document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.getElementById(id + 'Tab').classList.add('active');
-        document.getElementById('btn-' + id).classList.add('active');
+        document.getElementById(tab + 'View').classList.remove('hidden');
+        if(tab === 'inbox') document.getElementById('tabIn').classList.add('active');
+        if(tab === 'message') document.getElementById('tabMsg').classList.add('active');
+        if(tab === 'transfer') document.getElementById('tabPay').classList.add('active');
     };
-
     window.logout = () => signOut(auth);
 </script>
 </body>
