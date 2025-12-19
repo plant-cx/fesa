@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MailCash | Marketplace Edition</title>
+    <title>MailCash | Ultimate Edition</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background: #0f172a; color: #f8fafc; padding: 20px; overflow-x: hidden; }
@@ -49,6 +49,12 @@
         .clicker-btn:active { transform: scale(0.95); }
         .popup-anim { position: absolute; color: #34d399; font-weight: 900; animation: floatUp 1.2s ease-out forwards; pointer-events: none; z-index: 10000; font-size: 18px; }
         @keyframes floatUp { 0% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -70px); } }
+
+        /* Badge Styles */
+        .badge-card { background: #0f172a; border: 1px solid #334155; border-radius: 12px; padding: 15px; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; }
+        .badge-icon { font-size: 40px; }
+        .badge-info h4 { color: #f8fafc; margin-bottom: 4px; }
+        .badge-info p { color: #94a3b8; font-size: 12px; }
     </style>
 </head>
 <body>
@@ -109,8 +115,11 @@
         </div>
 
         <div id="collectionView" class="tab-view hidden">
-            <h3 style="text-align:center; color:#6366f1; margin-bottom:10px;">Your Collection</h3>
-            <p style="text-align:center; font-size:11px; color:#94a3b8; margin-bottom:20px;">Unique orbs currently in your possession.</p>
+            <h3 style="text-align:center; color:#6366f1; margin-bottom:20px;">Your Collection</h3>
+            
+            <div id="clickerBadgeSection">
+                </div>
+
             <div class="orb-grid" id="collectionGrid"></div>
         </div>
 
@@ -281,17 +290,38 @@
 
     function renderCollection() {
         if (!userData) return;
+        
+        // 1. Render Badge Section
+        const badgeSec = document.getElementById('clickerBadgeSection');
+        const clicks = userData.totalClicks || 0;
+        let badge = { name: "No Badge", icon: "⚪", color: "#475569" };
+
+        if (clicks >= 10000) badge = { name: "Champion", icon: "🏆", color: "#f8fafc" };
+        else if (clicks >= 1000) badge = { name: "Emerald", icon: "❇️", color: "#10b981" };
+        else if (clicks >= 750) badge = { name: "Diamond", icon: "💎", color: "#06b6d4" };
+        else if (clicks >= 250) badge = { name: "Gold", icon: "🥇", color: "#f59e0b" };
+        else if (clicks >= 50) badge = { name: "Silver", icon: "🥈", color: "#94a3b8" };
+        else if (clicks >= 1) badge = { name: "Bronze", icon: "🥉", color: "#b45309" };
+
+        badgeSec.innerHTML = `
+            <div class="badge-card" style="border-left: 5px solid ${badge.color}">
+                <div class="badge-icon">${badge.icon}</div>
+                <div class="badge-info">
+                    <h4>${badge.name} Clicker</h4>
+                    <p>Total Lifetime Clicks: ${clicks.toLocaleString()}</p>
+                </div>
+            </div>
+        `;
+
+        // 2. Render Orbs
         const grid = document.getElementById('collectionGrid');
         grid.innerHTML = '';
-        
         const allPossibleOrbs = [...ORB_DATA, ...MARKET_ORB_DATA];
         const ownedList = allPossibleOrbs.filter(orb => userData.orbs?.[orb.id] > 0);
-        
-        // Ascending order by base cost
         ownedList.sort((a, b) => a.baseCost - b.baseCost);
 
         if (ownedList.length === 0) {
-            grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#94a3b8; padding:20px;">Your collection is empty.</p>';
+            grid.innerHTML += '<p style="grid-column: 1/-1; text-align:center; color:#94a3b8; padding:20px;">No orbs collected yet.</p>';
             return;
         }
 
@@ -328,7 +358,10 @@
     document.getElementById('mainClicker').addEventListener('click', (e) => {
         if (!userData) return;
         const power = getPower(userData.clickLevel || 1);
-        updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(power) });
+        updateDoc(doc(db, "users", auth.currentUser.uid), { 
+            balance: increment(power),
+            totalClicks: increment(1)
+        });
         spawnPop(e.clientX, e.clientY, `+$${power}`);
     });
 
@@ -339,7 +372,7 @@
             if(isReg) {
                 const email = document.getElementById('regEmail').value;
                 const res = await createUserWithEmailAndPassword(auth, email, pass);
-                await setDoc(doc(db, "users", res.user.uid), { username: userNm, email: email, balance: 1000, orbs: {}, clickLevel: 1, pfpSeed: userNm });
+                await setDoc(doc(db, "users", res.user.uid), { username: userNm, email: email, balance: 1000, orbs: {}, clickLevel: 1, totalClicks: 0, pfpSeed: userNm });
             } else {
                 const s = await getDocs(query(collection(db, "users"), where("username", "==", userNm)));
                 if(s.empty) throw new Error("No user found");
