@@ -117,107 +117,130 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, query, where, onSnapshot, orderBy, runTransaction } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    // 1. Import Firebase SDKs from CDN (Essential for HTML files)
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, query, where, onSnapshot, orderBy, runTransaction, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // TODO: REPLACE THIS WITH YOUR CONFIG FROM FIREBASE CONSOLE
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_PROJECT.firebaseapp.com",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_PROJECT.appspot.com",
-            messagingSenderId: "YOUR_SENDER_ID",
-            appId: "YOUR_APP_ID"
-        };
+    // 2. Your specific Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyBo2zhESYzv1OChHSAfSb2GLiP6XtI6q1s",
+        authDomain: "mailcash-3da79.firebaseapp.com",
+        projectId: "mailcash-3da79",
+        storageBucket: "mailcash-3da79.firebasestorage.app",
+        messagingSenderId: "9602664972",
+        appId: "1:9602664972:web:2ded4f3a7f583558513c29",
+        measurementId: "G-4V6B28HZG4"
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+    // 3. Initialize Services
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-        // --- Auth Listeners ---
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                const userDoc = await getDoc(doc(db, "users", user.uid));
+    // --- AUTHENTICATION LOGIC ---
+
+    // Monitor login state
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            const userDoc = await getDoc(doc(db, "users", user.uid));
+            if (userDoc.exists()) {
                 const userData = userDoc.data();
-                document.getElementById('userNameDisplay').innerText = userData.name;
-                document.getElementById('userBalance').innerText = userData.balance.toFixed(2);
-                
+                document.getElementById('userNameDisplay').textContent = userData.name;
+                document.getElementById('userBalance').textContent = userData.balance.toFixed(2);
                 showApp();
                 setupRealtimeListeners(user.email, user.uid);
-            } else {
-                showLogin();
             }
+        } else {
+            showLogin();
+        }
+    });
+
+    window.register = async () => {
+        const name = document.getElementById('regName').value.trim();
+        const email = document.getElementById('regEmail').value.trim();
+        const pass = document.getElementById('regPassword').value;
+
+        if (!name || !email || !pass) return alert("Please fill all fields");
+
+        try {
+            const res = await createUserWithEmailAndPassword(auth, email, pass);
+            // Create user profile in Firestore
+            await setDoc(doc(db, "users", res.user.uid), {
+                name: name,
+                email: email,
+                balance: 1000.00 // Sign-up bonus
+            });
+        } catch (e) { alert(e.message); }
+    };
+
+    window.login = () => {
+        const email = document.getElementById('loginEmail').value.trim();
+        const pass = document.getElementById('loginPassword').value;
+        signInWithEmailAndPassword(auth, email, pass).catch(e => alert("Login failed: " + e.message));
+    };
+
+    window.logout = () => signOut(auth);
+
+    // --- REALTIME DATA LISTENERS ---
+
+    function setupRealtimeListeners(email, uid) {
+        // Listen for balance updates
+        onSnapshot(doc(db, "users", uid), (doc) => {
+            if (doc.exists()) document.getElementById('userBalance').textContent = doc.data().balance.toFixed(2);
         });
 
-        // --- Realtime Data Listeners ---
-        function setupRealtimeListeners(email, uid) {
-            // Listen for Balance changes
-            onSnapshot(doc(db, "users", uid), (doc) => {
-                if(doc.exists()) document.getElementById('userBalance').innerText = doc.data().balance.toFixed(2);
-            });
-
-            // Listen for Messages
-            const msgQuery = query(collection(db, "messages"), where("to", "==", email), orderBy("date", "desc"));
-            onSnapshot(msgQuery, (snapshot) => {
-                const container = document.getElementById('inboxMessages');
-                if (snapshot.empty) { container.innerHTML = "No messages."; return; }
-                container.innerHTML = snapshot.docs.map(d => `
-                    <div class="message-item">
-                        <b>From: ${d.data().from}</b><br>
-                        <small>${d.data().subject}</small>
-                        <p>${d.data().body}</p>
+        // Listen for incoming emails
+        const msgQuery = query(collection(db, "messages"), where("to", "==", email), orderBy("date", "desc"));
+        onSnapshot(msgQuery, (snapshot) => {
+            const container = document.getElementById('inboxMessages');
+            if (snapshot.empty) { container.innerHTML = '<div class="empty-state">No messages</div>'; return; }
+            container.innerHTML = snapshot.docs.map(d => `
+                <div class="message-item">
+                    <div class="message-header">
+                        <span class="message-from">${d.data().from}</span>
                     </div>
-                `).join('');
-            });
+                    <div class="message-subject">${d.data().subject}</div>
+                    <div class="message-body">${d.data().body}</div>
+                </div>
+            `).join('');
+        });
 
-            // Listen for Transactions
-            const txnQuery = query(collection(db, "transactions"), where("participants", "array-contains", email), orderBy("date", "desc"));
-            onSnapshot(txnQuery, (snapshot) => {
-                const container = document.getElementById('transactionsList');
-                container.innerHTML = snapshot.docs.map(d => {
-                    const data = d.data();
-                    const isReceived = data.to === email;
-                    return `
-                        <div class="transaction-item">
-                            <span class="${isReceived ? 'received' : 'sent'}">
+        // Listen for transactions
+        const txnQuery = query(collection(db, "transactions"), where("participants", "array-contains", email), orderBy("date", "desc"));
+        onSnapshot(txnQuery, (snapshot) => {
+            const container = document.getElementById('transactionsList');
+            if (snapshot.empty) { container.innerHTML = '<div class="empty-state">No transactions</div>'; return; }
+            container.innerHTML = snapshot.docs.map(d => {
+                const data = d.data();
+                const isReceived = data.to === email;
+                return `
+                    <div class="transaction-item">
+                        <div class="transaction-header">
+                            <div>
+                                <div class="transaction-type">${isReceived ? 'Received from' : 'Sent to'}: ${isReceived ? data.from : data.to}</div>
+                                <div class="transaction-date">${data.date.toDate().toLocaleString()}</div>
+                            </div>
+                            <div class="transaction-amount ${isReceived ? 'received' : 'sent'}">
                                 ${isReceived ? '+' : '-'}$${data.amount.toFixed(2)}
-                            </span>
-                            <span>${isReceived ? 'From: ' + data.from : 'To: ' + data.to}</span>
+                            </div>
                         </div>
-                    `;
-                }).join('');
-            });
-        }
+                    </div>
+                `;
+            }).join('');
+        });
+    }
 
-        // --- Core Functions ---
-        window.register = async () => {
-            const name = document.getElementById('regName').value;
-            const email = document.getElementById('regEmail').value;
-            const pass = document.getElementById('regPassword').value;
-            try {
-                const res = await createUserWithEmailAndPassword(auth, email, pass);
-                await setDoc(doc(db, "users", res.user.uid), {
-                    name: name,
-                    email: email,
-                    balance: 1000 // New user bonus
-                });
-            } catch (e) { alert(e.message); }
-        };
+    // --- ACTIONS ---
 
-        window.login = () => {
-            const email = document.getElementById('loginEmail').value;
-            const pass = document.getElementById('loginPassword').value;
-            signInWithEmailAndPassword(auth, email, pass).catch(e => alert(e.message));
-        };
+    window.sendEmail = async () => {
+        const to = document.getElementById('emailTo').value.trim();
+        const subject = document.getElementById('emailSubject').value.trim();
+        const body = document.getElementById('emailBody').value.trim();
 
-        window.logout = () => signOut(auth);
+        if (!to || !subject || !body) return alert("Fill all fields");
 
-        window.sendEmail = async () => {
-            const to = document.getElementById('emailTo').value;
-            const subject = document.getElementById('emailSubject').value;
-            const body = document.getElementById('emailBody').value;
-            
+        try {
             await addDoc(collection(db, "messages"), {
                 from: auth.currentUser.email,
                 to: to,
@@ -225,47 +248,68 @@
                 body: body,
                 date: new Date()
             });
-            alert("Sent!");
-        };
+            alert("Email sent!");
+            switchTab('inbox');
+        } catch (e) { alert(e.message); }
+    };
 
-        window.sendMoney = async () => {
-            const toEmail = document.getElementById('transferTo').value;
-            const amount = parseFloat(document.getElementById('transferAmount').value);
+    window.sendMoney = async () => {
+        const toEmail = document.getElementById('transferTo').value.trim();
+        const amount = parseFloat(document.getElementById('transferAmount').value);
 
-            if (amount <= 0) return alert("Invalid amount");
+        if (!toEmail || isNaN(amount) || amount <= 0) return alert("Enter valid recipient and amount");
+        if (toEmail === auth.currentUser.email) return alert("You cannot send money to yourself");
 
-            try {
-                // We use a transaction to ensure balance integrity
-                await runTransaction(db, async (transaction) => {
-                    // 1. Find recipient by email (Query Firestore)
-                    // Note: In a production app, you'd usually use UIDs, not emails, for speed.
-                    alert("Processing transaction...");
-                    
-                    // This is a simplified logic: In Firestore you'd usually query for the user doc first.
-                    // For this demo, ensure you know the recipient's email is registered.
+        try {
+            // Find recipient user first
+            const q = query(collection(db, "users"), where("email", "==", toEmail));
+            const querySnapshot = await getDocs(q);
+            
+            if (querySnapshot.empty) return alert("User not found!");
+            const recipientDoc = querySnapshot.docs[0];
+
+            // Transactional update: Deduct from sender, add to recipient
+            await runTransaction(db, async (transaction) => {
+                const senderDoc = await transaction.get(doc(db, "users", auth.currentUser.uid));
+                
+                if (senderDoc.data().balance < amount) throw "Insufficient balance!";
+
+                transaction.update(doc(db, "users", auth.currentUser.uid), {
+                    balance: senderDoc.data().balance - amount
+                });
+                transaction.update(doc(db, "users", recipientDoc.id), {
+                    balance: recipientDoc.data().balance + amount
                 });
                 
-                // Simplified non-transaction version for demo clarity:
-                await addDoc(collection(db, "transactions"), {
+                // Record the transaction
+                const txnRef = doc(collection(db, "transactions"));
+                transaction.set(txnRef, {
                     from: auth.currentUser.email,
                     to: toEmail,
                     amount: amount,
                     participants: [auth.currentUser.email, toEmail],
                     date: new Date()
                 });
-                // Note: Real money apps require Cloud Functions to safely update balances.
-            } catch (e) { alert(e.message); }
-        };
+            });
 
-        // --- UI Logic ---
-        window.showRegister = () => { document.getElementById('loginScreen').classList.add('hidden'); document.getElementById('registerScreen').classList.remove('hidden'); }
-        window.showLogin = () => { document.getElementById('registerScreen').classList.add('hidden'); document.getElementById('loginScreen').classList.remove('hidden'); }
-        function showApp() { document.getElementById('loginScreen').classList.add('hidden'); document.getElementById('registerScreen').classList.add('hidden'); document.getElementById('appScreen').classList.remove('hidden'); }
-        window.switchTab = (id) => {
-            document.querySelectorAll('.tab, .tab-content').forEach(el => el.classList.remove('active'));
-            document.getElementById(id + 'Tab').classList.add('active');
-            event.target.classList.add('active');
-        }
-    </script>
+            alert("Transfer successful!");
+            switchTab('transactions');
+        } catch (e) { alert(e); }
+    };
+
+    // --- NAVIGATION HELPERS ---
+    window.showRegister = () => { document.getElementById('loginScreen').classList.add('hidden'); document.getElementById('registerScreen').classList.remove('hidden'); };
+    window.showLogin = () => { document.getElementById('registerScreen').classList.add('hidden'); document.getElementById('loginScreen').classList.remove('hidden'); };
+    function showApp() { document.getElementById('loginScreen').classList.add('hidden'); document.getElementById('registerScreen').classList.add('hidden'); document.getElementById('appScreen').classList.remove('hidden'); }
+    
+    window.switchTab = (tabName) => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.getElementById(tabName + 'Tab').classList.add('active');
+        // Handle logic to find the button that was clicked if possible
+        const buttons = document.querySelectorAll('.tab');
+        buttons.forEach(btn => { if(btn.innerText.toLowerCase().includes(tabName)) btn.classList.add('active'); });
+    };
+</script>
 </body>
 </html>
