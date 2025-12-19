@@ -3,82 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MailCash | Visible Ambition</title>
+    <title>MailCash | Mystery Progression</title>
     <style>
         /* --- CORE BRAND STYLES --- */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background: #0f172a; color: #f8fafc; padding: 20px; overflow-x: hidden; }
         .container { max-width: 600px; margin: 0 auto; position: relative; }
         
+        #notifier { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 16px 32px; border-radius: 12px; font-weight: 700; opacity: 0; transition: 0.4s; z-index: 9999; pointer-events: none; text-align: center; min-width: 280px; }
+        .ntf-err { background: #ef4444; color: white; }
+        .ntf-ok { background: #10b981; color: white; }
+
         .card { background: #1e293b; border-radius: 16px; padding: 25px; border: 1px solid #334155; margin-bottom: 20px; }
         .hidden { display: none !important; }
-        input { width: 100%; padding: 14px; background: #0f172a; border: 1px solid #334155; border-radius: 10px; color: white; margin-bottom: 12px; outline: none; }
+        input, textarea { width: 100%; padding: 14px; background: #0f172a; border: 1px solid #334155; border-radius: 10px; color: white; margin-bottom: 12px; outline: none; font-size: 16px; }
         button { width: 100%; padding: 14px; background: #6366f1; color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; transition: 0.2s; }
         
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; position: relative; }
-        .balance-pill { background: #064e3b; color: #34d399; padding: 10px 20px; border-radius: 50px; font-weight: 800; border: 1px solid #059669; font-size: 18px; }
+        .balance-pill { background: #064e3b; color: #34d399; padding: 10px 20px; border-radius: 50px; font-weight: 800; border: 1px solid #059669; }
+        .pfp-circle { width: 44px; height: 44px; border-radius: 50%; border: 2px solid #6366f1; background: #334155; cursor: pointer; }
         
-        /* TABS */
+        #settingsMenu { position: absolute; right: 0; top: 60px; width: 260px; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #475569; }
+        .settings-btn { background: #334155; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 18px; }
+
         .tabs { display: flex; gap: 8px; margin-bottom: 20px; background: #0f172a; padding: 6px; border-radius: 14px; }
         .tab { flex: 1; text-align: center; padding: 12px; cursor: pointer; border-radius: 10px; color: #94a3b8; font-weight: 700; font-size: 14px; }
         .tab.active { background: #334155; color: white; }
 
-        /* ORB MARKET - MOTIVATION STYLE */
-        .orb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
-        .orb-item { background: #0f172a; border: 1px solid #334155; padding: 15px; border-radius: 12px; position: relative; text-align: center; overflow: hidden; transition: 0.3s; }
-        .orb-visual { width: 50px; height: 50px; border-radius: 50%; margin: 0 auto 10px; box-shadow: 0 0 15px currentColor; filter: brightness(1.2); }
-        
-        /* THE LOCK OVERLAY */
-        .lock-overlay { 
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(4px);
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 10; padding: 10px;
-        }
-        .lock-icon { font-size: 24px; margin-bottom: 5px; }
-        .lock-msg { font-size: 10px; color: #ef4444; font-weight: 800; text-transform: uppercase; }
+        /* MESSAGE STYLING */
+        .msg-card { background: #1e293b; padding: 18px; border-radius: 14px; margin-bottom: 12px; border: 1px solid #334155; border-left: 5px solid #6366f1; }
+        .cash-tag { display: inline-block; background: #064e3b; color: #34d399; padding: 4px 10px; border-radius: 6px; font-size: 12px; margin-top: 10px; font-weight: 800; }
 
+        /* ORB MARKET */
+        .orb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .orb-item { background: #0f172a; border: 1px solid #334155; padding: 15px; border-radius: 12px; position: relative; text-align: center; overflow: hidden; }
+        .orb-visual { width: 50px; height: 50px; border-radius: 50%; margin: 0 auto 10px; box-shadow: 0 0 15px currentColor; filter: brightness(1.2); }
+        .orb-locked { filter: grayscale(1) opacity(0.3); }
+        .mystery-text { font-size: 32px; font-weight: 900; color: #475569; margin-bottom: 10px; display: block; }
+        
         .btn-locked { background: #475569 !important; color: #94a3b8 !important; cursor: not-allowed; }
         .btn-available { background: #10b981 !important; color: white !important; }
-
-        /* CLICKER */
-        .clicker-btn { width: 130px; height: 130px; border-radius: 50%; background: radial-gradient(circle, #6366f1, #4338ca); border: 6px solid #312e81; font-size: 40px; margin: 10px auto; display: block; cursor: pointer; }
-        .popup-anim { position: absolute; color: #34d399; font-weight: 900; animation: floatUpOrb 1.2s ease-out forwards; pointer-events: none; z-index: 10000; }
-        @keyframes floatUpOrb { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-80px); } }
+        
+        .clicker-btn { width: 140px; height: 140px; border-radius: 50%; background: radial-gradient(circle, #6366f1, #4338ca); border: 8px solid #312e81; font-size: 40px; margin: 10px auto; display: block; box-shadow: 0 0 20px rgba(99, 102, 241, 0.4); }
+        .popup-anim { position: absolute; color: #34d399; font-weight: 900; animation: floatUpOrb 1.2s ease-out forwards; pointer-events: none; z-index: 10000; font-size: 18px; }
+        @keyframes floatUpOrb { 0% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -70px); } }
     </style>
 </head>
 <body>
 
+<div id="notifier">Notification</div>
+
 <div class="container">
     <div id="authScreen" class="card">
-        <h2 style="margin-bottom:20px">MailCash</h2>
+        <h2>MailCash</h2>
         <input type="text" id="loginUser" placeholder="Username">
+        <div id="regArea" class="hidden"><input type="email" id="regEmail" placeholder="Email"></div>
         <input type="password" id="authPass" placeholder="Password">
-        <button onclick="handleAuth()">Login / Register</button>
+        <button onclick="handleAuth()">Enter MailCash</button>
+        <p style="text-align: center; margin-top: 15px;"><a href="javascript:void(0)" onclick="isReg=!isReg; document.getElementById('regArea').classList.toggle('hidden')">Switch Mode</a></p>
     </div>
 
     <div id="appScreen" class="hidden">
         <div class="header">
-            <b id="userDisplay" style="font-size: 18px;">@user</b>
-            <div class="balance-pill">$<span id="userBal">0</span></div>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <img id="userPfp" class="pfp-circle" src="" onclick="toggleSettings()">
+                <b id="userDisplay">@user</b>
+            </div>
+            <div style="display:flex; gap:10px; align-items:center;">
+                <div class="balance-pill">$<span id="userBal">0.00</span></div>
+                <button class="settings-btn" onclick="toggleSettings()">⚙️</button>
+            </div>
+
+            <div id="settingsMenu" class="card hidden">
+                <h4>Settings</h4>
+                <button onclick="logout()" style="background: #ef4444; margin-top:10px;">Logout</button>
+            </div>
         </div>
 
         <div class="tabs">
             <div id="tIn" class="tab active" onclick="showTab('inbox')">Inbox</div>
+            <div id="tMsg" class="tab" onclick="showTab('message')">Message</div>
+            <div id="tPay" class="tab" onclick="showTab('transfer')">Transfer</div>
             <div id="tEar" class="tab" onclick="showTab('earn')">Earn</div>
         </div>
 
         <div id="inboxView" class="tab-view">
-            <div id="mailBox" class="card">No new notifications.</div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h3>Inbox</h3>
+                <button onclick="clearInbox()" style="width:auto; padding:5px 12px; background:#ef4444; font-size:11px;">Clear</button>
+            </div>
+            <div id="mailBox">Loading...</div>
+        </div>
+        
+        <div id="messageView" class="tab-view hidden card">
+            <h3>New Message</h3>
+            <input type="text" id="msgTo" placeholder="To @username">
+            <input type="text" id="msgSub" placeholder="Subject">
+            <textarea id="msgBody" rows="4" placeholder="Message content..."></textarea>
+            <button onclick="sendAction('text')">Send</button>
+        </div>
+
+        <div id="transferView" class="tab-view hidden card">
+            <h3>Transfer Cash</h3>
+            <input type="text" id="payTo" placeholder="Recipient @username">
+            <input type="number" id="payAmt" placeholder="Amount ($)">
+            <button onclick="sendAction('money')" style="background:#10b981">Confirm Transfer</button>
         </div>
 
         <div id="earnView" class="tab-view hidden card">
             <div style="text-align:center">
+                <p style="color:#94a3b8">Clicker: $<span id="clickPowerText">1</span></p>
                 <button class="clicker-btn" id="mainClicker">💰</button>
-                <p style="margin-top:10px; color:#94a3b8">Tap the bag for cash</p>
             </div>
-            
-            <h3 style="margin: 25px 0 10px; border-bottom: 1px solid #334155; padding-bottom: 5px;">Orb Market (x1.8 Yield)</h3>
+            <h3 style="margin: 25px 0 10px; border-bottom: 1px solid #334155; padding-bottom: 5px;">Orb Market</h3>
             <div class="orb-grid" id="orbGrid"></div>
         </div>
     </div>
@@ -86,8 +123,8 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, updateDoc, onSnapshot, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, updateDoc, onSnapshot, query, collection, where, getDocs, increment, orderBy, addDoc, runTransaction, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBo2zhESYzv1OChHSAfSb2GLiP6XtI6q1s",
@@ -103,43 +140,44 @@
     const db = getFirestore(app);
 
     let userData = null;
+    let isReg = false;
 
     const ORB_DATA = [
-        { id: 'orb1', name: 'Blue Orb', cost: 500, income: 15, time: 5000, color: '#3b82f6' },
-        { id: 'orb2', name: 'Red Orb', cost: 5000, income: 180, time: 6000, color: '#ef4444' },
-        { id: 'orb3', name: 'Green Orb', cost: 25000, income: 1200, time: 7000, color: '#10b981' },
-        { id: 'orb4', name: 'Gold Orb', cost: 100000, income: 6500, time: 4000, color: '#f59e0b' },
-        { id: 'orb5', name: 'Void Orb', cost: 500000, income: 45000, time: 10000, color: '#8b5cf6' }
+        { id: 'orb1', name: 'Blue Orb', baseCost: 500, baseIncome: 10, time: 5000, color: '#3b82f6' },
+        { id: 'orb2', name: 'Red Orb', baseCost: 5000, baseIncome: 150, time: 7000, color: '#ef4444' },
+        { id: 'orb3', name: 'Green Orb', baseCost: 15000, baseIncome: 450, time: 6000, color: '#10b981' },
+        { id: 'orb4', name: 'Gold Orb', baseCost: 50000, baseIncome: 2000, time: 4000, color: '#f59e0b' },
+        { id: 'orb5', name: 'Purple Orb', baseCost: 150000, baseIncome: 7500, time: 5000, color: '#8b5cf6' }
     ];
 
     onAuthStateChanged(auth, u => {
         if(u) {
             onSnapshot(doc(db, "users", u.uid), d => {
                 userData = d.data();
-                if(!userData) setupUser(u.uid);
-                else {
-                    updateUI();
-                    renderOrbs();
-                    document.getElementById('authScreen').classList.add('hidden');
-                    document.getElementById('appScreen').classList.remove('hidden');
-                }
+                updateUI();
+                renderOrbs();
+                loadInbox();
+                document.getElementById('authScreen').classList.add('hidden');
+                document.getElementById('appScreen').classList.remove('hidden');
             });
+        } else {
+            document.getElementById('appScreen').classList.add('hidden');
+            document.getElementById('authScreen').classList.remove('hidden');
         }
     });
 
-    async function setupUser(uid) {
-        await setDoc(doc(db, "users", uid), { username: "Player", balance: 1000, orbs: {} });
-    }
-
-    function updateUI() {
-        document.getElementById('userBal').innerText = Math.floor(userData.balance).toLocaleString();
-        document.getElementById('userDisplay').innerText = "@" + (userData.username || "User");
-    }
-
     const calcIncome = (orb, owned) => {
         if(owned <= 0) return 0;
-        return Math.floor(orb.income * (Math.pow(1.8, owned) - 1) / (1.8 - 1));
+        return Math.floor(orb.baseIncome * (Math.pow(1.8, owned) - 1) / (1.8 - 1));
     };
+
+    function updateUI() {
+        if(!userData) return;
+        document.getElementById('userBal').innerText = Math.floor(userData.balance).toLocaleString();
+        document.getElementById('userDisplay').innerText = "@" + userData.username;
+        document.getElementById('clickPowerText').innerText = userData.clickPower || 1;
+        document.getElementById('userPfp').src = `https://api.dicebear.com/7.x/identicon/svg?seed=${userData.username}`;
+    }
 
     function renderOrbs() {
         const grid = document.getElementById('orbGrid');
@@ -147,52 +185,46 @@
         
         ORB_DATA.forEach((orb, index) => {
             const owned = userData.orbs?.[orb.id] || 0;
-            const isUnlocked = index === 0 || (userData.orbs?.[ORB_DATA[index-1].id] > 0);
-            const currentPrice = Math.floor(orb.cost * Math.pow(1.5, owned));
-            const canAfford = userData.balance >= currentPrice;
-
+            const prevOrbOwned = index === 0 ? 1 : (userData.orbs?.[ORB_DATA[index-1].id] || 0);
+            
             const div = document.createElement('div');
             div.className = 'orb-item';
-            
-            // Background Content (Visible for Motivation)
-            div.innerHTML = `
-                <div class="orb-visual" style="color:${orb.color}; background:currentColor"></div>
-                <b>${orb.name}</b><br>
-                <small>Owned: ${owned}</small><br>
-                <button class="${canAfford ? 'btn-available' : 'btn-locked'}" style="margin-top:8px">
-                    Buy $${currentPrice.toLocaleString()}
-                </button>
-            `;
+            div.id = `orb-box-${orb.id}`;
 
-            // If Locked, add the Blur Overlay
-            if (!isUnlocked) {
-                const overlay = document.createElement('div');
-                overlay.className = 'lock-overlay';
-                overlay.innerHTML = `
-                    <span class="lock-icon">🔒</span>
-                    <span class="lock-msg">Unlock ${ORB_DATA[index-1].name} First</span>
+            if (prevOrbOwned > 0) {
+                // REVEALED
+                const cost = Math.floor(orb.baseCost * Math.pow(1.5, owned));
+                const currentTotalIncome = calcIncome(orb, owned);
+                div.innerHTML = `
+                    <div class="orb-visual" style="color:${orb.color}; background:currentColor"></div>
+                    <b>${orb.name}</b><br>
+                    <small>Owned: ${owned}</small><br>
+                    <button onclick="buyOrb('${orb.id}', ${cost})" class="buy-btn ${userData.balance >= cost ? 'btn-available' : 'btn-locked'}">
+                        Buy ($${cost.toLocaleString()})
+                    </button>
                 `;
-                div.appendChild(overlay);
             } else {
-                div.querySelector('button').onclick = () => buyOrb(orb.id, currentPrice);
+                // MYSTERY
+                div.innerHTML = `
+                    <span class="mystery-text">?</span>
+                    <b style="color:#64748b">Mystery Orb</b><br>
+                    <small style="color:#ef4444">Unlock ${ORB_DATA[index-1].name} first</small>
+                    <button class="btn-locked" style="margin-top:10px;">LOCKED</button>
+                `;
             }
-
             grid.appendChild(div);
         });
     }
 
-    async function buyOrb(id, cost) {
-        if(userData.balance >= cost) {
-            await updateDoc(doc(db, "users", auth.currentUser.uid), {
-                balance: increment(-cost),
-                [`orbs.${id}`]: increment(1)
-            });
-        }
-    }
+    window.buyOrb = async (id, cost) => {
+        if(userData.balance < cost) return;
+        await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-cost), [`orbs.${id}`]: increment(1) });
+    };
 
     document.getElementById('mainClicker').addEventListener('click', (e) => {
-        spawnPop(e.clientX, e.clientY, "+$1");
-        updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(1) });
+        const p = userData.clickPower || 1;
+        spawnPop(e.clientX, e.clientY, `+$${p}`, true);
+        updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(p) });
     });
 
     window.showTab = (t) => {
@@ -202,28 +234,50 @@
         document.getElementById('t' + t.charAt(0).toUpperCase() + t.slice(1,3)).classList.add('active');
     };
 
-    window.handleAuth = () => signInAnonymously(auth);
+    window.toggleSettings = () => document.getElementById('settingsMenu').classList.toggle('hidden');
+    window.logout = () => signOut(auth);
 
-    // Income Tick
+    window.handleAuth = async () => {
+        const u = document.getElementById('loginUser').value.trim().toLowerCase();
+        const p = document.getElementById('authPass').value;
+        try {
+            if(isReg) {
+                const e = document.getElementById('regEmail').value;
+                const res = await createUserWithEmailAndPassword(auth, e, p);
+                await setDoc(doc(db, "users", res.user.uid), { username: u, email: e, balance: 1000, clickPower: 1, orbs: {} });
+            } else {
+                const s = await getDocs(query(collection(db, "users"), where("username", "==", u)));
+                await signInWithEmailAndPassword(auth, s.docs[0].data().email, p);
+            }
+        } catch (e) { alert("Auth fail"); }
+    };
+
+    const loadInbox = () => {
+        onSnapshot(query(collection(db, "messages"), where("to", "==", userData.username), orderBy("date", "desc")), s => {
+            document.getElementById('mailBox').innerHTML = s.docs.map(d => {
+                const m = d.data();
+                return `<div class="msg-card"><b>@${m.from}</b><p>${m.body}</p></div>`;
+            }).join('') || "Empty.";
+        });
+    };
+
     setInterval(() => {
-        if(!userData) return;
+        if(!userData || !userData.orbs) return;
         ORB_DATA.forEach(orb => {
-            const owned = userData.orbs?.[orb.id] || 0;
+            const owned = userData.orbs[orb.id] || 0;
             if(owned > 0 && !window[orb.id+'_timer']) {
                 window[orb.id+'_timer'] = setInterval(() => {
-                    const latestOwned = userData.orbs?.[orb.id] || 0;
-                    updateDoc(doc(db, "users", auth.currentUser.uid), { 
-                        balance: increment(calcIncome(orb, latestOwned)) 
-                    });
+                    const totalIncome = calcIncome(orb, userData.orbs[orb.id]);
+                    updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(totalIncome) });
                 }, orb.time);
             }
         });
     }, 1000);
 
-    function spawnPop(x, y, text) {
+    function spawnPop(x, y, text, isFixed) {
         const p = document.createElement('div');
         p.className = 'popup-anim'; p.innerText = text;
-        p.style.left = x + 'px'; p.style.top = y + 'px';
+        p.style.position = 'fixed'; p.style.left = x + 'px'; p.style.top = y + 'px';
         document.body.appendChild(p);
         setTimeout(() => p.remove(), 1200);
     }
