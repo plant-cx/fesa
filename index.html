@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MailCash | Scalable Orbs</title>
+    <title>MailCash | Restored Settings</title>
     <style>
-        /* --- RESTORED CORE BRAND STYLES --- */
+        /* --- CORE BRAND STYLES --- */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background: #0f172a; color: #f8fafc; padding: 20px; overflow-x: hidden; }
         .container { max-width: 600px; margin: 0 auto; position: relative; }
@@ -19,15 +19,20 @@
         input, textarea { width: 100%; padding: 14px; background: #0f172a; border: 1px solid #334155; border-radius: 10px; color: white; margin-bottom: 12px; outline: none; font-size: 16px; }
         button { width: 100%; padding: 14px; background: #6366f1; color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; transition: 0.2s; }
         
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-        .balance-pill { background: #064e3b; color: #34d399; padding: 12px 24px; border-radius: 50px; font-weight: 800; border: 1px solid #059669; }
-        .pfp-circle { width: 44px; height: 44px; border-radius: 50%; border: 2px solid #6366f1; background: #334155; }
+        /* HEADER & SETTINGS MENU */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; position: relative; }
+        .balance-pill { background: #064e3b; color: #34d399; padding: 10px 20px; border-radius: 50px; font-weight: 800; border: 1px solid #059669; }
+        .pfp-circle { width: 44px; height: 44px; border-radius: 50%; border: 2px solid #6366f1; background: #334155; cursor: pointer; }
+        
+        #settingsMenu { position: absolute; right: 0; top: 60px; width: 260px; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #475569; }
+        .settings-btn { background: #334155; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 18px; }
 
+        /* TABS */
         .tabs { display: flex; gap: 8px; margin-bottom: 20px; background: #0f172a; padding: 6px; border-radius: 14px; }
         .tab { flex: 1; text-align: center; padding: 12px; cursor: pointer; border-radius: 10px; color: #94a3b8; font-weight: 700; font-size: 14px; }
         .tab.active { background: #334155; color: white; }
 
-        /* MESSAGING */
+        /* MESSAGE/INBOX */
         .msg-card { background: #1e293b; padding: 18px; border-radius: 14px; margin-bottom: 12px; border: 1px solid #334155; border-left: 5px solid #6366f1; }
         .cash-tag { display: inline-block; background: #064e3b; color: #34d399; padding: 4px 10px; border-radius: 6px; font-size: 12px; margin-top: 10px; font-weight: 800; }
 
@@ -52,17 +57,29 @@
         <input type="text" id="loginUser" placeholder="Username">
         <div id="regArea" class="hidden"><input type="email" id="regEmail" placeholder="Email"></div>
         <input type="password" id="authPass" placeholder="Password">
-        <button onclick="handleAuth()">Sign In</button>
-        <p style="text-align: center; margin-top: 15px;"><a href="javascript:void(0)" onclick="isReg=!isReg; document.getElementById('regArea').classList.toggle('hidden')">Switch Mode</a></p>
+        <button onclick="handleAuth()">Enter MailCash</button>
+        <p style="text-align: center; margin-top: 15px;"><a href="javascript:void(0)" onclick="isReg=!isReg; document.getElementById('regArea').classList.toggle('hidden')" style="color:#818cf8; text-decoration:none;">Switch Login/Register</a></p>
     </div>
 
     <div id="appScreen" class="hidden">
         <div class="header">
             <div style="display:flex; align-items:center; gap:10px;">
-                <img id="userPfp" class="pfp-circle" src="">
+                <img id="userPfp" class="pfp-circle" src="" onclick="toggleSettings()">
                 <b id="userDisplay">@user</b>
             </div>
-            <div class="balance-pill">$<span id="userBal">0.00</span></div>
+            <div style="display:flex; gap:10px; align-items:center;">
+                <div class="balance-pill">$<span id="userBal">0.00</span></div>
+                <button class="settings-btn" onclick="toggleSettings()">⚙️</button>
+            </div>
+
+            <div id="settingsMenu" class="card hidden">
+                <h4 style="margin-bottom:10px;">Settings</h4>
+                <input type="text" id="newUsername" placeholder="New @username">
+                <input type="text" id="newPfpUrl" placeholder="PFP Image URL">
+                <button onclick="updateProfile()" style="background: #10b981; margin-bottom:10px; padding:8px;">Save Profile</button>
+                <button onclick="showTab('casino')" style="background: #f59e0b; color: #000; margin-bottom:10px; padding:8px;">🎰 Casino Games</button>
+                <button onclick="logout()" style="background: #ef4444; padding:8px;">Logout</button>
+            </div>
         </div>
 
         <div class="tabs">
@@ -74,46 +91,51 @@
 
         <div id="inboxView" class="tab-view">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                <h3>Your Messages</h3>
-                <button onclick="clearInbox()" style="width:auto; padding:8px 15px; background:#ef4444; font-size:12px;">Clear All</button>
+                <h3>Inbox</h3>
+                <button onclick="clearInbox()" style="width:auto; padding:5px 12px; background:#ef4444; font-size:11px;">Clear</button>
             </div>
             <div id="mailBox">Loading...</div>
         </div>
         
         <div id="messageView" class="tab-view hidden card">
             <h3>New Message</h3>
-            <input type="text" id="msgTo" placeholder="Recipient @username">
+            <input type="text" id="msgTo" placeholder="To @username">
             <input type="text" id="msgSub" placeholder="Subject">
-            <textarea id="msgBody" rows="5" placeholder="Write your message..."></textarea>
-            <button onclick="sendAction('text')">Send Message</button>
+            <textarea id="msgBody" rows="4" placeholder="Message content..."></textarea>
+            <button onclick="sendAction('text')">Send</button>
         </div>
 
         <div id="transferView" class="tab-view hidden card">
-            <h3>Transfer Funds</h3>
+            <h3>Transfer Cash</h3>
             <input type="text" id="payTo" placeholder="Recipient @username">
             <input type="number" id="payAmt" placeholder="Amount ($)">
-            <input type="text" id="payNote" placeholder="Note (Optional)">
-            <button onclick="sendAction('money')" style="background:#10b981">Send Transfer</button>
+            <button onclick="sendAction('money')" style="background:#10b981">Confirm Transfer</button>
         </div>
 
         <div id="earnView" class="tab-view hidden card">
             <div style="text-align:center">
-                <p style="color:#94a3b8">Click Power: $<span id="clickPowerText">1</span></p>
+                <p style="color:#94a3b8">Clicker: $<span id="clickPowerText">1</span></p>
                 <button class="clicker-btn" id="mainClicker">💰</button>
                 <div id="upgradeArea" style="margin-top:10px;">
-                    <p id="nextClickText" style="font-size:12px; color:#94a3b8">Loading...</p>
-                    <button id="upgradeBtn" onclick="buyUpgrade()" class="btn-locked" style="width:200px; margin-top:5px;">Upgrade Clicker</button>
+                    <p id="nextClickText" style="font-size:11px; color:#94a3b8; margin-bottom:5px;">Loading...</p>
+                    <button id="upgradeBtn" onclick="buyUpgrade()" class="btn-locked" style="width:180px; padding:10px;">Upgrade Clicker</button>
                 </div>
             </div>
-            <h3 style="margin: 30px 0 10px; border-bottom: 1px solid #334155; padding-bottom: 5px;">Orb Market (Scales 1.5x)</h3>
+            <h3 style="margin: 25px 0 10px; border-bottom: 1px solid #334155; padding-bottom: 5px;">Orb Market (x1.5 Growth)</h3>
             <div class="orb-grid" id="orbGrid"></div>
+        </div>
+
+        <div id="casinoView" class="tab-view hidden card">
+            <h3>🎰 MailCash Casino</h3>
+            <p style="color:#94a3b8; margin-bottom:20px;">Coming Soon: High-stakes betting!</p>
+            <button onclick="showTab('earn')">Back to Earning</button>
         </div>
     </div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, updateDoc, onSnapshot, query, collection, where, getDocs, increment, orderBy, addDoc, runTransaction, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -150,12 +172,6 @@
         { id: 'orb10', name: 'Solar Orb', baseCost: 2500000, income: 500000, time: 15000, color: '#fbbf24' }
     ];
 
-    const notify = (msg, type = 'ok') => {
-        const n = document.getElementById('notifier');
-        n.innerText = msg; n.className = type === 'ok' ? 'ntf-ok' : 'ntf-err';
-        n.style.opacity = '1'; setTimeout(() => n.style.opacity = '0', 2500);
-    };
-
     onAuthStateChanged(auth, u => {
         if(u) {
             onSnapshot(doc(db, "users", u.uid), d => {
@@ -166,6 +182,9 @@
                 document.getElementById('authScreen').classList.add('hidden');
                 document.getElementById('appScreen').classList.remove('hidden');
             });
+        } else {
+            document.getElementById('appScreen').classList.add('hidden');
+            document.getElementById('authScreen').classList.remove('hidden');
         }
     });
 
@@ -174,20 +193,31 @@
         document.getElementById('userBal').innerText = userData.balance.toLocaleString();
         document.getElementById('userDisplay').innerText = "@" + userData.username;
         document.getElementById('clickPowerText').innerText = userData.clickPower || 1;
-        document.getElementById('userPfp').src = `https://api.dicebear.com/7.x/identicon/svg?seed=${userData.username}`;
+        document.getElementById('userPfp').src = userData.pfp || `https://api.dicebear.com/7.x/identicon/svg?seed=${userData.username}`;
         
-        const currentPower = userData.clickPower || 1;
-        const nextIdx = UPGRADES.findIndex(u => u.power === currentPower) + 1;
+        const nextIdx = UPGRADES.findIndex(u => u.power === (userData.clickPower || 1)) + 1;
         const upBtn = document.getElementById('upgradeBtn');
         if (nextIdx < UPGRADES.length) {
             const next = UPGRADES[nextIdx];
             document.getElementById('nextClickText').innerText = `Next: $${next.power}/click (Cost: $${next.cost.toLocaleString()})`;
             upBtn.className = userData.balance >= next.cost ? 'btn-available' : 'btn-locked';
         } else {
-            document.getElementById('nextClickText').innerText = "Max Clicker Level";
+            document.getElementById('nextClickText').innerText = "Max Level";
             upBtn.classList.add('hidden');
         }
     }
+
+    window.toggleSettings = () => document.getElementById('settingsMenu').classList.toggle('hidden');
+
+    window.updateProfile = async () => {
+        const name = document.getElementById('newUsername').value.trim().toLowerCase();
+        const pfp = document.getElementById('newPfpUrl').value.trim();
+        const updateObj = {};
+        if(name) updateObj.username = name;
+        if(pfp) updateObj.pfp = pfp;
+        await updateDoc(doc(db, "users", auth.currentUser.uid), updateObj);
+        toggleSettings();
+    };
 
     document.getElementById('mainClicker').addEventListener('click', (e) => {
         const p = userData.clickPower || 1;
@@ -196,8 +226,7 @@
     });
 
     window.buyUpgrade = async () => {
-        const currentPower = userData.clickPower || 1;
-        const nextIdx = UPGRADES.findIndex(u => u.power === currentPower) + 1;
+        const nextIdx = UPGRADES.findIndex(u => u.power === (userData.clickPower || 1)) + 1;
         if (nextIdx < UPGRADES.length) {
             const next = UPGRADES[nextIdx];
             if (userData.balance >= next.cost) {
@@ -211,20 +240,17 @@
         grid.innerHTML = '';
         ORB_DATA.forEach(orb => {
             const owned = userData.orbs?.[orb.id] || 0;
-            // SCALE LOGIC: Price = baseCost * (1.5 ^ owned)
-            const currentCost = Math.floor(orb.baseCost * Math.pow(1.5, owned));
-            const canAfford = userData.balance >= currentCost;
-            
+            const cost = Math.floor(orb.baseCost * Math.pow(1.5, owned));
             const div = document.createElement('div');
             div.className = 'orb-item';
             div.id = `orb-box-${orb.id}`;
             div.innerHTML = `
                 <div class="orb-visual" style="color:${orb.color}; background:currentColor"></div>
                 <b>${orb.name}</b><br>
-                <small>$${orb.income.toLocaleString()} / ${orb.time/1000}s</small><br>
+                <small>$${orb.income} / ${orb.time/1000}s</small><br>
                 <small>Owned: ${owned}</small>
-                <button onclick="buyOrb('${orb.id}', ${currentCost})" class="buy-btn ${canAfford ? 'btn-available' : 'btn-locked'}">
-                    Buy ($${currentCost.toLocaleString()})
+                <button onclick="buyOrb('${orb.id}', ${cost})" class="buy-btn ${userData.balance >= cost ? 'btn-available' : 'btn-locked'}">
+                    Buy ($${cost.toLocaleString()})
                 </button>
             `;
             grid.appendChild(div);
@@ -233,17 +259,21 @@
 
     window.buyOrb = async (id, cost) => {
         if(userData.balance < cost) return;
-        await updateDoc(doc(db, "users", auth.currentUser.uid), {
-            balance: increment(-cost),
-            [`orbs.${id}`]: increment(1)
-        });
+        await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-cost), [`orbs.${id}`]: increment(1) });
+    };
+
+    window.showTab = (t) => {
+        document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
+        document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+        document.getElementById(t + 'View').classList.remove('hidden');
+        document.getElementById('t' + t.charAt(0).toUpperCase() + t.slice(1,3)).classList.add('active');
+        document.getElementById('settingsMenu').classList.add('hidden');
     };
 
     window.clearInbox = async () => {
         const q = query(collection(db, "messages"), where("to", "==", userData.username));
         const snap = await getDocs(q);
         snap.forEach(async d => await deleteDoc(doc(db, "messages", d.id)));
-        notify("Inbox Cleared");
     };
 
     window.sendAction = async (type) => {
@@ -256,7 +286,7 @@
                 await runTransaction(db, async t => {
                     const myRef = doc(db, "users", auth.currentUser.uid), theirRef = doc(db, "users", snap.docs[0].id);
                     const myB = (await t.get(myRef)).data().balance;
-                    if (myB < amt) throw new Error("Funds low");
+                    if (myB < amt) throw new Error("Low funds");
                     t.update(myRef, { balance: myB - amt });
                     t.update(theirRef, { balance: (await t.get(theirRef)).data().balance + amt });
                 });
@@ -264,11 +294,11 @@
             await addDoc(collection(db, "messages"), { 
                 to, from: userData.username, 
                 subject: type === 'text' ? document.getElementById('msgSub').value : "Payment",
-                body: type === 'text' ? document.getElementById('msgBody').value : (document.getElementById('payNote').value || "Funds sent."),
+                body: type === 'text' ? document.getElementById('msgBody').value : "Funds transfer.",
                 cash: amt, date: new Date() 
             });
-            notify("Sent!"); showTab('inbox');
-        } catch (e) { notify(e.message, 'err'); }
+            showTab('inbox');
+        } catch (e) { alert(e.message); }
     };
 
     const loadInbox = () => {
@@ -276,16 +306,13 @@
             document.getElementById('mailBox').innerHTML = s.docs.map(d => {
                 const m = d.data();
                 return `<div class="msg-card">
-                    <b>@${m.from}</b>
-                    <h4 style="margin:5px 0">${m.subject}</h4>
-                    <p style="color:#cbd5e1; font-size:14px;">${m.body}</p>
-                    ${m.cash > 0 ? `<span class="cash-tag">+$${m.cash.toLocaleString()}</span>` : ''}
+                    <b>@${m.from}</b><br><small>${m.subject}</small><p>${m.body}</p>
+                    ${m.cash > 0 ? `<span class="cash-tag">+$${m.cash}</span>` : ''}
                 </div>`;
             }).join('') || "Inbox empty.";
         });
     };
 
-    // Income Loop
     setInterval(() => {
         if(!userData || !userData.orbs) return;
         ORB_DATA.forEach(orb => {
@@ -293,10 +320,12 @@
                 window[orb.id+'_timer'] = setInterval(() => {
                     const count = userData.orbs[orb.id] || 0;
                     const total = orb.income * count;
-                    const el = document.getElementById(`orb-box-${orb.id}`);
-                    if(el && document.getElementById('tEar').classList.contains('active')) {
-                        const rect = el.getBoundingClientRect();
-                        spawnPop(rect.left + rect.width/2, rect.top + 20, `+$${total}`);
+                    if(document.getElementById('tEar').classList.contains('active')) {
+                        const el = document.getElementById(`orb-box-${orb.id}`);
+                        if(el) {
+                            const rect = el.getBoundingClientRect();
+                            spawnPop(rect.left + rect.width/2, rect.top + 20, `+$${total}`);
+                        }
                     }
                     updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(total) });
                 }, orb.time);
@@ -314,13 +343,7 @@
         setTimeout(() => p.remove(), 1200);
     }
 
-    window.showTab = (t) => {
-        document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
-        document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
-        document.getElementById(t + 'View').classList.remove('hidden');
-        document.getElementById('t' + t.charAt(0).toUpperCase() + t.slice(1,3)).classList.add('active');
-    };
-
+    window.logout = () => signOut(auth);
     window.handleAuth = async () => {
         const u = document.getElementById('loginUser').value.trim().toLowerCase();
         const p = document.getElementById('authPass').value;
@@ -333,7 +356,7 @@
                 const s = await getDocs(query(collection(db, "users"), where("username", "==", u)));
                 await signInWithEmailAndPassword(auth, s.docs[0].data().email, p);
             }
-        } catch (e) { notify("Error", "err"); }
+        } catch (e) { alert("Auth fail"); }
     };
 </script>
 </body>
