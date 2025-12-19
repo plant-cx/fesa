@@ -391,17 +391,34 @@
     };
 
     window.sendAction = async (type) => {
-        const to = document.getElementById(type === 'text' ? 'msgTo' : 'payTo').value.trim().toLowerCase();
-        const amt = type === 'money' ? parseFloat(document.getElementById('payAmt').value || 0) : 0;
+        const toInput = document.getElementById(type === 'text' ? 'msgTo' : 'payTo');
+        const to = toInput.value.trim().toLowerCase();
+        const amtInput = document.getElementById('payAmt');
+        const amt = type === 'money' ? parseFloat(amtInput.value || 0) : 0;
+        const bodyInput = document.getElementById('msgBody');
+        
+        if (!to) return alert("ENTER USERNAME");
+
         const s = await getDocs(query(collection(db, "users"), where("username", "==", to)));
         if(s.empty) return alert("USER NOT FOUND");
+        
         if(type === 'money') {
             if(userData.balance < amt) return alert("NO CASH");
             await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-amt) });
             await updateDoc(doc(db, "users", s.docs[0].id), { balance: increment(amt) });
         }
-        await addDoc(collection(db, "messages"), { to, from: userData.username, body: type === 'money' ? `Sent $${amt}` : document.getElementById('msgBody').value, date: Date.now() });
+        
+        await addDoc(collection(db, "messages"), { 
+            to, 
+            from: userData.username, 
+            body: type === 'money' ? `Sent $${amt}` : bodyInput.value, 
+            date: Date.now() 
+        });
+        
         alert("SENT!");
+        toInput.value = "";
+        if(amtInput) amtInput.value = "";
+        if(bodyInput) bodyInput.value = "";
     };
 
     window.showTab = (t) => {
