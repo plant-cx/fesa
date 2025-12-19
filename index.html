@@ -271,7 +271,7 @@
             const owned = userData.orbs?.[orb.id] || 0;
             const isUnlocked = index === 0 || (userData.orbs?.[dataList[index-1].id] > 0);
             const cost = Math.floor(orb.baseCost * Math.pow(1.3, owned));
-            const isMaxed = owned >= 50; // MAX CAP CHANGED TO 50
+            const isMaxed = owned >= 50;
 
             const currentInc = calcIncome(orb, owned);
             const ips = currentInc / (orb.time / 1000);
@@ -394,15 +394,20 @@
     window.handleAuth = async () => {
         const userNm = document.getElementById('loginUser').value.trim().toLowerCase();
         const pass = document.getElementById('authPass').value;
+        if(!userNm || !pass) return alert("Enter Username and Password");
+
         try {
             if(isReg) {
-                const email = document.getElementById('regEmail').value;
+                const email = document.getElementById('regEmail').value.trim();
+                if(!email) return alert("Email Required");
                 const res = await createUserWithEmailAndPassword(auth, email, pass);
                 await setDoc(doc(db, "users", res.user.uid), { username: userNm, email, balance: 1000, orbs: {}, clickLevel: 1, totalClicks: 0, pfpSeed: userNm, mysteryOrbs: [] });
             } else {
-                const s = await getDocs(query(collection(db, "users"), where("username", "==", userNm)));
-                if(s.empty) throw new Error("USER NOT FOUND");
-                await signInWithEmailAndPassword(auth, s.docs[0].data().email, pass);
+                const userQuery = query(collection(db, "users"), where("username", "==", userNm));
+                const querySnapshot = await getDocs(userQuery);
+                if(querySnapshot.empty) throw new Error("USER NOT FOUND");
+                const userDataFromDB = querySnapshot.docs[0].data();
+                await signInWithEmailAndPassword(auth, userDataFromDB.email, pass);
             }
         } catch (e) { alert(e.message); }
     };
