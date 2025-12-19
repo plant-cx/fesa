@@ -244,7 +244,7 @@
         if(isReg) {
             const e = document.getElementById('regEmail').value;
             const res = await createUserWithEmailAndPassword(auth, e, p);
-            await setDoc(doc(db, "users", res.user.uid), { username: u, email: e, balance: 2000, clickPower: 1, orbs: {} });
+            await setDoc(doc(db, "users", res.user.uid), { username: u, email: e, balance: 1000, clickPower: 10, orbs: {} });
         } else {
             const s = await getDocs(query(collection(db, "users"), where("username", "==", u)));
             await signInWithEmailAndPassword(auth, s.docs[0].data().email, p);
