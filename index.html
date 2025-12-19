@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MailCash | Ultimate Edition Fixed</title>
+    <title>MailCash | Ultimate Edition</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background: #0f172a; color: #f8fafc; padding: 20px; overflow-x: hidden; font-size: 18px; }
@@ -30,12 +30,16 @@
         .orb-item { background: #0f172a; border: 2px solid #334155; padding: 20px; border-radius: 16px; position: relative; text-align: center; min-height: 240px; display: flex; flex-direction: column; justify-content: space-between; }
         .orb-visual { width: 65px; height: 65px; border-radius: 50%; margin: 0 auto 12px; box-shadow: 0 0 20px currentColor; filter: brightness(1.3); }
         
+        .progress-bg { width: 100%; height: 6px; background: #1e293b; border-radius: 10px; margin-top: 12px; overflow: hidden; }
+        .progress-fill { height: 100%; background: #6366f1; width: 0%; transition: width 0.1s linear; }
+
         .buy-btn { font-size: 14px; padding: 12px; margin-top: 10px; }
         .btn-locked { background: #334155 !important; color: #64748b !important; cursor: not-allowed; border: 1px solid transparent; }
         .btn-available { background: #10b981 !important; color: white !important; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3); }
         .btn-sell { background: #f59e0b !important; color: white !important; font-size: 12px; margin-top: 5px; }
 
         .orb-stats-top { position: absolute; top: 10px; left: 10px; display: flex; gap: 6px; align-items: center; z-index: 5; }
+        .sell-btn { background: #ef4444; color: white; border: none; border-radius: 6px; padding: 4px 10px; font-size: 11px; font-weight: 900; cursor: pointer; }
         .owned-badge { background: #1e293b; color: #f8fafc; font-size: 13px; padding: 4px 10px; border-radius: 6px; font-weight: 900; border: 2px solid #475569; }
         
         .clicker-btn { width: 130px; height: 130px; border-radius: 50%; background: radial-gradient(circle, #6366f1, #4338ca); border: 10px solid #312e81; font-size: 45px; margin: 0 auto 15px; display: block; cursor: pointer; transition: transform 0.1s; box-shadow: 0 0 30px rgba(99, 102, 241, 0.4); }
@@ -49,9 +53,18 @@
         .chest-gold { background: linear-gradient(135deg, #b45309, #d97706); border-color: #fbbf24; }
         
         .listing-seller { font-size: 12px; color: #94a3b8; font-weight: 700; margin-top: 5px; }
+
+        .notif-banner {
+            position: fixed; top: 25px; left: -400px; width: 320px; background: #6366f1; color: white; padding: 20px; border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5); z-index: 99999; display: flex; align-items: center; gap: 15px; font-weight: 800;
+            transition: left 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .notif-banner.active { left: 25px; }
     </style>
 </head>
 <body>
+
+<div id="notifBanner" class="notif-banner"><div style="width:12px;height:12px;background:#10b981;border-radius:50%"></div><span id="notifText">@user sent mail!</span></div>
 
 <div class="container">
     <div id="authScreen" class="card">
@@ -100,19 +113,21 @@
 
         <div id="markV2View" class="tab-view hidden">
             <h3 style="text-align:center; color:#10b981; margin-bottom:20px;">COMMUNAL MARKET V2</h3>
+            <p style="text-align:center; font-size:14px; color:#94a3b8; margin-bottom:20px;">Buy unique orbs listed by other players worldwide.</p>
             <div id="globalListings" class="orb-grid"></div>
         </div>
 
         <div id="marketplaceView" class="tab-view hidden">
             <div class="chest-row">
-                <div class="chest-card chest-bronze"><h3>BRONZE</h3><p>$1,000</p><button onclick="buyChest('bronze')">BUY</button></div>
-                <div class="chest-card chest-silver"><h3>SILVER</h3><p>$5,000</p><button onclick="buyChest('silver')">BUY</button></div>
-                <div class="chest-card chest-gold"><h3>GOLD</h3><p>$20,000</p><button onclick="buyChest('gold')">BUY</button></div>
+                <div class="chest-card chest-bronze"><h3>BRONZE</h3><p>$1,000</p><button onclick="buyChest('bronze')" id="btn-bronze">BUY</button></div>
+                <div class="chest-card chest-silver"><h3>SILVER</h3><p>$5,000</p><button onclick="buyChest('silver')" id="btn-silver">BUY</button></div>
+                <div class="chest-card chest-gold"><h3>GOLD</h3><p>$20,000</p><button onclick="buyChest('gold')" id="btn-gold">BUY</button></div>
             </div>
             <div id="marketContent"></div>
         </div>
 
         <div id="inboxView" class="tab-view hidden">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;"><h3>INBOX</h3><button onclick="clearInbox()" style="width:auto; padding:8px 20px; background:#ef4444; font-size:14px;">CLEAR</button></div>
             <div id="mailBox">Loading...</div>
         </div>
 
@@ -129,6 +144,9 @@
         </div>
         
         <div id="settingsMenu" class="card hidden">
+            <h3 style="margin-bottom:20px;">Settings</h3>
+            <input type="text" id="setNewUser" placeholder="New Username">
+            <button onclick="updateProfile()" style="background:#10b981; margin-bottom:15px;">Update Profile</button>
             <button onclick="logout()" style="background:#ef4444;">Logout</button>
         </div>
     </div>
@@ -137,7 +155,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, updateDoc, onSnapshot, query, collection, where, getDocs, increment, orderBy, addDoc, deleteDoc, arrayUnion, arrayRemove, runTransaction } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, updateDoc, onSnapshot, query, collection, where, getDocs, increment, orderBy, addDoc, deleteDoc, limit, arrayUnion, arrayRemove, runTransaction } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = { apiKey: "AIzaSyBo2zhESYzv1OChHSAfSb2GLiP6XtI6q1s", authDomain: "mailcash-3da79.firebaseapp.com", projectId: "mailcash-3da79", storageBucket: "mailcash-3da79.firebasestorage.app", messagingSenderId: "9602664972", appId: "1:9602664972:web:2ded4f3a7f583558513c29" };
     const app = initializeApp(firebaseConfig);
@@ -146,15 +164,19 @@
 
     let userData = null;
     let isReg = false;
+    let initialMailLoad = true;
 
     const ORB_DATA = [
-        { id: 'orb1', name: 'Blue Orb', baseCost: 350, baseInc: 15, color: '#3b82f6' },
-        { id: 'orb2', name: 'Red Orb', baseCost: 3000, baseInc: 200, color: '#ef4444' },
-        { id: 'orb3', name: 'Green Orb', baseCost: 15000, baseInc: 850, color: '#10b981' }
+        { id: 'orb1', name: 'Blue Orb', baseCost: 350, baseInc: 15, time: 5000, color: '#3b82f6' },
+        { id: 'orb2', name: 'Red Orb', baseCost: 3000, baseInc: 200, time: 7000, color: '#ef4444' },
+        { id: 'orb3', name: 'Green Orb', baseCost: 15000, baseInc: 850, time: 6000, color: '#10b981' },
+        { id: 'orb4', name: 'Gold Orb', baseCost: 50000, baseInc: 3500, time: 4000, color: '#f59e0b' },
+        { id: 'orb5', name: 'Purple Orb', baseCost: 150000, baseInc: 12000, time: 5000, color: '#8b5cf6' }
     ];
 
     const MARKET_ORB_DATA = [
-        { id: 'h_orb1', name: 'Diamond Orb', baseCost: 1000000, baseInc: 50000, color: '#e2e8f0' }
+        { id: 'h_orb1', name: 'Diamond Orb', baseCost: 100000000, baseInc: 50000000, time: 10000, color: '#e2e8f0' },
+        { id: 'h_orb2', name: 'Emerald Orb', baseCost: 500000000, baseInc: 250000000, time: 12000, color: '#10b981' }
     ];
 
     onAuthStateChanged(auth, u => {
@@ -171,7 +193,7 @@
                     document.getElementById('appScreen').classList.remove('hidden');
                 }
             });
-            // Market Listener
+            // Global Market Listener
             onSnapshot(query(collection(db, "global_market"), orderBy("date", "desc")), s => {
                 const grid = document.getElementById('globalListings');
                 grid.innerHTML = s.docs.map(docSnap => {
@@ -179,27 +201,29 @@
                     return `<div class="orb-item">
                         <div class="orb-visual" style="color:${item.color}; background:currentColor"></div>
                         <b>${item.name}</b>
-                        <div style="font-size:14px; margin:5px 0; color:#10b981; font-weight:900;">+$${item.inc}/s</div>
+                        <div style="font-size:14px; margin:5px 0; color:#10b981; font-weight:900;">+$${item.inc}/25s</div>
                         <div class="listing-seller">Seller: @${item.seller}</div>
                         <button onclick="buyFromMarket('${docSnap.id}')" class="buy-btn ${userData.balance >= item.price ? 'btn-available' : 'btn-locked'}">BUY $${item.price.toLocaleString()}</button>
                     </div>`;
-                }).join('') || `<p style="grid-column:1/-1;text-align:center;">Market is empty.</p>`;
+                }).join('') || `<div style="grid-column: 1/-1; text-align:center; padding:40px; color:#475569;">No orbs for sale yet.</div>`;
             });
         }
     });
 
     const updateUI = () => {
-        document.getElementById('userBal').innerText = Math.floor(userData.balance).toLocaleString();
+        if (!userData) return;
+        document.getElementById('userBal').innerText = Math.floor(userData.balance || 0).toLocaleString();
         document.getElementById('userDisplay').innerText = "@" + userData.username;
         document.getElementById('userPfp').src = `https://api.dicebear.com/7.x/identicon/svg?seed=${userData.username}`;
-        document.getElementById('clickPowerVal').innerText = (userData.clickLevel || 1);
+        document.getElementById('clickPowerVal').innerText = [1, 5, 25, 50, 100][(userData.clickLevel || 1)-1] || 500;
         document.getElementById('clickCost').innerText = ((userData.clickLevel || 1) * 200).toLocaleString();
     };
 
     function renderOrbs(gridId, dataList) {
+        if (!userData) return;
         const grid = document.getElementById(gridId);
         grid.innerHTML = '';
-        dataList.forEach(orb => {
+        dataList.forEach((orb, index) => {
             const owned = userData.orbs?.[orb.id] || 0;
             const cost = Math.floor(orb.baseCost * Math.pow(1.3, owned));
             grid.innerHTML += `<div class="orb-item">
@@ -213,98 +237,142 @@
 
     function renderLootSection() {
         const cont = document.getElementById('marketContent');
-        cont.innerHTML = '<div class="section-header">YOUR UNBOXED ORBS</div><div class="orb-grid" id="myOrbsGrid"></div>';
-        const grid = document.getElementById('myOrbsGrid');
-        (userData.mysteryOrbs || []).forEach((mOrb, idx) => {
-            const div = document.createElement('div');
-            div.className = 'orb-item';
-            div.innerHTML = `<div class="orb-visual" style="color:${mOrb.color}; background:currentColor"></div><b>${mOrb.name}</b><p style="color:#10b981">+$${mOrb.inc}/s</p><button onclick="listToMarket(${idx})" class="buy-btn btn-sell">SELL TO MARKET</button>`;
-            grid.appendChild(div);
+        cont.innerHTML = '';
+        const tiers = ['bronze', 'silver', 'gold'];
+        tiers.forEach(tier => {
+            const orbs = (userData.mysteryOrbs || []).filter(o => o.tier === tier);
+            if(orbs.length > 0) {
+                cont.innerHTML += `<div class="section-header">${tier.toUpperCase()} LOOT</div><div class="orb-grid" id="market-${tier}"></div>`;
+                setTimeout(() => {
+                    const grid = document.getElementById(`market-${tier}`);
+                    orbs.forEach((mOrb, idx) => {
+                        const div = document.createElement('div');
+                        div.className = 'orb-item';
+                        div.innerHTML = `<div class="orb-visual" style="color:${mOrb.color}; background:currentColor"></div><b>${mOrb.name}</b><div style="font-size:14px; margin:8px 0; color:#10b981">+$${mOrb.inc}/25s</div><button onclick="listToMarket(${userData.mysteryOrbs.indexOf(mOrb)})" class="buy-btn btn-sell">SELL TO MARKET</button>`;
+                        grid.appendChild(div);
+                    });
+                }, 0);
+            }
         });
     }
 
-window.listToMarket = async (index) => {
-    const orb = userData.mysteryOrbs[index];
-    const price = parseInt(prompt(`Sell ${orb.name} for?`, "1000"));
-    
-    if(!price || price <= 0) return;
+    window.listToMarket = async (index) => {
+        const orb = userData.mysteryOrbs[index];
+        const price = parseInt(prompt(`Listing ${orb.name}. How much do you want to sell it for?`, "1000"));
+        if(isNaN(price) || price <= 0) return alert("Invalid price.");
 
-    try {
-        // 1. First, create the listing in the global market
-        const marketRef = await addDoc(collection(db, "global_market"), { 
-            name: orb.name,
-            inc: orb.inc,
-            color: orb.color,
-            tier: orb.tier,
-            instanceId: orb.instanceId || Math.random(), // Keep the unique ID
-            price: price, 
-            seller: userData.username, 
-            sellerUid: auth.currentUser.uid, 
-            date: Date.now() 
-        });
-
-        // 2. ONLY if the market listing worked, remove it from the user's inventory
-        if (marketRef.id) {
-            await updateDoc(doc(db, "users", auth.currentUser.uid), { 
-                mysteryOrbs: arrayRemove(orb) 
+        try {
+            await addDoc(collection(db, "global_market"), {
+                ...orb,
+                price: price,
+                seller: userData.username,
+                sellerUid: auth.currentUser.uid,
+                date: Date.now()
             });
-            alert("Orb listed successfully!");
+            await updateDoc(doc(db, "users", auth.currentUser.uid), {
+                mysteryOrbs: arrayRemove(orb)
+            });
+            alert("Listed on Marketplace V2!");
             showTab('markV2');
-        }
-    } catch (e) { 
-        console.error(e);
-        alert("Error listing orb: " + e.message); 
-    }
-};
+        } catch (e) { alert("Error listing: " + e.message); }
+    };
+
     window.buyFromMarket = async (listingId) => {
         try {
             await runTransaction(db, async (transaction) => {
-                const lRef = doc(db, "global_market", listingId);
-                const lSnap = await transaction.get(lRef);
-                const item = lSnap.data();
-                if (item.sellerUid === auth.currentUser.uid) throw "Can't buy your own.";
-                if (userData.balance < item.price) throw "No money.";
+                const listingRef = doc(db, "global_market", listingId);
+                const listingSnap = await transaction.get(listingRef);
+                if (!listingSnap.exists()) throw "Listing no longer available.";
+                
+                const item = listingSnap.data();
+                if (item.sellerUid === auth.currentUser.uid) throw "You can't buy your own orb.";
+                if (userData.balance < item.price) throw "Insufficient funds.";
 
-                transaction.update(doc(db, "users", auth.currentUser.uid), { 
+                const sellerRef = doc(db, "users", item.sellerUid);
+                const buyerRef = doc(db, "users", auth.currentUser.uid);
+
+                transaction.update(buyerRef, { 
                     balance: increment(-item.price),
-                    mysteryOrbs: arrayUnion({ name: item.name, inc: item.inc, color: item.color, tier: item.tier, instanceId: item.instanceId || Math.random() })
+                    mysteryOrbs: arrayUnion({ name: item.name, inc: item.inc, color: item.color, tier: item.tier, lastClaim: Date.now() })
                 });
-                transaction.update(doc(db, "users", item.sellerUid), { balance: increment(item.price) });
-                transaction.delete(lRef);
+                transaction.update(sellerRef, { balance: increment(item.price) });
+                transaction.delete(listingRef);
             });
-            alert("Bought!");
+            alert("Orb Purchased!");
         } catch (e) { alert(e); }
     };
 
     window.buyChest = async (tier) => {
-        const cost = { bronze: 1000, silver: 5000, gold: 20000 }[tier];
-        if(userData.balance < cost) return alert("Poor.");
-        const orb = { name: tier.toUpperCase() + " Orb", inc: { bronze: 50, silver: 250, gold: 750 }[tier], color: "#6366f1", tier, instanceId: Math.random() };
-        await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-cost), mysteryOrbs: arrayUnion(orb) });
+        const prices = { bronze: 1000, silver: 5000, gold: 20000 };
+        if(userData.balance < prices[tier]) return alert("Not enough cash!");
+        const adjectives = ["Ancient", "Mystic", "Neon", "Void"];
+        const elements = ["Plasma", "Crystal", "Lava", "Storm"];
+        const colors = ["#ef4444", "#3b82f6", "#10b981", "#f59e0b"];
+        const orb = { 
+            name: adjectives[Math.floor(Math.random()*4)] + " " + elements[Math.floor(Math.random()*4)] + " Orb",
+            inc: tier === 'bronze' ? 50 : (tier === 'silver' ? 250 : 750),
+            color: colors[Math.floor(Math.random()*4)],
+            tier: tier,
+            lastClaim: Date.now()
+        };
+        await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-prices[tier]), mysteryOrbs: arrayUnion(orb) });
     };
-
-    // Earnings Engine
-    setInterval(() => {
-        if(!userData) return;
-        let total = 0;
-        ORB_DATA.forEach(o => total += (userData.orbs?.[o.id] || 0) * (o.baseInc / 10));
-        (userData.mysteryOrbs || []).forEach(o => total += (o.inc / 10));
-        if(total > 0) updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(total) });
-    }, 1000);
 
     window.buyOrb = async (id, cost) => { if(userData.balance >= cost) await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-cost), [`orbs.${id}`]: increment(1) }); };
-    window.upgradeClicker = async () => { const cost = (userData.clickLevel || 1) * 200; if(userData.balance >= cost) await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-cost), clickLevel: increment(1) }); };
+    
+    document.getElementById('mainClicker').addEventListener('click', () => {
+        const p = [1, 5, 25, 50, 100][(userData.clickLevel || 1)-1] || 500;
+        updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(p) });
+    });
+
+    window.handleAuth = async () => {
+        const userNm = document.getElementById('loginUser').value.trim().toLowerCase();
+        const pass = document.getElementById('authPass').value;
+        try {
+            if(isReg) {
+                const res = await createUserWithEmailAndPassword(auth, document.getElementById('regEmail').value, pass);
+                await setDoc(doc(db, "users", res.user.uid), { username: userNm, email: document.getElementById('regEmail').value, balance: 1000, orbs: {}, clickLevel: 1, mysteryOrbs: [] });
+            } else {
+                const s = await getDocs(query(collection(db, "users"), where("username", "==", userNm)));
+                if(s.empty) throw new Error("USER NOT FOUND");
+                await signInWithEmailAndPassword(auth, s.docs[0].data().email, pass);
+            }
+        } catch (e) { alert(e.message); }
+    };
+
+    window.sendAction = async (type) => {
+        const toVal = document.getElementById(type === 'text' ? 'msgTo' : 'payTo').value.trim().toLowerCase().replace('@', '');
+        const userQuery = query(collection(db, "users"), where("username", "==", toVal));
+        const s = await getDocs(userQuery);
+        if (s.empty) return alert("User not found.");
+        const rUid = s.docs[0].id;
+        if (type === 'money') {
+            const amt = parseFloat(document.getElementById('payAmt').value);
+            if (userData.balance < amt) return alert("Poor.");
+            await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-amt) });
+            await updateDoc(doc(db, "users", rUid), { balance: increment(amt) });
+        }
+        await addDoc(collection(db, "messages"), { to: toVal, from: userData.username, body: type === 'money' ? `Sent $${document.getElementById('payAmt').value}` : document.getElementById('msgBody').value, date: Date.now() });
+        alert("Sent!");
+    };
+
     window.showTab = (t) => {
         document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
-        document.getElementById(t + 'View').classList.remove('hidden');
         document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
-        document.getElementById({earn:'tEar', markV2:'tV2', marketplace:'tMkt', inbox:'tIn', message:'tMsg', transfer:'tPay'}[t]).classList.add('active');
+        document.getElementById(t + 'View').classList.remove('hidden');
+        const m = {earn:'tEar', markV2:'tV2', marketplace:'tMkt', inbox:'tIn', message:'tMsg', transfer:'tPay'};
+        document.getElementById(m[t]).classList.add('active');
     };
+
+    const loadInbox = () => {
+        onSnapshot(query(collection(db, "messages"), where("to", "==", userData.username), orderBy("date", "desc")), s => {
+            document.getElementById('mailBox').innerHTML = s.docs.map(d => `<div class="msg-card"><b>@${d.data().from}</b><p>${d.data().body}</p></div>`).join('') || "NO MESSAGES.";
+        });
+    };
+
     window.toggleSettings = () => document.getElementById('settingsMenu').classList.toggle('hidden');
-    window.toggleAuthMode = () => { isReg = !isReg; document.getElementById('regArea').classList.toggle('hidden'); };
+    window.toggleAuthMode = () => { isReg = !isReg; document.getElementById('regArea').classList.toggle('hidden', !isReg); };
     window.logout = () => signOut(auth).then(() => location.reload());
-    window.handleAuth = async () => { /* Same as your version */ };
-    window.loadInbox = () => { /* Same as your version */ };
 </script>
 </body>
 </html>
