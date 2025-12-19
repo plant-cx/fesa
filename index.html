@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MailCash | Ultimate Edition</title>
+    <title>MailCash | Marketplace Edition</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background: #0f172a; color: #f8fafc; padding: 20px; overflow-x: hidden; }
@@ -49,40 +49,9 @@
         .clicker-btn:active { transform: scale(0.95); }
         .popup-anim { position: absolute; color: #34d399; font-weight: 900; animation: floatUp 1.2s ease-out forwards; pointer-events: none; z-index: 10000; font-size: 18px; }
         @keyframes floatUp { 0% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -70px); } }
-
-        .badge-card { background: #0f172a; border: 1px solid #334155; border-radius: 12px; padding: 15px; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; }
-        .badge-icon { font-size: 40px; }
-        .badge-info h4 { color: #f8fafc; margin-bottom: 4px; }
-        .badge-info p { color: #94a3b8; font-size: 12px; }
-
-        .notif-banner {
-            position: fixed;
-            top: 20px;
-            left: -350px;
-            width: 280px;
-            background: #6366f1;
-            color: white;
-            padding: 15px;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-            z-index: 99999;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: 700;
-            transition: left 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .notif-banner.active { left: 20px; }
-        .notif-dot { width: 10px; height: 10px; background: #10b981; border-radius: 50%; animation: pulse 1s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.5); opacity: 0.5; } 100% { transform: scale(1); opacity: 1; } }
     </style>
 </head>
 <body>
-
-<div id="notifBanner" class="notif-banner">
-    <div class="notif-dot"></div>
-    <span id="notifText">@user sent you mail!</span>
-</div>
 
 <div class="container">
     <div id="authScreen" class="card">
@@ -140,8 +109,8 @@
         </div>
 
         <div id="collectionView" class="tab-view hidden">
-            <h3 style="text-align:center; color:#6366f1; margin-bottom:20px;">Your Collection</h3>
-            <div id="clickerBadgeSection"></div>
+            <h3 style="text-align:center; color:#6366f1; margin-bottom:10px;">Your Collection</h3>
+            <p style="text-align:center; font-size:11px; color:#94a3b8; margin-bottom:20px;">Unique orbs currently in your possession.</p>
             <div class="orb-grid" id="collectionGrid"></div>
         </div>
 
@@ -176,7 +145,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, updateDoc, onSnapshot, query, collection, where, getDocs, increment, orderBy, addDoc, deleteDoc, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, updateDoc, onSnapshot, query, collection, where, getDocs, increment, orderBy, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBo2zhESYzv1OChHSAfSb2GLiP6XtI6q1s",
@@ -193,7 +162,6 @@
 
     let userData = null;
     let isReg = false;
-    let initialMailLoad = true;
 
     const ORB_DATA = [
         { id: 'orb1', name: 'Blue Orb', baseCost: 350, baseInc: 15, time: 5000, color: '#3b82f6' },
@@ -234,29 +202,14 @@
             userData = null;
             document.getElementById('appScreen').classList.add('hidden');
             document.getElementById('authScreen').classList.remove('hidden');
+            document.getElementById('settingsMenu').classList.add('hidden');
         }
     });
 
-    function showNotification(sender) {
-        const banner = document.getElementById('notifBanner');
-        document.getElementById('notifText').innerText = `@${sender} sent you mail!`;
-        banner.classList.add('active');
-        setTimeout(() => banner.classList.remove('active'), 5000);
-    }
-
-    const loadInbox = () => {
-        onSnapshot(query(collection(db, "messages"), where("to", "==", userData.username), orderBy("date", "desc"), limit(1)), s => {
-            if (initialMailLoad) { initialMailLoad = false; return; }
-            if (!s.empty) showNotification(s.docs[0].data().from);
-        });
-        onSnapshot(query(collection(db, "messages"), where("to", "==", userData.username), orderBy("date", "desc")), s => {
-            document.getElementById('mailBox').innerHTML = s.docs.map(d => `<div class="msg-card"><b>@${d.data().from}</b><p>${d.data().body}</p></div>`).join('') || "No mail.";
-        });
-    };
-
     const getPower = (lvl) => {
         const sequence = [1, 5, 25, 50, 100, 250, 500, 1000, 2500, 5000];
-        return lvl <= sequence.length ? sequence[lvl - 1] : lvl * 500;
+        if (lvl <= sequence.length) return sequence[lvl - 1];
+        return lvl * 500;
     };
 
     function updateUI() {
@@ -265,15 +218,22 @@
         const lvl = userData.clickLevel || 1;
         const power = getPower(lvl);
         const cost = lvl * 200;
+
         document.getElementById('userBal').innerText = Math.floor(bal).toLocaleString();
-        document.getElementById('userDisplay').innerText = "@" + userData.username;
+        document.getElementById('userDisplay').innerText = "@" + (userData.username || "User");
         document.getElementById('userPfp').src = `https://api.dicebear.com/7.x/identicon/svg?seed=${userData.pfpSeed || userData.username}`;
+        
         document.getElementById('clickPowerVal').innerText = power.toLocaleString();
         document.getElementById('clickCost').innerText = cost.toLocaleString();
-        document.getElementById('upgradeClickBtn').className = (bal >= cost) ? "btn-available" : "btn-locked";
+        
+        const upBtn = document.getElementById('upgradeClickBtn');
+        upBtn.className = (bal >= cost) ? "btn-available" : "btn-locked";
     }
 
-    const calcIncome = (orb, owned) => owned > 0 ? Math.floor(orb.baseInc * (Math.pow(2.0, owned) - 1)) : 0;
+    const calcIncome = (orb, owned) => {
+        if(!owned || owned <= 0) return 0;
+        return Math.floor(orb.baseInc * (Math.pow(2.0, owned) - 1) / (2.0 - 1));
+    };
 
     function renderOrbs(gridId, dataList) {
         if (!userData) return;
@@ -283,76 +243,92 @@
             const owned = userData.orbs?.[orb.id] || 0;
             const isUnlocked = index === 0 || (userData.orbs?.[dataList[index-1].id] > 0);
             const cost = Math.floor(orb.baseCost * Math.pow(1.3, owned));
-            const isMaxed = owned >= 100;
+            const sellPrice = Math.floor(cost * 0.7);
             
             const div = document.createElement('div');
             div.className = 'orb-item';
+            
             div.innerHTML = `
                 ${isUnlocked ? `
                 <div class="orb-stats-top">
-                    ${owned > 0 ? `<button onclick="sellOrb('${orb.id}', ${Math.floor(cost * 0.7)})" class="sell-btn">SELL</button>` : ''}
-                    <div class="owned-badge" style="${isMaxed ? 'border-color: #ef4444; color: #ef4444;' : ''}">
-                        ${isMaxed ? 'MAX' : 'x' + owned}
-                    </div>
-                </div>` : ''}
+                    ${owned > 0 ? `<button onclick="sellOrb('${orb.id}', ${sellPrice})" class="sell-btn">SELL</button>` : ''}
+                    <div class="owned-badge">x${owned}</div>
+                </div>
+                ` : ''}
                 <div class="orb-visual" style="color:${orb.color}; background:currentColor"></div>
                 <b>${orb.name}</b>
                 ${isUnlocked ? `
-                    <div style="font-size:10px; margin:5px 0;"><span style="color:#10b981">+$${calcIncome(orb, owned).toLocaleString()}</span><br><span style="color:#94a3b8">Every ${orb.time/1000}s</span></div>
+                    <div style="font-size:10px; margin:5px 0;">
+                        <span style="color:#10b981">+$${calcIncome(orb, owned).toLocaleString()}</span>
+                        <br><span style="color:#94a3b8">Every ${orb.time/1000}s</span>
+                    </div>
                     <div class="progress-bg"><div class="progress-fill" id="bar-${orb.id}"></div></div>
                 ` : ''}
-                <button onclick="buyOrb('${orb.id}', ${cost})" class="buy-btn ${userData.balance >= cost && isUnlocked && !isMaxed ? 'btn-available' : 'btn-locked'}">
-                    ${isUnlocked ? (isMaxed ? 'MAX CAPACITY' : `Upgrade $${cost.toLocaleString()}`) : 'LOCKED'}
-                </button>`;
-            if (!isUnlocked) div.innerHTML += `<div class="blur-lock"><div class="lock-q">?</div><div class="lock-hint">Own 1 ${dataList[index-1].name}</div></div>`;
+                <button onclick="buyOrb('${orb.id}', ${cost})" class="buy-btn ${userData.balance >= cost && isUnlocked ? 'btn-available' : 'btn-locked'}">
+                    ${isUnlocked ? `Upgrade $${cost.toLocaleString()}` : 'LOCKED'}
+                </button>
+            `;
+
+            if (!isUnlocked) {
+                const lock = document.createElement('div');
+                lock.className = 'blur-lock';
+                lock.innerHTML = `<div class="lock-q">?</div><div class="lock-hint">Own 1 ${dataList[index-1].name}</div>`;
+                div.appendChild(lock);
+            }
             grid.appendChild(div);
         });
     }
 
     function renderCollection() {
         if (!userData) return;
-        const badgeSec = document.getElementById('clickerBadgeSection');
-        const clicks = userData.totalClicks || 0;
-        let b = { name: "No Badge", icon: "⚪", color: "#475569" };
-        if (clicks >= 10000) b = { name: "Champion", icon: "🏆", color: "#f8fafc" };
-        else if (clicks >= 1000) b = { name: "Emerald", icon: "❇️", color: "#10b981" };
-        else if (clicks >= 750) b = { name: "Diamond", icon: "💎", color: "#06b6d4" };
-        else if (clicks >= 250) b = { name: "Gold", icon: "🥇", color: "#f59e0b" };
-        else if (clicks >= 50) b = { name: "Silver", icon: "🥈", color: "#94a3b8" };
-        else if (clicks >= 1) b = { name: "Bronze", icon: "🥉", color: "#b45309" };
-        
-        badgeSec.innerHTML = `<div class="badge-card" style="border-left: 5px solid ${b.color}"><div class="badge-icon">${b.icon}</div><div class="badge-info"><h4>${b.name} Clicker</h4><p>Total Lifetime Clicks: ${clicks.toLocaleString()}</p></div></div>`;
-        
         const grid = document.getElementById('collectionGrid');
         grid.innerHTML = '';
-        const ownedList = [...ORB_DATA, ...MARKET_ORB_DATA].filter(o => userData.orbs?.[o.id] > 0).sort((a,b) => a.baseCost - b.baseCost);
-        ownedList.forEach(o => {
+        
+        const allPossibleOrbs = [...ORB_DATA, ...MARKET_ORB_DATA];
+        const ownedList = allPossibleOrbs.filter(orb => userData.orbs?.[orb.id] > 0);
+        
+        // Ascending order by base cost
+        ownedList.sort((a, b) => a.baseCost - b.baseCost);
+
+        if (ownedList.length === 0) {
+            grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#94a3b8; padding:20px;">Your collection is empty.</p>';
+            return;
+        }
+
+        ownedList.forEach(orb => {
             const div = document.createElement('div');
             div.className = 'orb-item';
-            div.innerHTML = `<div class="orb-visual" style="color:${o.color}; background:currentColor"></div><b>${o.name}</b><div style="font-size:10px; margin-top:10px; color:#6366f1; font-weight:700;">COLLECTED</div>`;
+            div.innerHTML = `
+                <div class="orb-visual" style="color:${orb.color}; background:currentColor"></div>
+                <b>${orb.name}</b>
+                <div style="font-size:10px; margin-top:10px; color:#6366f1; font-weight:700;">COLLECTED</div>
+            `;
             grid.appendChild(div);
         });
     }
 
     window.buyOrb = async (id, cost) => {
-        if(!userData || (userData.orbs?.[id] || 0) >= 100 || userData.balance < cost) return;
+        if(!userData || userData.balance < cost) return;
         await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-cost), [`orbs.${id}`]: increment(1) });
     };
 
     window.sellOrb = async (id, refund) => {
-        if(!userData?.orbs?.[id] || userData.orbs[id] <= 0) return;
+        if(!userData || !userData.orbs?.[id] || userData.orbs[id] <= 0) return;
         await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(refund), [`orbs.${id}`]: increment(-1) });
     };
 
     window.upgradeClicker = async () => {
-        const cost = (userData.clickLevel || 1) * 200;
-        if(userData.balance >= cost) await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-cost), clickLevel: increment(1) });
+        const lvl = userData.clickLevel || 1;
+        const cost = lvl * 200;
+        if(userData.balance >= cost) {
+            await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-cost), clickLevel: increment(1) });
+        }
     };
 
     document.getElementById('mainClicker').addEventListener('click', (e) => {
         if (!userData) return;
         const power = getPower(userData.clickLevel || 1);
-        updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(power), totalClicks: increment(1) });
+        updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(power) });
         spawnPop(e.clientX, e.clientY, `+$${power}`);
     });
 
@@ -363,7 +339,7 @@
             if(isReg) {
                 const email = document.getElementById('regEmail').value;
                 const res = await createUserWithEmailAndPassword(auth, email, pass);
-                await setDoc(doc(db, "users", res.user.uid), { username: userNm, email, balance: 1000, orbs: {}, clickLevel: 1, totalClicks: 0, pfpSeed: userNm });
+                await setDoc(doc(db, "users", res.user.uid), { username: userNm, email: email, balance: 1000, orbs: {}, clickLevel: 1, pfpSeed: userNm });
             } else {
                 const s = await getDocs(query(collection(db, "users"), where("username", "==", userNm)));
                 if(s.empty) throw new Error("No user found");
@@ -386,6 +362,12 @@
         alert("Sent!");
     };
 
+    const loadInbox = () => {
+        onSnapshot(query(collection(db, "messages"), where("to", "==", userData.username), orderBy("date", "desc")), s => {
+            document.getElementById('mailBox').innerHTML = s.docs.map(d => `<div class="msg-card"><b>@${d.data().from}</b><p>${d.data().body}</p></div>`).join('') || "No mail.";
+        });
+    };
+
     window.clearInbox = async () => {
         const s = await getDocs(query(collection(db, "messages"), where("to", "==", userData.username)));
         s.docs.forEach(d => deleteDoc(d.ref));
@@ -398,18 +380,29 @@
 
     setInterval(() => {
         if(!userData) return;
-        [...ORB_DATA, ...MARKET_ORB_DATA].forEach(orb => {
-            if((userData.orbs?.[orb.id] || 0) > 0) {
+        const ALL_ORBS = [...ORB_DATA, ...MARKET_ORB_DATA];
+        ALL_ORBS.forEach(orb => {
+            const owned = userData.orbs?.[orb.id] || 0;
+            if(owned > 0) {
                 if(!window[orb.id+'_timer']) {
                     window[orb.id+'_start'] = Date.now();
                     window[orb.id+'_timer'] = setInterval(() => {
+                        if (!userData) return;
                         updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(calcIncome(orb, userData.orbs[orb.id])) });
                         window[orb.id+'_start'] = Date.now();
                     }, orb.time);
                 }
                 const bar = document.getElementById(`bar-${orb.id}`);
-                if(bar) bar.style.width = Math.min(((Date.now() - window[orb.id+'_start']) / orb.time) * 100, 100) + "%";
-            } else if(window[orb.id+'_timer']) { clearInterval(window[orb.id+'_timer']); window[orb.id+'_timer'] = null; }
+                if(bar) {
+                    const elapsed = Date.now() - (window[orb.id+'_start'] || Date.now());
+                    bar.style.width = Math.min((elapsed / orb.time) * 100, 100) + "%";
+                }
+            } else {
+                if(window[orb.id+'_timer']) {
+                    clearInterval(window[orb.id+'_timer']);
+                    window[orb.id+'_timer'] = null;
+                }
+            }
         });
     }, 100);
 
@@ -417,17 +410,25 @@
         document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
         document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
         document.getElementById(t + 'View').classList.remove('hidden');
-        const m = {earn:'tEar', collection:'tCol', marketplace:'tMkt', inbox:'tIn', message:'tMsg', transfer:'tPay'};
-        document.getElementById(m[t]).classList.add('active');
+        const map = {earn:'tEar', collection:'tCol', marketplace:'tMkt', inbox:'tIn', message:'tMsg', transfer:'tPay'};
+        document.getElementById(map[t]).classList.add('active');
     };
 
     window.toggleSettings = () => document.getElementById('settingsMenu').classList.toggle('hidden');
     window.toggleAuthMode = () => { isReg = !isReg; document.getElementById('regArea').classList.toggle('hidden', !isReg); };
-    window.logout = () => signOut(auth).then(() => location.reload());
+    
+    window.logout = () => {
+        signOut(auth).then(() => {
+            location.reload(); 
+        });
+    };
+
     function spawnPop(x, y, text) {
-        const p = document.createElement('div'); p.className = 'popup-anim'; p.innerText = text;
+        const p = document.createElement('div');
+        p.className = 'popup-anim'; p.innerText = text;
         p.style.position = 'fixed'; p.style.left = x + 'px'; p.style.top = y + 'px';
-        document.body.appendChild(p); setTimeout(() => p.remove(), 1200);
+        document.body.appendChild(p);
+        setTimeout(() => p.remove(), 1200);
     }
 </script>
 </body>
