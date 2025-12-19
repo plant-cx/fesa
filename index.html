@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MailCash | Username Access</title>
+    <title>MailCash | Gaming & Finance</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', -apple-system, sans-serif; background: #0f172a; color: #f8fafc; padding: 20px; }
@@ -16,18 +16,25 @@
         .card { background: #1e293b; border-radius: 16px; padding: 25px; border: 1px solid #334155; margin-bottom: 20px; }
         .hidden { display: none !important; }
         input, textarea { width: 100%; padding: 14px; background: #0f172a; border: 1px solid #334155; border-radius: 10px; color: white; margin-bottom: 12px; outline: none; font-size: 16px; }
-        button { width: 100%; padding: 14px; background: #6366f1; color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; }
+        button { width: 100%; padding: 14px; background: #6366f1; color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+        button:active { transform: scale(0.98); }
         
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
         .balance-pill { background: #064e3b; color: #34d399; padding: 12px 24px; border-radius: 50px; font-weight: 800; border: 1px solid #059669; }
         .logout-btn { background: #ef4444; width: auto; padding: 6px 14px; font-size: 11px; margin-top: 8px; border-radius: 6px; }
 
-        .tabs { display: flex; gap: 8px; margin-bottom: 20px; background: #0f172a; padding: 6px; border-radius: 14px; }
-        .tab { flex: 1; text-align: center; padding: 12px; cursor: pointer; border-radius: 10px; color: #94a3b8; font-weight: 700; }
+        .tabs { display: flex; gap: 8px; margin-bottom: 20px; background: #0f172a; padding: 6px; border-radius: 14px; overflow-x: auto; }
+        .tab { flex: 1; text-align: center; padding: 12px; cursor: pointer; border-radius: 10px; color: #94a3b8; font-weight: 700; white-space: nowrap; }
         .tab.active { background: #334155; color: white; }
 
         .msg-card { background: #1e293b; padding: 18px; border-radius: 14px; margin-bottom: 12px; border: 1px solid #334155; border-left: 5px solid #6366f1; }
         .cash-tag { display: inline-block; background: #064e3b; color: #34d399; padding: 4px 10px; border-radius: 6px; font-size: 12px; margin-top: 10px; font-weight: 800; }
+        
+        /* Casino Styles */
+        .game-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .btn-red { background: #ef4444; }
+        .btn-green { background: #10b981; }
+        .btn-black { background: #000; border: 1px solid #334155; }
     </style>
 </head>
 <body>
@@ -37,17 +44,12 @@
 <div class="container">
     <div id="authScreen" class="card">
         <h2 id="authTitle" style="margin-bottom: 20px;">MailCash Login</h2>
-        
         <input type="text" id="loginUser" placeholder="Username">
-        
         <div id="regArea" class="hidden">
-            <input type="email" id="regEmail" placeholder="Email Address (Required for recovery)">
+            <input type="email" id="regEmail" placeholder="Email Address">
         </div>
-        
         <input type="password" id="authPass" placeholder="Password">
-        
         <button id="authBtn" onclick="handleAuth()">Sign In</button>
-        
         <p style="text-align: center; margin-top: 18px; font-size: 14px;">
             <a href="javascript:void(0)" onclick="toggleAuth()" id="toggleLink" style="color:#818cf8; text-decoration: none;">New here? Create an account</a>
         </p>
@@ -66,9 +68,12 @@
             <div id="tIn" class="tab active" onclick="showTab('inbox')">Inbox</div>
             <div id="tMsg" class="tab" onclick="showTab('message')">Message</div>
             <div id="tPay" class="tab" onclick="showTab('transfer')">Transfer</div>
+            <div id="tGames" class="tab" onclick="showTab('games')">Casino</div>
         </div>
 
-        <div id="inboxView" class="tab-view"><div id="mailBox">Loading...</div></div>
+        <div id="inboxView" class="tab-view">
+            <div id="mailBox">Loading messages...</div>
+        </div>
 
         <div id="messageView" class="tab-view hidden card">
             <h3>New Message</h3>
@@ -84,6 +89,29 @@
             <input type="number" id="payAmt" placeholder="Amount ($)">
             <input type="text" id="payNote" placeholder="Note (Optional)">
             <button onclick="sendAction('money')" style="background: #10b981;">Send Funds</button>
+        </div>
+
+        <div id="gamesView" class="tab-view hidden card">
+            <h3>MailCash Casino</h3>
+            <p style="font-size: 14px; color: #94a3b8; margin-bottom: 15px;">Enter bet amount and choose a game:</p>
+            <input type="number" id="betAmt" placeholder="Bet Amount ($)" min="1">
+            
+            <div style="margin-bottom: 20px;">
+                <label style="font-size: 12px; font-weight: bold; color: #818cf8;">COIN FLIP (2x Payout)</label>
+                <div class="game-grid">
+                    <button onclick="playCoinFlip('heads')">Heads</button>
+                    <button onclick="playCoinFlip('tails')">Tails</button>
+                </div>
+            </div>
+
+            <div style="border-top: 1px solid #334155; padding-top: 15px;">
+                <label style="font-size: 12px; font-weight: bold; color: #818cf8;">MINI ROULETTE</label>
+                <div style="display: flex; gap: 8px; margin-top: 10px;">
+                    <button onclick="playRoulette('red')" class="btn-red" style="flex:2">Red (2x)</button>
+                    <button onclick="playRoulette('black')" class="btn-black" style="flex:2">Black (2x)</button>
+                    <button onclick="playRoulette('green')" class="btn-green" style="flex:1">0 (14x)</button>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -108,6 +136,7 @@
     let userData = null;
     let isReg = false;
 
+    // --- UTILITIES ---
     function notify(msg, type = 'ok') {
         const n = document.getElementById('notifier');
         n.innerText = msg;
@@ -116,6 +145,7 @@
         setTimeout(() => n.style.opacity = '0', 3000);
     }
 
+    // --- AUTH LOGIC ---
     window.toggleAuth = () => {
         isReg = !isReg;
         document.getElementById('authTitle').innerText = isReg ? "Create Account" : "MailCash Login";
@@ -128,35 +158,23 @@
     window.handleAuth = async () => {
         const userInput = document.getElementById('loginUser').value.trim().toLowerCase();
         const pass = document.getElementById('authPass').value;
-        
         try {
             if (isReg) {
                 const email = document.getElementById('regEmail').value.trim();
                 if (userInput.length < 3) throw new Error("Username too short");
-                
-                // Check if username exists
                 const q = query(collection(db, "users"), where("username", "==", userInput));
                 const s = await getDocs(q);
                 if (!s.empty) throw new Error("Username taken");
-                
                 const res = await createUserWithEmailAndPassword(auth, email, pass);
-                await setDoc(doc(db, "users", res.user.uid), { 
-                    username: userInput, 
-                    email: email, 
-                    balance: 1000 
-                });
+                await setDoc(doc(db, "users", res.user.uid), { username: userInput, email: email, balance: 1000 });
             } else {
-                // LOGIN VIA USERNAME LOOKUP
                 let finalEmail = userInput;
-                
-                // If the input doesn't look like an email, find the email linked to this username
                 if (!userInput.includes('@')) {
                     const q = query(collection(db, "users"), where("username", "==", userInput));
                     const s = await getDocs(q);
                     if (s.empty) throw new Error("Username not found");
                     finalEmail = s.docs[0].data().email;
                 }
-                
                 await signInWithEmailAndPassword(auth, finalEmail, pass);
             }
         } catch (err) { notify(err.message, 'err'); }
@@ -180,6 +198,7 @@
         }
     });
 
+    // --- MESSAGING LOGIC ---
     function loadInbox() {
         if (!userData) return;
         const q = query(collection(db, "messages"), where("to", "==", userData.username), orderBy("date", "desc"));
@@ -188,14 +207,7 @@
             if(s.empty) { box.innerHTML = "<p style='text-align:center;color:#64748b;margin-top:20px;'>Inbox Empty</p>"; return; }
             box.innerHTML = s.docs.map(d => {
                 const m = d.data();
-                return `
-                    <div class="msg-card">
-                        <b style="color:#818cf8; font-size:12px;">FROM: @${m.from}</b>
-                        <h4 style="margin:5px 0;">${m.subject}</h4>
-                        <p style="color:#cbd5e1; font-size:14px;">${m.body}</p>
-                        ${m.cash > 0 ? `<span class="cash-tag">+$${m.cash.toFixed(2)} RECEIVED</span>` : ''}
-                    </div>
-                `;
+                return `<div class="msg-card"><b style="color:#818cf8; font-size:12px;">FROM: @${m.from}</b><h4 style="margin:5px 0;">${m.subject}</h4><p style="color:#cbd5e1; font-size:14px;">${m.body}</p>${m.cash > 0 ? `<span class="cash-tag">+$${m.cash.toFixed(2)} RECEIVED</span>` : ''}</div>`;
             }).join('');
         });
     }
@@ -205,25 +217,21 @@
         const amt = type === 'money' ? (parseFloat(document.getElementById('payAmt').value) || 0) : 0;
         const sub = type === 'text' ? document.getElementById('msgSub').value : "Payment";
         const body = type === 'text' ? document.getElementById('msgBody').value : document.getElementById('payNote').value;
-
         try {
             const q = query(collection(db, "users"), where("username", "==", to));
             const snap = await getDocs(q);
             if (snap.empty) throw new Error("Recipient not found");
             const recId = snap.docs[0].id;
-
             if (amt > 0) {
-                if (userData.balance < amt) throw new Error("Low balance");
                 await runTransaction(db, async t => {
                     const myRef = doc(db, "users", auth.currentUser.uid);
                     const theirRef = doc(db, "users", recId);
                     const myD = await t.get(myRef);
-                    const theirD = await t.get(theirRef);
+                    if (myD.data().balance < amt) throw new Error("Low balance");
                     t.update(myRef, { balance: myD.data().balance - amt });
-                    t.update(theirRef, { balance: theirD.data().balance + amt });
+                    t.update(theirRef, { balance: (await t.get(theirRef)).data().balance + amt });
                 });
             }
-
             await addDoc(collection(db, "messages"), { to, from: userData.username, subject: sub || "No Subject", body: body || "", cash: amt, date: new Date() });
             notify("Sent!");
             document.querySelectorAll('input, textarea').forEach(i => i.value = "");
@@ -231,6 +239,50 @@
         } catch (e) { notify(e.message, 'err'); }
     };
 
+    // --- CASINO LOGIC ---
+    window.playCoinFlip = async (choice) => {
+        const amt = parseFloat(document.getElementById('betAmt').value);
+        if (isNaN(amt) || amt <= 0) return notify("Enter a valid bet", "err");
+        try {
+            await runTransaction(db, async t => {
+                const userRef = doc(db, "users", auth.currentUser.uid);
+                const userDoc = await t.get(userRef);
+                const currentBal = userDoc.data().balance;
+                if (currentBal < amt) throw new Error("Insufficient funds");
+                
+                const win = Math.random() < 0.5;
+                const result = win ? choice : (choice === 'heads' ? 'tails' : 'heads');
+                const newBal = win ? currentBal + amt : currentBal - amt;
+                
+                t.update(userRef, { balance: newBal });
+                notify(win ? `Win! It was ${result}. +$${amt}` : `Lost! It was ${result}. -$${amt}`, win ? 'ok' : 'err');
+            });
+        } catch (e) { notify(e.message, 'err'); }
+    };
+
+    window.playRoulette = async (betOn) => {
+        const amt = parseFloat(document.getElementById('betAmt').value);
+        if (isNaN(amt) || amt <= 0) return notify("Enter a valid bet", "err");
+        try {
+            await runTransaction(db, async t => {
+                const userRef = doc(db, "users", auth.currentUser.uid);
+                const userDoc = await t.get(userRef);
+                const currentBal = userDoc.data().balance;
+                if (currentBal < amt) throw new Error("Insufficient funds");
+
+                const roll = Math.floor(Math.random() * 15);
+                let color = roll === 0 ? "green" : (roll <= 7 ? "red" : "black");
+                
+                let win = betOn === color;
+                let payout = win ? (color === 'green' ? amt * 14 : amt) : -amt;
+                
+                t.update(userRef, { balance: currentBal + payout });
+                notify(win ? `Rolled ${color}! Won $${payout.toFixed(2)}` : `Rolled ${color}. Lost $${amt}`, win ? 'ok' : 'err');
+            });
+        } catch (e) { notify(e.message, 'err'); }
+    };
+
+    // --- NAVIGATION ---
     window.showTab = (t) => {
         document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
         document.querySelectorAll('.tab').forEach(btn => btn.classList.remove('active'));
