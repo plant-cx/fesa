@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MailCash | Gaming & Finance</title>
+    <title>MailCash | Scalable Orbs</title>
     <style>
         /* --- RESTORED CORE BRAND STYLES --- */
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -19,17 +19,15 @@
         input, textarea { width: 100%; padding: 14px; background: #0f172a; border: 1px solid #334155; border-radius: 10px; color: white; margin-bottom: 12px; outline: none; font-size: 16px; }
         button { width: 100%; padding: 14px; background: #6366f1; color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; transition: 0.2s; }
         
-        /* HEADER */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
         .balance-pill { background: #064e3b; color: #34d399; padding: 12px 24px; border-radius: 50px; font-weight: 800; border: 1px solid #059669; }
         .pfp-circle { width: 44px; height: 44px; border-radius: 50%; border: 2px solid #6366f1; background: #334155; }
 
-        /* TABS */
         .tabs { display: flex; gap: 8px; margin-bottom: 20px; background: #0f172a; padding: 6px; border-radius: 14px; }
         .tab { flex: 1; text-align: center; padding: 12px; cursor: pointer; border-radius: 10px; color: #94a3b8; font-weight: 700; font-size: 14px; }
         .tab.active { background: #334155; color: white; }
 
-        /* RESTORED MESSAGE STYLING */
+        /* MESSAGING */
         .msg-card { background: #1e293b; padding: 18px; border-radius: 14px; margin-bottom: 12px; border: 1px solid #334155; border-left: 5px solid #6366f1; }
         .cash-tag { display: inline-block; background: #064e3b; color: #34d399; padding: 4px 10px; border-radius: 6px; font-size: 12px; margin-top: 10px; font-weight: 800; }
 
@@ -50,12 +48,12 @@
 
 <div class="container">
     <div id="authScreen" class="card">
-        <h2 style="margin-bottom:20px;">MailCash</h2>
+        <h2>MailCash</h2>
         <input type="text" id="loginUser" placeholder="Username">
         <div id="regArea" class="hidden"><input type="email" id="regEmail" placeholder="Email"></div>
         <input type="password" id="authPass" placeholder="Password">
         <button onclick="handleAuth()">Sign In</button>
-        <p style="text-align: center; margin-top: 15px; font-size: 14px;"><a href="javascript:void(0)" onclick="isReg=!isReg; document.getElementById('regArea').classList.toggle('hidden')" style="color:#818cf8; text-decoration: none;">Switch Login/Register</a></p>
+        <p style="text-align: center; margin-top: 15px;"><a href="javascript:void(0)" onclick="isReg=!isReg; document.getElementById('regArea').classList.toggle('hidden')">Switch Mode</a></p>
     </div>
 
     <div id="appScreen" class="hidden">
@@ -75,12 +73,15 @@
         </div>
 
         <div id="inboxView" class="tab-view">
-            <div id="mailBox">Loading messages...</div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h3>Your Messages</h3>
+                <button onclick="clearInbox()" style="width:auto; padding:8px 15px; background:#ef4444; font-size:12px;">Clear All</button>
+            </div>
+            <div id="mailBox">Loading...</div>
         </div>
         
         <div id="messageView" class="tab-view hidden card">
             <h3>New Message</h3>
-            <p style="color:#94a3b8; font-size:13px; margin-bottom:15px;">Send a secure encrypted message to another user.</p>
             <input type="text" id="msgTo" placeholder="Recipient @username">
             <input type="text" id="msgSub" placeholder="Subject">
             <textarea id="msgBody" rows="5" placeholder="Write your message..."></textarea>
@@ -89,7 +90,6 @@
 
         <div id="transferView" class="tab-view hidden card">
             <h3>Transfer Funds</h3>
-            <p style="color:#94a3b8; font-size:13px; margin-bottom:15px;">Instantly send cash to any MailCash user.</p>
             <input type="text" id="payTo" placeholder="Recipient @username">
             <input type="number" id="payAmt" placeholder="Amount ($)">
             <input type="text" id="payNote" placeholder="Note (Optional)">
@@ -101,11 +101,11 @@
                 <p style="color:#94a3b8">Click Power: $<span id="clickPowerText">1</span></p>
                 <button class="clicker-btn" id="mainClicker">💰</button>
                 <div id="upgradeArea" style="margin-top:10px;">
-                    <p id="nextClickText" style="font-size:12px; color:#94a3b8">Next: $5/click (Cost: $1,000)</p>
+                    <p id="nextClickText" style="font-size:12px; color:#94a3b8">Loading...</p>
                     <button id="upgradeBtn" onclick="buyUpgrade()" class="btn-locked" style="width:200px; margin-top:5px;">Upgrade Clicker</button>
                 </div>
             </div>
-            <h3 style="margin: 30px 0 10px; border-bottom: 1px solid #334155; padding-bottom: 5px;">Orb Market</h3>
+            <h3 style="margin: 30px 0 10px; border-bottom: 1px solid #334155; padding-bottom: 5px;">Orb Market (Scales 1.5x)</h3>
             <div class="orb-grid" id="orbGrid"></div>
         </div>
     </div>
@@ -114,7 +114,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, updateDoc, onSnapshot, query, collection, where, getDocs, increment, orderBy, addDoc, runTransaction } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, updateDoc, onSnapshot, query, collection, where, getDocs, increment, orderBy, addDoc, runTransaction, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBo2zhESYzv1OChHSAfSb2GLiP6XtI6q1s",
@@ -138,16 +138,16 @@
     ];
 
     const ORB_DATA = [
-        { id: 'orb1', name: 'Blue Orb', cost: 500, income: 10, time: 5000, color: '#3b82f6' },
-        { id: 'orb2', name: 'Red Orb', cost: 5000, income: 150, time: 7000, color: '#ef4444' },
-        { id: 'orb3', name: 'Green Orb', cost: 7500, income: 300, time: 6000, color: '#10b981' },
-        { id: 'orb4', name: 'Gold Orb', cost: 17500, income: 1000, time: 1000, color: '#f59e0b' },
-        { id: 'orb5', name: 'Purple Orb', cost: 37500, income: 2500, time: 3000, color: '#8b5cf6' },
-        { id: 'orb6', name: 'Cyan Orb', cost: 75000, income: 6000, time: 5000, color: '#06b6d4' },
-        { id: 'orb7', name: 'Pink Orb', cost: 150000, income: 15000, time: 8000, color: '#ec4899' },
-        { id: 'orb8', name: 'White Orb', cost: 375000, income: 40000, time: 10000, color: '#f8fafc' },
-        { id: 'orb9', name: 'Void Orb', cost: 750000, income: 100000, time: 12000, color: '#475569' },
-        { id: 'orb10', name: 'Solar Orb', cost: 2500000, income: 500000, time: 15000, color: '#fbbf24' }
+        { id: 'orb1', name: 'Blue Orb', baseCost: 500, income: 10, time: 5000, color: '#3b82f6' },
+        { id: 'orb2', name: 'Red Orb', baseCost: 5000, income: 150, time: 7000, color: '#ef4444' },
+        { id: 'orb3', name: 'Green Orb', baseCost: 7500, income: 300, time: 6000, color: '#10b981' },
+        { id: 'orb4', name: 'Gold Orb', baseCost: 17500, income: 1000, time: 1000, color: '#f59e0b' },
+        { id: 'orb5', name: 'Purple Orb', baseCost: 37500, income: 2500, time: 3000, color: '#8b5cf6' },
+        { id: 'orb6', name: 'Cyan Orb', baseCost: 75000, income: 6000, time: 5000, color: '#06b6d4' },
+        { id: 'orb7', name: 'Pink Orb', baseCost: 150000, income: 15000, time: 8000, color: '#ec4899' },
+        { id: 'orb8', name: 'White Orb', baseCost: 375000, income: 40000, time: 10000, color: '#f8fafc' },
+        { id: 'orb9', name: 'Void Orb', baseCost: 750000, income: 100000, time: 12000, color: '#475569' },
+        { id: 'orb10', name: 'Solar Orb', baseCost: 2500000, income: 500000, time: 15000, color: '#fbbf24' }
     ];
 
     const notify = (msg, type = 'ok') => {
@@ -171,7 +171,7 @@
 
     function updateUI() {
         if(!userData) return;
-        document.getElementById('userBal').innerText = userData.balance.toLocaleString(undefined, {minimumFractionDigits: 2});
+        document.getElementById('userBal').innerText = userData.balance.toLocaleString();
         document.getElementById('userDisplay').innerText = "@" + userData.username;
         document.getElementById('clickPowerText').innerText = userData.clickPower || 1;
         document.getElementById('userPfp').src = `https://api.dicebear.com/7.x/identicon/svg?seed=${userData.username}`;
@@ -184,12 +184,11 @@
             document.getElementById('nextClickText').innerText = `Next: $${next.power}/click (Cost: $${next.cost.toLocaleString()})`;
             upBtn.className = userData.balance >= next.cost ? 'btn-available' : 'btn-locked';
         } else {
-            document.getElementById('nextClickText').innerText = "Max Level Reached";
+            document.getElementById('nextClickText').innerText = "Max Clicker Level";
             upBtn.classList.add('hidden');
         }
     }
 
-    // CLICKER
     document.getElementById('mainClicker').addEventListener('click', (e) => {
         const p = userData.clickPower || 1;
         spawnPop(e.clientX, e.clientY, `+$${p}`, true);
@@ -202,38 +201,73 @@
         if (nextIdx < UPGRADES.length) {
             const next = UPGRADES[nextIdx];
             if (userData.balance >= next.cost) {
-                await updateDoc(doc(db, "users", auth.currentUser.uid), {
-                    balance: increment(-next.cost),
-                    clickPower: next.power
-                });
-                notify("Clicker Upgraded!");
+                await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-next.cost), clickPower: next.power });
             }
         }
     };
 
-    // MESSAGING & TRANSFER LOGIC
+    function renderOrbs() {
+        const grid = document.getElementById('orbGrid');
+        grid.innerHTML = '';
+        ORB_DATA.forEach(orb => {
+            const owned = userData.orbs?.[orb.id] || 0;
+            // SCALE LOGIC: Price = baseCost * (1.5 ^ owned)
+            const currentCost = Math.floor(orb.baseCost * Math.pow(1.5, owned));
+            const canAfford = userData.balance >= currentCost;
+            
+            const div = document.createElement('div');
+            div.className = 'orb-item';
+            div.id = `orb-box-${orb.id}`;
+            div.innerHTML = `
+                <div class="orb-visual" style="color:${orb.color}; background:currentColor"></div>
+                <b>${orb.name}</b><br>
+                <small>$${orb.income.toLocaleString()} / ${orb.time/1000}s</small><br>
+                <small>Owned: ${owned}</small>
+                <button onclick="buyOrb('${orb.id}', ${currentCost})" class="buy-btn ${canAfford ? 'btn-available' : 'btn-locked'}">
+                    Buy ($${currentCost.toLocaleString()})
+                </button>
+            `;
+            grid.appendChild(div);
+        });
+    }
+
+    window.buyOrb = async (id, cost) => {
+        if(userData.balance < cost) return;
+        await updateDoc(doc(db, "users", auth.currentUser.uid), {
+            balance: increment(-cost),
+            [`orbs.${id}`]: increment(1)
+        });
+    };
+
+    window.clearInbox = async () => {
+        const q = query(collection(db, "messages"), where("to", "==", userData.username));
+        const snap = await getDocs(q);
+        snap.forEach(async d => await deleteDoc(doc(db, "messages", d.id)));
+        notify("Inbox Cleared");
+    };
+
     window.sendAction = async (type) => {
         const to = (type === 'text' ? document.getElementById('msgTo') : document.getElementById('payTo')).value.trim().toLowerCase();
         const amt = type === 'money' ? (parseFloat(document.getElementById('payAmt').value) || 0) : 0;
         try {
             const snap = await getDocs(query(collection(db, "users"), where("username", "==", to)));
-            if (snap.empty) throw new Error("Recipient not found");
+            if (snap.empty) throw new Error("User not found");
             if (amt > 0) {
                 await runTransaction(db, async t => {
                     const myRef = doc(db, "users", auth.currentUser.uid), theirRef = doc(db, "users", snap.docs[0].id);
                     const myB = (await t.get(myRef)).data().balance;
-                    if (myB < amt) throw new Error("Insufficient funds");
+                    if (myB < amt) throw new Error("Funds low");
                     t.update(myRef, { balance: myB - amt });
                     t.update(theirRef, { balance: (await t.get(theirRef)).data().balance + amt });
                 });
             }
             await addDoc(collection(db, "messages"), { 
                 to, from: userData.username, 
-                subject: type === 'text' ? document.getElementById('msgSub').value : "Payment Received",
-                body: type === 'text' ? document.getElementById('msgBody').value : (document.getElementById('payNote').value || "Sent funds."),
+                subject: type === 'text' ? document.getElementById('msgSub').value : "Payment",
+                body: type === 'text' ? document.getElementById('msgBody').value : (document.getElementById('payNote').value || "Funds sent."),
                 cash: amt, date: new Date() 
             });
-            notify("Sent successfully!"); showTab('inbox');
+            notify("Sent!"); showTab('inbox');
         } catch (e) { notify(e.message, 'err'); }
     };
 
@@ -247,43 +281,11 @@
                     <p style="color:#cbd5e1; font-size:14px;">${m.body}</p>
                     ${m.cash > 0 ? `<span class="cash-tag">+$${m.cash.toLocaleString()}</span>` : ''}
                 </div>`;
-            }).join('') || "Inbox is empty";
+            }).join('') || "Inbox empty.";
         });
     };
 
-    // ORBS ENGINE
-    function renderOrbs() {
-        const grid = document.getElementById('orbGrid');
-        grid.innerHTML = '';
-        ORB_DATA.forEach(orb => {
-            const owned = userData.orbs?.[orb.id] || 0;
-            const canAfford = userData.balance >= orb.cost;
-            const div = document.createElement('div');
-            div.className = 'orb-item';
-            div.id = `orb-box-${orb.id}`;
-            div.innerHTML = `
-                <div class="orb-visual" style="color:${orb.color}; background:currentColor"></div>
-                <b>${orb.name}</b><br>
-                <small>$${orb.income} / ${orb.time/1000}s</small><br>
-                <small>Owned: ${owned}</small>
-                <button onclick="buyOrb('${orb.id}')" class="buy-btn ${canAfford ? 'btn-available' : 'btn-locked'}">
-                    Buy ($${orb.cost.toLocaleString()})
-                </button>
-            `;
-            grid.appendChild(div);
-        });
-    }
-
-    window.buyOrb = async (id) => {
-        const orb = ORB_DATA.find(o => o.id === id);
-        if(userData.balance < orb.cost) return;
-        await updateDoc(doc(db, "users", auth.currentUser.uid), {
-            balance: increment(-orb.cost),
-            [`orbs.${id}`]: increment(1)
-        });
-    };
-
-    // Auto-Income loop
+    // Income Loop
     setInterval(() => {
         if(!userData || !userData.orbs) return;
         ORB_DATA.forEach(orb => {
@@ -331,7 +333,7 @@
                 const s = await getDocs(query(collection(db, "users"), where("username", "==", u)));
                 await signInWithEmailAndPassword(auth, s.docs[0].data().email, p);
             }
-        } catch (e) { notify("Authentication Error", "err"); }
+        } catch (e) { notify("Error", "err"); }
     };
 </script>
 </body>
