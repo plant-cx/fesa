@@ -200,7 +200,17 @@
         { id: 'orb7', name: 'Pink Orb', baseCost: 1000000, baseInc: 120000, time: 8000, color: '#ec4899' },
         { id: 'orb8', name: 'White Orb', baseCost: 4000000, baseInc: 500000, time: 10000, color: '#f8fafc' },
         { id: 'orb9', name: 'Void Orb', baseCost: 20000000, baseInc: 3000000, time: 12000, color: '#475569' },
-        { id: 'orb10', name: 'Solar Orb', baseCost: 80000000, baseInc: 15000000, time: 15000, color: '#fbbf24' }
+        { id: 'orb10', name: 'Solar Orb', baseCost: 80000000, baseInc: 15000000, time: 15000, color: '#fbbf24' },
+        { id: 'orb11', name: 'Nebula.Ghost', baseCost: 250000000, baseInc: 45000000, time: 10000, color: '#c084fc' },
+        { id: 'orb12', name: 'Quasar_X', baseCost: 1000000000, baseInc: 180000000, time: 8000, color: '#22d3ee' },
+        { id: 'orb13', name: 'Abyssal.Viper', baseCost: 5000000000, baseInc: 750000000, time: 12000, color: '#1e293b' },
+        { id: 'orb14', name: 'Titan_Forge', baseCost: 20000000000, baseInc: 3000000000, time: 15000, color: '#fca5a5' },
+        { id: 'orb15', name: 'Neon.Demon', baseCost: 100000000000, baseInc: 15000000000, time: 6000, color: '#2dd4bf' },
+        { id: 'orb16', name: 'Zenith_Core', baseCost: 500000000000, baseInc: 80000000000, time: 10000, color: '#eab308' },
+        { id: 'orb17', name: 'Cyber.Skull', baseCost: 2500000000000, baseInc: 400000000000, time: 9000, color: '#f472b6' },
+        { id: 'orb18', name: 'Omega_Pulse', baseCost: 10000000000000, baseInc: 2000000000000, time: 12000, color: '#6366f1' },
+        { id: 'orb19', name: 'Star.Eater', baseCost: 50000000000000, baseInc: 10000000000000, time: 15000, color: '#fb7185' },
+        { id: 'orb20', name: 'Infinity_God', baseCost: 250000000000000, baseInc: 60000000000000, time: 20000, color: '#ffffff' }
     ];
 
     const MARKET_ORB_DATA = [
@@ -284,14 +294,13 @@
     function renderCollection() {
         const grid = document.getElementById('collectionGrid');
         const lootGrid = document.getElementById('collectionLootGrid');
+        if(!grid || !lootGrid) return;
         grid.innerHTML = ''; lootGrid.innerHTML = '';
-        
         [...ORB_DATA, ...MARKET_ORB_DATA].filter(o => userData.orbs?.[o.id] > 0).forEach(o => {
             const div = document.createElement('div'); div.className = 'orb-item';
             div.innerHTML = `<div class="orb-visual ${getStageClass(userData.orbs[o.id])}" style="color:${o.color}; background:currentColor"></div><b>${o.name}</b><div class="owned-badge" style="margin-top:10px">Owned: ${userData.orbs[o.id]}</div>`;
             grid.appendChild(div);
         });
-
         userData.mysteryOrbs?.forEach(m => {
             const div = document.createElement('div'); div.className = 'orb-item';
             div.innerHTML = `<div class="orb-visual stage-1" style="color:${m.color}; background:currentColor"></div><b>${m.name}</b><div style="font-size:11px; color:#94a3b8; margin-top:5px;">FROM ${m.tier.toUpperCase()} CHEST</div>`;
@@ -302,6 +311,7 @@
     function renderOrbs(gridId, dataList) {
         if (!userData) return;
         const grid = document.getElementById(gridId);
+        if(!grid) return;
         grid.innerHTML = '';
         dataList.forEach((orb, index) => {
             const owned = userData.orbs?.[orb.id] || 0;
@@ -359,7 +369,13 @@
 
     setInterval(() => {
         if(!userData) return;
-        [...ORB_DATA, ...MARKET_ORB_DATA].forEach(orb => {
+        ORB_DATA.forEach(orb => {
+            if(userData.orbs?.[orb.id] > 0) {
+                if(!window[orb.id+'_timer']) { window[orb.id+'_start'] = Date.now(); window[orb.id+'_timer'] = setInterval(() => { updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(calcIncome(orb, userData.orbs[orb.id])) }); window[orb.id+'_start'] = Date.now(); }, orb.time); }
+                const bar = document.getElementById(`bar-${orb.id}`); if(bar) bar.style.width = Math.min(((Date.now() - window[orb.id+'_start']) / orb.time) * 100, 100) + "%";
+            }
+        });
+        MARKET_ORB_DATA.forEach(orb => {
             if(userData.orbs?.[orb.id] > 0) {
                 if(!window[orb.id+'_timer']) { window[orb.id+'_start'] = Date.now(); window[orb.id+'_timer'] = setInterval(() => { updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(calcIncome(orb, userData.orbs[orb.id])) }); window[orb.id+'_start'] = Date.now(); }, orb.time); }
                 const bar = document.getElementById(`bar-${orb.id}`); if(bar) bar.style.width = Math.min(((Date.now() - window[orb.id+'_start']) / orb.time) * 100, 100) + "%";
