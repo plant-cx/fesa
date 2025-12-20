@@ -47,7 +47,22 @@
         
         .clicker-btn { width: 130px; height: 130px; border-radius: 50%; background: radial-gradient(circle, #6366f1, #4338ca); border: 10px solid #312e81; font-size: 45px; margin: 0 auto 15px; display: block; cursor: pointer; transition: transform 0.1s; box-shadow: 0 0 30px rgba(99, 102, 241, 0.4); }
         .clicker-btn:active { transform: scale(0.92); }
-        .popup-anim { position: absolute; color: #34d399; font-weight: 900; animation: floatUp 1.2s ease-out forwards; pointer-events: none; z-index: 10000; font-size: 24px; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+        
+        /* UPDATED: Faster popup animation duration */
+        @keyframes floatUp {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-40px); opacity: 0; }
+        }
+        .popup-anim { 
+            position: absolute; 
+            color: #34d399; 
+            font-weight: 900; 
+            animation: floatUp 0.4s ease-out forwards; 
+            pointer-events: none; 
+            z-index: 10000; 
+            font-size: 24px; 
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5); 
+        }
         
         .badge-card { background: #0f172a; border: 2px solid #334155; border-radius: 16px; padding: 20px; margin-bottom: 25px; display: flex; align-items: center; gap: 20px; }
         .badge-icon { font-size: 50px; }
@@ -237,10 +252,8 @@
         const grid = document.getElementById(gridId);
         grid.innerHTML = '';
 
-        // RENDERING MYSTERY ORBS FIRST (NEWEST TO OLDEST)
         if (gridId === 'marketOrbGrid' && userData.mysteryOrbs) {
             [...userData.mysteryOrbs].reverse().forEach((mOrb, reverseIdx) => {
-                // Find actual index for progress bar sync
                 const actualIdx = userData.mysteryOrbs.indexOf(mOrb);
                 const div = document.createElement('div');
                 div.className = 'orb-item';
@@ -322,7 +335,9 @@
         updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(p), totalClicks: increment(1) });
         const pop = document.createElement('div'); pop.className = 'popup-anim'; pop.innerText = `+$${p}`;
         pop.style.position = 'fixed'; pop.style.left = e.clientX + 'px'; pop.style.top = e.clientY + 'px';
-        document.body.appendChild(pop); setTimeout(() => pop.remove(), 1200);
+        document.body.appendChild(pop); 
+        // UPDATED: Faster removal from DOM to match new animation speed
+        setTimeout(() => pop.remove(), 400); 
     });
 
     window.handleAuth = async () => {
