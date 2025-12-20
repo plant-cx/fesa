@@ -342,7 +342,7 @@
         for (const tier in CHEST_LOOT_TABLE) {
             const data = CHEST_LOOT_TABLE[tier];
             if (data.orbs.includes(id)) {
-                return Math.floor(Math.random() * (data.range[1] - data.range[0] + 1)) + data.range[0];
+                return Math.floor((data.range[0] + data.range[1]) / 2);
             }
         }
         return 0;
@@ -350,11 +350,9 @@
 
     const calcIncome = (orb, owned, lootedCount = 0) => {
         let totalIncome = 0;
-        // Standard purchased income
         if (owned > 0) {
             totalIncome += Math.floor(orb.baseInc * (Math.pow(2.0, owned) - 1));
         }
-        // Looted orb income
         if (lootedCount > 0) {
             totalIncome += lootedCount * getLootedOrbValue(orb.id);
         }
@@ -565,7 +563,9 @@
                     window[orb.id+'_start'] = Date.now(); 
                     window[orb.id+'_timer'] = setInterval(() => { 
                         const incomePerCycle = calcIncome(orb, owned, looted);
-                        updateDoc(doc(db, "users", myUid), { balance: increment(incomePerCycle) }); 
+                        if (incomePerCycle > 0) {
+                            updateDoc(doc(db, "users", myUid), { balance: increment(incomePerCycle) }); 
+                        }
                         window[orb.id+'_start'] = Date.now(); 
                     }, orb.time); 
                 }
