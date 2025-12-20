@@ -112,7 +112,6 @@
 
         <div id="collectionView" class="tab-view hidden">
             <h3 style="text-align:center; color:#6366f1; margin-bottom:25px; font-size:28px;">YOUR COLLECTION</h3>
-            <div id="clickerBadgeSection"></div>
             <div id="standardOrbsSection">
                 <div class="loot-section-title">OWNED ORBS</div>
                 <div class="orb-grid" id="collectionGrid"></div>
@@ -124,6 +123,10 @@
         </div>
 
         <div id="marketplaceView" class="tab-view hidden">
+            <h3 style="text-align:center; color:#f59e0b; margin-bottom:15px;">💎 HYPER RARE MARKET</h3>
+            <div class="orb-grid" id="marketOrbGrid" style="margin-bottom: 50px;"></div>
+
+            <h3 style="text-align:center; color:#6366f1; margin-bottom:15px;">🎁 MYSTERY CHESTS</h3>
             <div class="chest-grid">
                 <div class="chest-card">
                     <div class="chest-icon">🪵</div>
@@ -157,8 +160,6 @@
                 </div>
             </div>
             <div id="lootContainer"></div>
-            <h3 style="text-align:center; color:#f59e0b; margin-top:50px; margin-bottom:15px;">💎 HYPER RARE MARKET</h3>
-            <div class="orb-grid" id="marketOrbGrid"></div>
         </div>
 
         <div id="inboxView" class="tab-view hidden"><div id="mailBox">Loading...</div></div>
@@ -188,7 +189,6 @@
 
     let userData = null;
     let isReg = false;
-    let initialMailLoad = true;
 
     const ORB_DATA = [
         { id: 'orb1', name: 'Blue Orb', baseCost: 350, baseInc: 15, time: 5000, color: '#3b82f6' },
@@ -262,13 +262,10 @@
         if (r < 75) { inc = Math.floor(Math.random() * 11) + baseBonus; time = (Math.random() * 3000) + 2000; type = "Common"; }
         else if (r < 95) { inc = (Math.floor(Math.random() * 3) + 10) + baseBonus; time = (Math.random() * 3000) + 1000; type = "Rare"; }
         else { inc = (Math.floor(Math.random() * 4) + 12) + baseBonus; time = (Math.random() * 6000) + 4000; type = "Epic"; }
-        const adjectives = ["Ancient", "Pulsing", "Radiant", "Shadow", "Mystic"];
-        const elements = ["Lava", "Water", "Earth", "Air", "Cosmic"];
-        const colors = ["#ef4444", "#3b82f6", "#10b981", "#f59e0b", "#8b5cf6"];
-        const name = `${type} ${adjectives[Math.floor(Math.random()*5)]} ${elements[Math.floor(Math.random()*5)]} Orb`;
+        const name = `${type} Mystery Orb`;
         await updateDoc(doc(db, "users", auth.currentUser.uid), { 
             balance: increment(-cost), 
-            mysteryOrbs: arrayUnion({ name, inc, time, color: colors[Math.floor(Math.random()*5)], tier, lastClaim: Date.now() }) 
+            mysteryOrbs: arrayUnion({ name, inc, time, color: "#6366f1", tier, lastClaim: Date.now() }) 
         });
         alert(`UNBOXED: ${name}`);
     };
