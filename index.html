@@ -133,6 +133,7 @@
             <div class="card" style="padding: 15px; margin-bottom: 20px; display: flex; align-items: center; gap: 15px;">
                 <span style="font-weight: 800; color: #94a3b8; font-size: 14px;">SORT BY:</span>
                 <select id="collectionSortOrder" onchange="renderCollection()" style="margin-bottom: 0; padding: 8px; font-size: 14px; width: auto;">
+                    <option value="id_asc">Default Order</option>
                     <option value="asc">Name (A-Z)</option>
                     <option value="desc">Name (Z-A)</option>
                     <option value="count_high">Highest Count</option>
@@ -412,6 +413,7 @@
                     if (sortMode === 'desc') return b.orb.name.localeCompare(a.orb.name);
                     if (sortMode === 'count_high') return b.count - a.count;
                     if (sortMode === 'count_low') return a.count - b.count;
+                    if (sortMode === 'id_asc') return a.id.localeCompare(b.id, undefined, {numeric: true});
                     return 0;
                 });
         };
@@ -494,10 +496,12 @@
         const winId = possible[Math.floor(Math.random() * possible.length)];
         const orbName = [...ORB_DATA, ...MARKET_ORB_DATA].find(o => o.id === winId).name;
 
-        await updateDoc(doc(db, "users", myUid), { 
-            balance: increment(-cost),
-            [`lootedOrbs.${winId}`]: increment(1)
-        });
+        // CRITICAL FIX: Ensure lootedOrbs object exists before incrementing
+        let updates = { balance: increment(-cost) };
+        if (!userData.lootedOrbs) updates.lootedOrbs = {};
+        updates[`lootedOrbs.${winId}`] = increment(1);
+
+        await updateDoc(doc(db, "users", myUid), updates);
         alert(`🎁 Chest contains: ${orbName}! (Added to Chest Finds)`);
     };
 
