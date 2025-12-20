@@ -33,7 +33,8 @@
         .stage-2 { border-radius: 10%; transform: rotate(45deg); box-shadow: 0 0 25px currentColor; }
         .stage-3 { clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%); border-radius: 15px; filter: drop-shadow(0 0 15px currentColor) brightness(1.2); }
         .stage-4 { clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%); filter: drop-shadow(0 0 20px currentColor) brightness(1.5); }
-        .stage-5 { border-radius: 8px; filter: drop-shadow(0 0 30px currentColor) brightness(1.8); } /* Removed Animation here */
+        .stage-5 { border-radius: 8px; animation: rotateSquare 3s linear infinite; filter: drop-shadow(0 0 30px currentColor) brightness(1.8); }
+        @keyframes rotateSquare { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         
         .orb-lvl-badge { position: absolute; top: 10px; right: 10px; background: #6366f1; color: white; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 900; border: 1px solid #818cf8; z-index: 5; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
         
@@ -65,7 +66,6 @@
         .loot-section-title { font-size: 24px; font-weight: 900; color: #94a3b8; margin: 30px 0 15px; border-left: 5px solid #6366f1; padding-left: 15px; }
         .notif-banner { position: fixed; top: 25px; left: -400px; width: 320px; background: #6366f1; color: white; padding: 20px; border-radius: 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); z-index: 99999; display: flex; align-items: center; gap: 15px; font-weight: 800; font-size: 18px; transition: left 0.5s; border: 2px solid #818cf8; }
         .notif-banner.active { left: 25px; }
-        .market-settings { display: flex; justify-content: flex-end; align-items: center; gap: 10px; margin-bottom: 20px; background: #1e293b; padding: 10px 20px; border-radius: 12px; border: 1px solid #334155; }
     </style>
 </head>
 <body>
@@ -130,6 +130,15 @@
         </div>
 
         <div id="collectionView" class="tab-view hidden">
+            <div class="card" style="padding: 15px; margin-bottom: 20px; display: flex; align-items: center; gap: 15px;">
+                <span style="font-weight: 800; color: #94a3b8; font-size: 14px;">SORT BY:</span>
+                <select id="collectionSortOrder" onchange="renderCollection()" style="margin-bottom: 0; padding: 8px; font-size: 14px; width: auto;">
+                    <option value="asc">Name (A-Z)</option>
+                    <option value="desc">Name (Z-A)</option>
+                    <option value="count_high">Highest Count</option>
+                    <option value="count_low">Lowest Count</option>
+                </select>
+            </div>
             <h3 style="text-align:center; color:#6366f1; margin-bottom:25px; font-size:28px;">YOUR COLLECTION</h3>
             <div id="standardOrbsSection">
                 <div class="loot-section-title">OWNED ORBS</div>
@@ -143,18 +152,7 @@
 
         <div id="marketplaceView" class="tab-view hidden">
             <h3 style="text-align:center; color:#f59e0b; margin-bottom:15px;">💎 HYPER RARE MARKET</h3>
-            
-            <div class="market-settings">
-                <label style="font-size: 14px; font-weight: 800; color: #94a3b8;">SORT BY PRICE:</label>
-                <select id="marketSort" style="width: auto; margin: 0; padding: 8px 12px; font-size: 14px;" onchange="renderOrbs('marketOrbGrid', MARKET_ORB_DATA)">
-                    <option value="default">Default</option>
-                    <option value="asc">Ascending</option>
-                    <option value="desc">Descending</option>
-                </select>
-            </div>
-
             <div class="orb-grid" id="marketOrbGrid" style="margin-bottom: 50px;"></div>
-            
             <h3 style="text-align:center; color:#6366f1; margin-bottom:15px;">🎁 MYSTERY CHESTS</h3>
             <div class="chest-grid">
                 <div class="chest-card"><div class="chest-icon">🪵</div><div class="chest-title">WOOD CHEST</div><div class="chest-cost">$250</div><button class="buy-btn btn-available" onclick="buyChest('wood', 250)">BUY</button></div>
@@ -370,28 +368,12 @@
         const grid = document.getElementById(gridId);
         if(!grid) return;
         grid.innerHTML = '';
-        
-        let displayList = [...dataList];
-        if (gridId === 'marketOrbGrid') {
-            const sortVal = document.getElementById('marketSort').value;
-            if (sortVal === 'asc') displayList.sort((a, b) => a.baseCost - b.baseCost);
-            else if (sortVal === 'desc') displayList.sort((a, b) => b.baseCost - a.baseCost);
-        }
-
-        displayList.forEach((orb, index) => {
+        dataList.forEach((orb, index) => {
             const owned = (userData.orbs?.[orb.id] || 0) + (userData.lootedOrbs?.[orb.id] || 0);
             const boughtOnly = userData.orbs?.[orb.id] || 0;
             const cost = Math.floor(orb.baseCost * Math.pow(1.3, boughtOnly));
             const income = calcIncome(orb, owned);
-            
-            // Logic for unlocking orbs in sequence
-            let isUnlocked = false;
-            if (gridId === 'orbGrid') {
-                isUnlocked = index === 0 || ((userData.orbs?.[dataList[index-1].id] || 0) + (userData.lootedOrbs?.[dataList[index-1].id] || 0) > 0);
-            } else {
-                isUnlocked = true; // Marketplace orbs are always visible
-            }
-
+            const isUnlocked = index === 0 || ((userData.orbs?.[dataList[index-1].id] || 0) + (userData.lootedOrbs?.[dataList[index-1].id] || 0) > 0);
             const isMaxed = boughtOnly >= 50;
             const div = document.createElement('div'); div.className = 'orb-item';
             
@@ -404,32 +386,43 @@
         });
     }
 
-    function renderCollection() {
+    window.renderCollection = () => {
         if (!userData) return;
         const collectionGrid = document.getElementById('collectionGrid');
         const lootGrid = document.getElementById('collectionLootGrid');
+        const sortMode = document.getElementById('collectionSortOrder').value;
+        
         collectionGrid.innerHTML = '';
         lootGrid.innerHTML = '';
 
         const allPossibleOrbs = [...ORB_DATA, ...MARKET_ORB_DATA];
 
-        if (userData.orbs) {
-            Object.keys(userData.orbs).forEach(id => {
-                if (userData.orbs[id] > 0) {
-                    const orb = allPossibleOrbs.find(o => o.id === id);
-                    if (orb) collectionGrid.appendChild(createCollectionItem(orb, userData.orbs[id]));
-                }
-            });
-        }
+        const processList = (dataObj) => {
+            if(!dataObj) return [];
+            return Object.keys(dataObj)
+                .filter(id => dataObj[id] > 0)
+                .map(id => ({ 
+                    id, 
+                    count: dataObj[id], 
+                    orb: allPossibleOrbs.find(o => o.id === id) 
+                }))
+                .filter(item => item.orb)
+                .sort((a, b) => {
+                    if (sortMode === 'asc') return a.orb.name.localeCompare(b.orb.name);
+                    if (sortMode === 'desc') return b.orb.name.localeCompare(a.orb.name);
+                    if (sortMode === 'count_high') return b.count - a.count;
+                    if (sortMode === 'count_low') return a.count - b.count;
+                    return 0;
+                });
+        };
 
-        if (userData.lootedOrbs) {
-            Object.keys(userData.lootedOrbs).forEach(id => {
-                if (userData.lootedOrbs[id] > 0) {
-                    const orb = allPossibleOrbs.find(o => o.id === id);
-                    if (orb) lootGrid.appendChild(createCollectionItem(orb, userData.lootedOrbs[id]));
-                }
-            });
-        }
+        processList(userData.orbs).forEach(item => {
+            collectionGrid.appendChild(createCollectionItem(item.orb, item.count));
+        });
+
+        processList(userData.lootedOrbs).forEach(item => {
+            lootGrid.appendChild(createCollectionItem(item.orb, item.count));
+        });
     }
 
     function createCollectionItem(orb, count) {
