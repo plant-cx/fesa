@@ -38,9 +38,10 @@
         .buy-btn { font-size: 14px; padding: 12px; margin-top: 10px; }
         .btn-locked { background: #334155 !important; color: #64748b !important; cursor: not-allowed; border: 1px solid transparent; }
         .btn-available { background: #10b981 !important; color: white !important; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3); }
-        .orb-stats-top { position: absolute; top: 10px; left: 10px; display: flex; gap: 6px; align-items: center; z-index: 5; }
+        .orb-stats-top { position: absolute; top: 10px; left: 10px; right: 10px; display: flex; justify-content: space-between; align-items: center; z-index: 5; }
         .sell-btn { background: #ef4444; color: white; border: none; border-radius: 6px; padding: 4px 10px; font-size: 11px; font-weight: 900; cursor: pointer; }
         .owned-badge { background: #1e293b; color: #f8fafc; font-size: 13px; padding: 4px 10px; border-radius: 6px; font-weight: 900; border: 2px solid #475569; }
+        .lvl-btn { background: #6366f1; color: white; border: 1px solid #818cf8; font-size: 11px; padding: 4px 8px; border-radius: 6px; font-weight: 900; cursor: pointer; }
         
         .clicker-btn { width: 160px; height: 160px; border-radius: 50%; background: radial-gradient(circle, #6366f1, #4338ca); border: 10px solid #312e81; font-size: 55px; margin: 0 auto 15px; display: block; cursor: pointer; transition: transform 0.1s, background 0.3s; box-shadow: 0 0 40px rgba(99, 102, 241, 0.5); }
         .clicker-btn:active { transform: scale(0.95); }
@@ -259,6 +260,17 @@
     const getClickUpgradeCost = (lvl) => lvl >= 51 ? Infinity : Math.floor(25 + ((lvl - 1) * 50.5));
     const calcIncome = (orb, owned) => owned > 0 ? Math.floor(orb.baseInc * (Math.pow(2.0, owned) - 1)) : 0;
     const getStageClass = (owned) => owned >= 41 ? 'stage-5' : owned >= 31 ? 'stage-4' : owned >= 21 ? 'stage-3' : owned >= 11 ? 'stage-2' : 'stage-1';
+    
+    // Level Multiplier Logic
+    const getOrbLevelCost = (lvl) => lvl >= 21 ? Infinity : Math.floor(10 * Math.pow(3.487, lvl - 1));
+
+    window.levelUpOrb = async (id) => {
+        const curLvl = userData.orbLevels?.[id] || 1;
+        const cost = getOrbLevelCost(curLvl);
+        if(userData.balance >= cost && curLvl < 21) {
+            await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-cost), [`orbLevels.${id}`]: increment(1) });
+        }
+    };
 
     window.buyChest = async (tier, cost) => {
         if(!userData || userData.balance < cost) return alert("NOT ENOUGH CASH!");
@@ -318,8 +330,11 @@
         grid.innerHTML = '';
         dataList.forEach((orb, index) => {
             const owned = userData.orbs?.[orb.id] || 0;
+            const lvl = userData.orbLevels?.[orb.id] || 1;
             const cost = Math.floor(orb.baseCost * Math.pow(1.3, owned));
-            const income = calcIncome(orb, owned);
+            const lvlCost = getOrbLevelCost(lvl);
+            const income = calcIncome(orb, owned) * lvl; // Multiplied by Level
+            
             const isUnlocked = index === 0 || (userData.orbs?.[dataList[index-1].id] > 0);
             const isMaxed = owned >= 50;
             const div = document.createElement('div'); div.className = 'orb-item';
@@ -327,7 +342,22 @@
             let btnLabel = isMaxed ? "MAXED" : (isUnlocked ? `UPG $${cost.toLocaleString()}` : "LOCKED");
             let btnClass = (userData.balance >= cost && isUnlocked && !isMaxed) ? 'btn-available' : 'btn-locked';
 
-            div.innerHTML = `${isUnlocked ? `<div class="orb-stats-top">${owned > 0 ? `<button onclick="sellOrb('${orb.id}', ${Math.floor(cost * 0.7)})" class="sell-btn">SELL</button>` : ''}<div class="owned-badge">x${owned}</div></div>` : ''}<div class="orb-visual ${getStageClass(owned)}" style="color:${orb.color}; background:currentColor"></div><b>${orb.name}</b>${isUnlocked ? `<div style="color:#10b981; font-weight:800;">+$${income.toLocaleString()}</div><div class="progress-bg"><div class="progress-fill" id="bar-${orb.id}"></div></div>` : ''}<button onclick="buyOrb('${orb.id}', ${cost}, ${owned})" class="buy-btn ${btnClass}">${btnLabel}</button>`;
+            div.innerHTML = `
+                ${isUnlocked ? `
+                    <div class="orb-stats-top">
+                        <div style="display:flex; gap:4px;">
+                            ${owned > 0 ? `<button onclick="sellOrb('${orb.id}', ${Math.floor(cost * 0.7)})" class="sell-btn">SELL</button>` : ''}
+                            <div class="owned-badge">x${owned}</div>
+                        </div>
+                        <button onclick="levelUpOrb('${orb.id}')" class="lvl-btn" title="Upgrade Level">
+                            Lvl ${lvl} ${lvl < 21 ? `($${lvlCost.toLocaleString()})` : '(MAX)'}
+                        </button>
+                    </div>` : ''}
+                <div class="orb-visual ${getStageClass(owned)}" style="color:${orb.color}; background:currentColor; margin-top:15px;"></div>
+                <b>${orb.name}</b>
+                ${isUnlocked ? `<div style="color:#10b981; font-weight:800;">+$${income.toLocaleString()}</div><div class="progress-bg"><div class="progress-fill" id="bar-${orb.id}"></div></div>` : ''}
+                <button onclick="buyOrb('${orb.id}', ${cost}, ${owned})" class="buy-btn ${btnClass}">${btnLabel}</button>`;
+            
             if (!isUnlocked) div.innerHTML += `<div class="blur-lock"><div class="lock-q">?</div></div>`;
             grid.appendChild(div);
         });
@@ -383,13 +413,15 @@
         if(!userData) return;
         ORB_DATA.forEach(orb => {
             if(userData.orbs?.[orb.id] > 0) {
-                if(!window[orb.id+'_timer']) { window[orb.id+'_start'] = Date.now(); window[orb.id+'_timer'] = setInterval(() => { updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(calcIncome(orb, userData.orbs[orb.id])) }); window[orb.id+'_start'] = Date.now(); }, orb.time); }
+                const orbLvl = userData.orbLevels?.[orb.id] || 1;
+                if(!window[orb.id+'_timer']) { window[orb.id+'_start'] = Date.now(); window[orb.id+'_timer'] = setInterval(() => { updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(calcIncome(orb, userData.orbs[orb.id]) * orbLvl) }); window[orb.id+'_start'] = Date.now(); }, orb.time); }
                 const bar = document.getElementById(`bar-${orb.id}`); if(bar) bar.style.width = Math.min(((Date.now() - window[orb.id+'_start']) / orb.time) * 100, 100) + "%";
             }
         });
         MARKET_ORB_DATA.forEach(orb => {
             if(userData.orbs?.[orb.id] > 0) {
-                if(!window[orb.id+'_timer']) { window[orb.id+'_start'] = Date.now(); window[orb.id+'_timer'] = setInterval(() => { updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(calcIncome(orb, userData.orbs[orb.id])) }); window[orb.id+'_start'] = Date.now(); }, orb.time); }
+                const orbLvl = userData.orbLevels?.[orb.id] || 1;
+                if(!window[orb.id+'_timer']) { window[orb.id+'_start'] = Date.now(); window[orb.id+'_timer'] = setInterval(() => { updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(calcIncome(orb, userData.orbs[orb.id]) * orbLvl) }); window[orb.id+'_start'] = Date.now(); }, orb.time); }
                 const bar = document.getElementById(`bar-${orb.id}`); if(bar) bar.style.width = Math.min(((Date.now() - window[orb.id+'_start']) / orb.time) * 100, 100) + "%";
             }
         });
@@ -405,7 +437,7 @@
         const p = document.getElementById('authPass').value;
         if(isReg) {
             const res = await createUserWithEmailAndPassword(auth, document.getElementById('regEmail').value, p);
-            await setDoc(doc(db, "users", res.user.uid), { username: u, email: document.getElementById('regEmail').value, balance: 1000, orbs: {}, clickLevel: 1, mysteryOrbs: [] });
+            await setDoc(doc(db, "users", res.user.uid), { username: u, email: document.getElementById('regEmail').value, balance: 1000, orbs: {}, clickLevel: 1, mysteryOrbs: [], orbLevels: {} });
         } else {
             const s = await getDocs(query(collection(db, "users"), where("username", "==", u)));
             await signInWithEmailAndPassword(auth, s.docs[0].data().email, p);
