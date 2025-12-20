@@ -160,7 +160,7 @@
                 <div class="chest-card"><div class="chest-icon">🥉</div><div class="chest-title">BRONZE CHEST</div><div class="chest-cost">$1,000</div><button class="buy-btn btn-available" onclick="buyChest('bronze', 1000)">BUY</button></div>
                 <div class="chest-card"><div class="chest-icon">🥈</div><div class="chest-title">SILVER CHEST</div><div class="chest-cost">$25,000</div><button class="buy-btn btn-available" onclick="buyChest('silver', 25000)">BUY</button></div>
                 <div class="chest-card"><div class="chest-icon">🥇</div><div class="chest-title">GOLD CHEST</div><div class="chest-cost">$500,000</div><button class="buy-btn btn-available" onclick="buyChest('gold', 500000)">BUY</button></div>
-                <div class="chest-card"><div class="chest-icon">💎</div><div class="chest-title">PLATINUM CHEST</div><div class="chest-cost">$1,000,000</div><button class="buy-btn btn-available" onclick="buyChest('plat', 1000000)">BUY</button></div>
+                <div class="chest-card"><div class="chest-icon">🏆</div><div class="chest-title">CHAMPION CHEST</div><div class="chest-cost">$2,500,000</div><button class="buy-btn btn-available" onclick="buyChest('champion', 2500000)">BUY</button></div>
             </div>
             <div id="lootContainer"></div>
         </div>
@@ -244,28 +244,11 @@
     ];
 
     const CHEST_LOOT_TABLE = {
-        wood: ['orb1', 'orb2'],
-        bronze: ['orb3', 'orb4'],
-        silver: ['orb5', 'orb6', 'orb7', 'h_orb1'],
-        gold: ['orb8', 'orb9', 'orb10', 'h_orb2'],
-        plat: ['orb15', 'orb20', 'h_orb5']
-    };
-
-    const PRESTIGE_UPGRADES = {
-        clicks: [
-            { id: 'p_click_1', name: 'Iron Clicks', mult: 1.1, cost: 1 },
-            { id: 'p_click_2', name: 'Golden Finger', mult: 1.25, cost: 3 },
-            { id: 'p_click_3', name: 'Titan Tap', mult: 1.5, cost: 10 },
-            { id: 'p_click_4', name: 'Godly Touch', mult: 2.0, cost: 25 },
-            { id: 'p_click_5', name: 'Cosmic Click', mult: 5.0, cost: 100 }
-        ],
-        orbs: [
-            { id: 'p_orb_1', name: 'Orb Polish', mult: 1.1, cost: 2 },
-            { id: 'p_orb_2', name: 'Mana Infusion', mult: 1.25, cost: 5 },
-            { id: 'p_orb_3', name: 'Time Warp', mult: 1.5, cost: 15 },
-            { id: 'p_orb_4', name: 'Star Power', mult: 2.0, cost: 40 },
-            { id: 'p_orb_5', name: 'Dark Matter', mult: 5.0, cost: 150 }
-        ]
+        wood: { orbs: ['orb1', 'orb2'], range: [0, 10] },
+        bronze: { orbs: ['orb3', 'orb4'], range: [15, 50] },
+        silver: { orbs: ['orb5', 'orb6', 'orb7', 'h_orb1'], range: [60, 200] },
+        gold: { orbs: ['orb8', 'orb9', 'orb10', 'h_orb2'], range: [250, 600] },
+        champion: { orbs: ['orb15', 'orb20', 'h_orb5'], range: [750, 1500] }
     };
 
     onAuthStateChanged(auth, u => {
@@ -419,19 +402,20 @@
         };
 
         processList(userData.orbs).forEach(item => {
-            collectionGrid.appendChild(createCollectionItem(item.orb, item.count));
+            collectionGrid.appendChild(createCollectionItem(item.orb, item.count, false));
         });
 
         processList(userData.lootedOrbs).forEach(item => {
-            lootGrid.appendChild(createCollectionItem(item.orb, item.count));
+            lootGrid.appendChild(createCollectionItem(item.orb, item.count, true));
         });
     }
 
-    function createCollectionItem(orb, count) {
+    function createCollectionItem(orb, count, isLoot) {
         const div = document.createElement('div');
         div.className = 'orb-item';
-        div.style.minHeight = '150px';
-        div.innerHTML = `<div class="orb-visual ${getStageClass(count)}" style="color:${orb.color}; background:currentColor; width:40px; height:40px;"></div><b>${orb.name}</b><p>Owned: ${count}</p>`;
+        div.style.minHeight = '180px';
+        const income = calcIncome(orb, count);
+        div.innerHTML = `<div class="orb-lvl-badge">LVL ${calculateOrbLevel(orb, count)}</div><div class="orb-visual ${getStageClass(count)}" style="color:${orb.color}; background:currentColor; width:40px; height:40px;"></div><b>${orb.name}</b><p style="font-size:12px;">Owned: ${count}</p><div style="color:#10b981; font-weight:800; font-size:14px;">+$${income.toLocaleString()}</div>`;
         return div;
     }
 
@@ -492,17 +476,17 @@
 
     window.buyChest = async (tier, cost) => {
         if (userData.balance < cost) return alert("Not enough cash!");
-        const possible = CHEST_LOOT_TABLE[tier];
-        const winId = possible[Math.floor(Math.random() * possible.length)];
+        const data = CHEST_LOOT_TABLE[tier];
+        const winId = data.orbs[Math.floor(Math.random() * data.orbs.length)];
         const orbName = [...ORB_DATA, ...MARKET_ORB_DATA].find(o => o.id === winId).name;
+        const cashBonus = Math.floor(Math.random() * (data.range[1] - data.range[0] + 1)) + data.range[0];
 
-        // CRITICAL FIX: Ensure lootedOrbs object exists before incrementing
-        let updates = { balance: increment(-cost) };
+        let updates = { balance: increment(-cost + cashBonus) };
         if (!userData.lootedOrbs) updates.lootedOrbs = {};
         updates[`lootedOrbs.${winId}`] = increment(1);
 
         await updateDoc(doc(db, "users", myUid), updates);
-        alert(`🎁 Chest contains: ${orbName}! (Added to Chest Finds)`);
+        alert(`🎁 Chest contains: ${orbName}!\n💰 Plus a $${cashBonus} cash find!`);
     };
 
     document.getElementById('mainClicker').addEventListener('click', (e) => {
