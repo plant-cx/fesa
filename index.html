@@ -369,24 +369,29 @@
         PRESTIGE_UPGRADES.clicks.forEach(u => renderUpgrade(u, rowClick));
         PRESTIGE_UPGRADES.orbs.forEach(u => renderUpgrade(u, rowOrb));
     }
-
 window.doPrestige = async () => {
     if(userData.balance < 50000000) return alert("Need $50 Million!");
     if(!confirm("Reset everything for Prestige Points?")) return;
+    
+    // Calculate points using the same formula shown in the UI
     const units = userData.balance / 50000000;
     const points = Math.floor(units + Math.pow(units, 1.4));
     
-    // Updated balance from 1000 to 500 to ensure a fresh start with capital
-    await updateDoc(doc(db, "users", myUid), { 
-        balance: 500, 
-        orbs: {}, 
-        clickLevel: 1, 
-        prestigePoints: increment(points) 
-    });
-    
-    location.reload();
+    try {
+        await updateDoc(doc(db, "users", myUid), { 
+            balance: 500, 
+            orbs: {}, 
+            clickLevel: 1, 
+            prestigePoints: increment(points) // Correctly increments existing points
+        });
+        
+        alert(`Success! You earned ${points.toLocaleString()} Prestige Points.`);
+        location.reload();
+    } catch (error) {
+        console.error("Prestige failed:", error);
+        alert("An error occurred during prestige. Please try again.");
+    }
 };
-
     window.buyPrestige = async (id, cost) => {
         if(userData.prestigePoints < cost || userData.prestigeUpgrades?.includes(id)) return;
         await updateDoc(doc(db, "users", myUid), { prestigePoints: increment(-cost), prestigeUpgrades: arrayUnion(id) });
