@@ -445,13 +445,23 @@ window.doPrestige = async () => {
     window.toggleAuthMode = () => { isReg = !isReg; document.getElementById('regArea').classList.toggle('hidden', !isReg); };
     window.logout = () => signOut(auth).then(() => location.reload());
     window.toggleSettings = () => document.getElementById('settingsMenu').classList.toggle('hidden');
-    window.buyChest = async (tier, cost) => {
+window.buyChest = async (tier, cost) => {
         if(userData.balance < cost) return alert("NOT ENOUGH CASH!");
-        let r = Math.random() * 100;
-        let inc = 10, time = 5000, type = "Common";
-        const name = `${type} Mystery Orb`;
-        await updateDoc(doc(db, "users", myUid), { balance: increment(-cost), mysteryOrbs: arrayUnion({ name, inc, time, color: "#6366f1", tier, lastClaim: Date.now() }) });
-        alert(`UNBOXED: ${name}`);
+        
+        // Define possible rewards based on the chest tier
+        let pool = ORB_DATA;
+        if (tier === 'silver' || tier === 'gold' || tier === 'plat') pool = [...ORB_DATA, ...MARKET_ORB_DATA];
+        
+        // Pick a random orb from the pool
+        const reward = pool[Math.floor(Math.random() * pool.length)];
+        
+        // Update balance and add the orb directly to the orbs collection
+        await updateDoc(doc(db, "users", myUid), { 
+            balance: increment(-cost), 
+            [`orbs.${reward.id}`]: increment(1) 
+        });
+        
+        alert(`UNBOXED: ${reward.name}! It has been added to your collection.`);
     };
     function renderLootSections() {} // Dummy to prevent error
     function renderCollection() {
