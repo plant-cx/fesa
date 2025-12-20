@@ -78,8 +78,8 @@
         <input type="text" id="loginUser" placeholder="Username">
         <div id="regArea" class="hidden"><input type="email" id="regEmail" placeholder="Email Address"></div>
         <input type="password" id="authPass" placeholder="Password">
-        <button onclick="handleAuth()">Enter Game</button>
-        <p style="text-align:center; margin-top:20px;"><a href="javascript:void(0)" onclick="toggleAuthMode()" style="color:#6366f1; font-weight:800;">Switch Login/Register</a></p>
+        <button id="authBtn">Enter Game</button>
+        <p style="text-align:center; margin-top:20px;"><a href="javascript:void(0)" id="toggleAuth" style="color:#6366f1; font-weight:800;">Switch Login/Register</a></p>
     </div>
 
     <div id="appScreen" class="hidden">
@@ -251,6 +251,23 @@
         champion: { orbs: ['orb15', 'orb20', 'h_orb5'], range: [750, 1500] }
     };
 
+    const PRESTIGE_UPGRADES = {
+        clicks: [
+            { id: 'p_click_1', name: 'Iron Clicks', mult: 1.1, cost: 1 },
+            { id: 'p_click_2', name: 'Golden Finger', mult: 1.25, cost: 3 },
+            { id: 'p_click_3', name: 'Titan Tap', mult: 1.5, cost: 10 },
+            { id: 'p_click_4', name: 'Godly Touch', mult: 2.0, cost: 25 },
+            { id: 'p_click_5', name: 'Cosmic Click', mult: 5.0, cost: 100 }
+        ],
+        orbs: [
+            { id: 'p_orb_1', name: 'Orb Polish', mult: 1.1, cost: 2 },
+            { id: 'p_orb_2', name: 'Mana Infusion', mult: 1.25, cost: 5 },
+            { id: 'p_orb_3', name: 'Time Warp', mult: 1.5, cost: 15 },
+            { id: 'p_orb_4', name: 'Star Power', mult: 2.0, cost: 40 },
+            { id: 'p_orb_5', name: 'Dark Matter', mult: 5.0, cost: 150 }
+        ]
+    };
+
     onAuthStateChanged(auth, u => {
         if(u) {
             myUid = u.uid;
@@ -402,15 +419,15 @@
         };
 
         processList(userData.orbs).forEach(item => {
-            collectionGrid.appendChild(createCollectionItem(item.orb, item.count, false));
+            collectionGrid.appendChild(createCollectionItem(item.orb, item.count));
         });
 
         processList(userData.lootedOrbs).forEach(item => {
-            lootGrid.appendChild(createCollectionItem(item.orb, item.count, true));
+            lootGrid.appendChild(createCollectionItem(item.orb, item.count));
         });
     }
 
-    function createCollectionItem(orb, count, isLoot) {
+    function createCollectionItem(orb, count) {
         const div = document.createElement('div');
         div.className = 'orb-item';
         div.style.minHeight = '180px';
@@ -558,23 +575,40 @@
         });
     }, 100);
 
-    window.handleAuth = async () => {
+    const handleAuth = async () => {
         const u = document.getElementById('loginUser').value.trim().toLowerCase();
         const p = document.getElementById('authPass').value;
         const e = document.getElementById('regEmail').value;
+        if (!u || !p || (isReg && !e)) return alert("Please fill all fields");
+        
         try {
             if(isReg) {
                 const res = await createUserWithEmailAndPassword(auth, e, p);
-                await setDoc(doc(db, "users", res.user.uid), { username: u, email: e, balance: 1000, orbs: {}, lootedOrbs: {}, clickLevel: 1, prestigePoints: 0, prestigeUpgrades: [] });
+                await setDoc(doc(db, "users", res.user.uid), { 
+                    username: u, 
+                    email: e, 
+                    balance: 1000, 
+                    orbs: {}, 
+                    lootedOrbs: {}, 
+                    clickLevel: 1, 
+                    prestigePoints: 0, 
+                    prestigeUpgrades: [] 
+                });
             } else {
-                const s = await getDocs(query(collection(db, "users"), where("username", "==", u)));
+                const q = query(collection(db, "users"), where("username", "==", u));
+                const s = await getDocs(q);
                 if(s.empty) return alert("User not found");
                 await signInWithEmailAndPassword(auth, s.docs[0].data().email, p);
             }
         } catch(err) { alert(err.message); }
     };
 
-    window.toggleAuthMode = () => { isReg = !isReg; document.getElementById('regArea').classList.toggle('hidden'); };
+    document.getElementById('authBtn').addEventListener('click', handleAuth);
+    document.getElementById('toggleAuth').addEventListener('click', () => { 
+        isReg = !isReg; 
+        document.getElementById('regArea').classList.toggle('hidden'); 
+    });
+
     window.toggleSettings = () => document.getElementById('settingsMenu').classList.toggle('hidden');
     window.updateProfile = async () => {
         const n = document.getElementById('setNewUser').value.trim();
