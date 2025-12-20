@@ -15,6 +15,11 @@
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; position: relative; }
         .balance-pill { background: #064e3b; color: #34d399; padding: 12px 24px; border-radius: 50px; font-weight: 900; border: 2px solid #059669; font-size: 22px; }
         .pfp-circle { width: 55px; height: 55px; border-radius: 50%; border: 3px solid #6366f1; background: #334155; cursor: pointer; }
+        
+        /* Relocated Prestige Button Style */
+        .prestige-btn-top { background: linear-gradient(135deg, #4f46e5, #9333ea); border: 2px solid #a855f7; color: white; padding: 12px 20px; border-radius: 12px; font-size: 14px; font-weight: 900; cursor: pointer; white-space: nowrap; box-shadow: 0 4px 10px rgba(147, 51, 234, 0.3); }
+        .prestige-btn-top:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(147, 51, 234, 0.4); }
+
         #settingsMenu { position: absolute; right: 0; top: 70px; width: 300px; z-index: 1000; box-shadow: 0 15px 40px rgba(0,0,0,0.6); border: 2px solid #475569; }
         .tabs { display: flex; gap: 8px; margin-bottom: 25px; background: #0f172a; padding: 8px; border-radius: 16px; overflow-x: auto; border: 1px solid #334155; }
         .tab { flex: 1; text-align: center; padding: 14px; cursor: pointer; border-radius: 12px; color: #94a3b8; font-weight: 800; font-size: 14px; white-space: nowrap; }
@@ -40,7 +45,6 @@
         .btn-available { background: #10b981 !important; color: white !important; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3); }
         .orb-stats-top { position: absolute; top: 10px; left: 10px; display: flex; gap: 6px; align-items: center; z-index: 5; }
         
-        /* New Level Badge Style */
         .orb-lvl-badge { position: absolute; top: 10px; right: 10px; background: #6366f1; color: white; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 900; border: 1px solid #818cf8; z-index: 5; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
         
         .sell-btn { background: #ef4444; color: white; border: none; border-radius: 6px; padding: 4px 10px; font-size: 11px; font-weight: 900; cursor: pointer; }
@@ -86,6 +90,7 @@
             <div style="display:flex; align-items:center; gap:15px;">
                 <img id="userPfp" class="pfp-circle" src="" onclick="toggleSettings()">
                 <b id="userDisplay" style="font-size:20px;">@user</b>
+                <button id="doPrestigeBtn" class="prestige-btn-top" onclick="showTab('prestige')">PRESTIGE ✨</button>
             </div>
             <div style="display:flex; align-items:center; gap:12px;">
                 <div class="balance-pill">$<span id="userBal">0</span></div>
@@ -180,14 +185,14 @@
 
         <div id="prestigeView" class="tab-view hidden">
             <div class="prestige-banner">
-                <h2 style="font-size:36px; margin-bottom:10px;">PRESTIGE</h2>
-                <p style="color:#d8b4fe; margin-bottom:20px;">Reset your money, clicks, and orbs to gain Prestige Points!</p>
+                <h2 style="font-size:36px; margin-bottom:10px;">PRESTIGE SYSTEM</h2>
+                <p style="color:#d8b4fe; margin-bottom:20px;">Reset orbs and money to grow your legacy.</p>
                 <div style="font-size:24px; font-weight:900; background:rgba(0,0,0,0.3); padding:15px; border-radius:12px; display:inline-block; border:1px solid #a855f7;">
-                    POINTS: <span id="prestigePointsDisplay" style="color:#facc15">0</span>
+                    MY POINTS: <span id="prestigePointsDisplay" style="color:#facc15">0</span>
                 </div>
                 <div style="margin-top:25px;">
                     <div style="margin-bottom:10px; font-size:14px; color:#cbd5e1;">Available on Reset: <b id="pendingPrestigePoints" style="color:#facc15; font-size:18px;">0</b> Points</div>
-                    <button id="doPrestigeBtn" onclick="doPrestige()" style="background:#ef4444; max-width:300px;">PRESTIGE NOW</button>
+                    <button id="mainPrestigeAction" onclick="doPrestige()" style="background:#ef4444; max-width:300px;">RESET & ASCEND</button>
                     <p style="font-size:12px; margin-top:5px; color:#94a3b8;">Requirement: $50,000,000</p>
                 </div>
             </div>
@@ -314,13 +319,18 @@
             potentialPoints = Math.floor(units + Math.pow(units, 1.4));
         }
         document.getElementById('pendingPrestigePoints').innerText = potentialPoints.toLocaleString();
-        const pBtn = document.getElementById('doPrestigeBtn');
+        
+        // Update both the header and panel buttons
+        const topPBtn = document.getElementById('doPrestigeBtn');
+        const mainPBtn = document.getElementById('mainPrestigeAction');
         if(userData.balance < 50000000) {
-            pBtn.style.opacity = "0.5";
-            pBtn.style.cursor = "not-allowed";
+            topPBtn.style.opacity = "0.6";
+            mainPBtn.style.opacity = "0.5";
+            mainPBtn.style.cursor = "not-allowed";
         } else {
-            pBtn.style.opacity = "1";
-            pBtn.style.cursor = "pointer";
+            topPBtn.style.opacity = "1";
+            mainPBtn.style.opacity = "1";
+            mainPBtn.style.cursor = "pointer";
         }
     };
 
@@ -349,11 +359,9 @@
         return Math.floor(base * mult);
     };
 
-    // New Level Calculation Logic
     const calculateOrbLevel = (orb, owned) => {
         if (!owned || owned <= 0) return 1;
         const incomePerSec = calcIncome(orb, owned) / (orb.time / 1000);
-        
         if (incomePerSec <= 10) return 1;
         if (incomePerSec <= 25) return 2;
         if (incomePerSec <= 100) return 3;
@@ -460,24 +468,13 @@
         const rowClick = document.getElementById('pRowClick');
         const rowOrb = document.getElementById('pRowOrb');
         rowClick.innerHTML = ''; rowOrb.innerHTML = '';
-        
         const renderUpgrade = (u, container) => {
             const owned = userData.prestigeUpgrades?.includes(u.id);
             const div = document.createElement('div');
             div.className = `prestige-card ${owned ? 'owned' : ''}`;
-            div.innerHTML = `
-                <div>
-                    <b style="color:${owned ? '#10b981' : 'white'}">${u.name}</b>
-                    <p style="font-size:12px; margin-top:5px; color:#cbd5e1;">x${u.mult} Multiplier</p>
-                </div>
-                ${owned 
-                    ? `<button class="buy-btn btn-locked" style="margin-top:10px; background:#064e3b !important; color:#34d399 !important;">OWNED</button>` 
-                    : `<button onclick="buyPrestige('${u.id}', ${u.cost})" class="buy-btn ${userData.prestigePoints >= u.cost ? 'btn-available' : 'btn-locked'}">UNLOCK ${u.cost} PTS</button>`
-                }
-            `;
+            div.innerHTML = `<div><b style="color:${owned ? '#10b981' : 'white'}">${u.name}</b><p style="font-size:12px; margin-top:5px; color:#cbd5e1;">x${u.mult} Multiplier</p></div>${owned ? `<button class="buy-btn btn-locked" style="margin-top:10px; background:#064e3b !important; color:#34d399 !important;">OWNED</button>` : `<button onclick="buyPrestige('${u.id}', ${u.cost})" class="buy-btn ${userData.prestigePoints >= u.cost ? 'btn-available' : 'btn-locked'}">UNLOCK ${u.cost} PTS</button>`}`;
             container.appendChild(div);
         };
-
         PRESTIGE_UPGRADES.clicks.forEach(u => renderUpgrade(u, rowClick));
         PRESTIGE_UPGRADES.orbs.forEach(u => renderUpgrade(u, rowOrb));
     }
@@ -485,27 +482,16 @@
     window.doPrestige = async () => {
         if(!userData || !myUid || userData.balance < 50000000) return alert("Need $50 Million to Prestige!");
         if(!confirm("ARE YOU SURE? This will RESET your Cash, Orbs, and Click Level to gain Prestige Points. You keep mystery items.")) return;
-
         const units = userData.balance / 50000000;
         const points = Math.floor(units + Math.pow(units, 1.4));
-
-        await updateDoc(doc(db, "users", myUid), {
-            balance: 1000,
-            orbs: {},
-            clickLevel: 1,
-            prestigePoints: increment(points)
-        });
-        
+        await updateDoc(doc(db, "users", myUid), { balance: 1000, orbs: {}, clickLevel: 1, prestigePoints: increment(points) });
         location.reload(); 
     };
 
     window.buyPrestige = async (id, cost) => {
         if(!userData || !myUid || (userData.prestigePoints || 0) < cost) return alert("Not enough Points!");
         if(userData.prestigeUpgrades?.includes(id)) return;
-        await updateDoc(doc(db, "users", myUid), {
-            prestigePoints: increment(-cost),
-            prestigeUpgrades: arrayUnion(id)
-        });
+        await updateDoc(doc(db, "users", myUid), { prestigePoints: increment(-cost), prestigeUpgrades: arrayUnion(id) });
     };
 
     window.buyOrb = async (id, cost, owned) => { if(owned < 50 && userData && myUid && userData.balance >= cost) await updateDoc(doc(db, "users", myUid), { balance: increment(-cost), [`orbs.${id}`]: increment(1) }); };
@@ -513,15 +499,10 @@
     window.upgradeClicker = async () => { const cost = getClickUpgradeCost(userData.clickLevel || 1); if(userData && myUid && userData.balance >= cost) await updateDoc(doc(db, "users", myUid), { balance: increment(-cost), clickLevel: increment(1) }); };
     
     document.getElementById('mainClicker').addEventListener('click', (e) => {
-        if(!initialClickDone) {
-            initialClickDone = true;
-            document.getElementById('mainClicker').innerText = "💰";
-        }
+        if(!initialClickDone) { initialClickDone = true; document.getElementById('mainClicker').innerText = "💰"; }
         if (!userData || !myUid) return;
-
         const p = getPower(userData.clickLevel || 1);
         updateDoc(doc(db, "users", myUid), { balance: increment(p), totalClicks: increment(1) });
-        
         const pop = document.createElement('div'); pop.className = 'popup-anim'; pop.innerText = `+$${p}`;
         pop.style.left = e.clientX + 'px'; pop.style.top = e.clientY + 'px';
         document.body.appendChild(pop); setTimeout(() => pop.remove(), 400); 
