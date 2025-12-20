@@ -15,7 +15,6 @@
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; position: relative; gap: 10px; flex-wrap: wrap; }
         .balance-pill { background: #064e3b; color: #34d399; padding: 12px 24px; border-radius: 50px; font-weight: 900; border: 2px solid #059669; font-size: 22px; }
         
-        /* New Header Prestige Button */
         .header-prestige-btn { background: linear-gradient(135deg, #4f46e5, #9333ea); border: 2px solid #a855f7; color: white; padding: 12px 20px; border-radius: 12px; font-weight: 900; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3); }
         .header-prestige-btn:hover { transform: translateY(-2px); }
 
@@ -234,6 +233,14 @@
         { id: 'h_orb5', name: 'Cosmic Orb', baseCost: 100000000000, baseInc: 25000000000, time: 8000, color: '#6366f1' }
     ];
 
+    const CHEST_LOOT_TABLE = {
+        wood: ['orb1', 'orb2'],
+        bronze: ['orb3', 'orb4'],
+        silver: ['orb5', 'orb6', 'orb7', 'h_orb1'],
+        gold: ['orb8', 'orb9', 'orb10', 'h_orb2'],
+        plat: ['orb15', 'orb20', 'h_orb5']
+    };
+
     const PRESTIGE_UPGRADES = {
         clicks: [
             { id: 'p_click_1', name: 'Iron Clicks', mult: 1.1, cost: 1 },
@@ -260,7 +267,6 @@
                     updateUI();
                     renderOrbs('orbGrid', ORB_DATA);
                     renderOrbs('marketOrbGrid', MARKET_ORB_DATA);
-                    renderLootSections();
                     renderCollection();
                     renderPrestige();
                     loadInbox();
@@ -296,7 +302,8 @@
         if (incomePerSec <= 5000000000) return 20;
         return 21;
     };
-const updateUI = () => {
+
+    const updateUI = () => {
         if (!userData) return;
         const currentLevel = userData.clickLevel || 1;
         const currentBasePower = currentLevel <= 1 ? 1 : Math.min(1 + ((currentLevel - 1) * 10), 500);
@@ -309,8 +316,6 @@ const updateUI = () => {
         document.getElementById('clickPowerVal').innerText = getPower(currentLevel).toLocaleString();
         
         const upgradeBtn = document.getElementById('upgradeClickBtn');
-        const costSpan = document.getElementById('clickCost');
-        
         if (isMaxed) {
             upgradeBtn.innerText = "MAXED";
             upgradeBtn.style.background = "#334155";
@@ -355,20 +360,59 @@ const updateUI = () => {
         if(!grid) return;
         grid.innerHTML = '';
         dataList.forEach((orb, index) => {
-            const owned = userData.orbs?.[orb.id] || 0;
-            const cost = Math.floor(orb.baseCost * Math.pow(1.3, owned));
+            const owned = (userData.orbs?.[orb.id] || 0) + (userData.lootedOrbs?.[orb.id] || 0);
+            const boughtOnly = userData.orbs?.[orb.id] || 0;
+            const cost = Math.floor(orb.baseCost * Math.pow(1.3, boughtOnly));
             const income = calcIncome(orb, owned);
-            const isUnlocked = index === 0 || (userData.orbs?.[dataList[index-1].id] > 0);
-            const isMaxed = owned >= 50;
+            const isUnlocked = index === 0 || ((userData.orbs?.[dataList[index-1].id] || 0) + (userData.lootedOrbs?.[dataList[index-1].id] || 0) > 0);
+            const isMaxed = boughtOnly >= 50;
             const div = document.createElement('div'); div.className = 'orb-item';
             
             let btnLabel = isMaxed ? "MAXED" : (isUnlocked ? `UPG $${cost.toLocaleString()}` : "LOCKED");
             let btnClass = (userData.balance >= cost && isUnlocked && !isMaxed) ? 'btn-available' : 'btn-locked';
 
-            div.innerHTML = `${isUnlocked ? `<div class="orb-stats-top">${owned > 0 ? `<button onclick="sellOrb('${orb.id}', ${Math.floor(cost * 0.7)})" class="sell-btn">SELL</button>` : ''}<div class="owned-badge">x${owned}</div></div><div class="orb-lvl-badge">LVL ${calculateOrbLevel(orb, owned)}</div>` : ''}<div class="orb-visual ${getStageClass(owned)}" style="color:${orb.color}; background:currentColor"></div><b>${orb.name}</b>${isUnlocked ? `<div style="color:#10b981; font-weight:800;">+$${income.toLocaleString()}</div><div class="progress-bg"><div class="progress-fill" id="bar-${orb.id}"></div></div>` : ''}<button onclick="buyOrb('${orb.id}', ${cost}, ${owned})" class="buy-btn ${btnClass}">${btnLabel}</button>`;
+            div.innerHTML = `${isUnlocked ? `<div class="orb-stats-top">${boughtOnly > 0 ? `<button onclick="sellOrb('${orb.id}', ${Math.floor(cost * 0.7)})" class="sell-btn">SELL</button>` : ''}<div class="owned-badge">x${owned}</div></div><div class="orb-lvl-badge">LVL ${calculateOrbLevel(orb, owned)}</div>` : ''}<div class="orb-visual ${getStageClass(owned)}" style="color:${orb.color}; background:currentColor"></div><b>${orb.name}</b>${isUnlocked ? `<div style="color:#10b981; font-weight:800;">+$${income.toLocaleString()}</div><div class="progress-bg"><div class="progress-fill" id="bar-${orb.id}"></div></div>` : ''}<button onclick="buyOrb('${orb.id}', ${cost}, ${boughtOnly})" class="buy-btn ${btnClass}">${btnLabel}</button>`;
             if (!isUnlocked) div.innerHTML += `<div class="blur-lock"><div class="lock-q">?</div></div>`;
             grid.appendChild(div);
         });
+    }
+
+    function renderCollection() {
+        if (!userData) return;
+        const collectionGrid = document.getElementById('collectionGrid');
+        const lootGrid = document.getElementById('collectionLootGrid');
+        collectionGrid.innerHTML = '';
+        lootGrid.innerHTML = '';
+
+        const allPossibleOrbs = [...ORB_DATA, ...MARKET_ORB_DATA];
+
+        // Standard Purchased Orbs
+        if (userData.orbs) {
+            Object.keys(userData.orbs).forEach(id => {
+                if (userData.orbs[id] > 0) {
+                    const orb = allPossibleOrbs.find(o => o.id === id);
+                    if (orb) collectionGrid.appendChild(createCollectionItem(orb, userData.orbs[id]));
+                }
+            });
+        }
+
+        // Chest Finds
+        if (userData.lootedOrbs) {
+            Object.keys(userData.lootedOrbs).forEach(id => {
+                if (userData.lootedOrbs[id] > 0) {
+                    const orb = allPossibleOrbs.find(o => o.id === id);
+                    if (orb) lootGrid.appendChild(createCollectionItem(orb, userData.lootedOrbs[id]));
+                }
+            });
+        }
+    }
+
+    function createCollectionItem(orb, count) {
+        const div = document.createElement('div');
+        div.className = 'orb-item';
+        div.style.minHeight = '150px';
+        div.innerHTML = `<div class="orb-visual ${getStageClass(count)}" style="color:${orb.color}; background:currentColor; width:40px; height:40px;"></div><b>${orb.name}</b><p>Owned: ${count}</p>`;
+        return div;
     }
 
     function renderPrestige() {
@@ -386,56 +430,59 @@ const updateUI = () => {
         PRESTIGE_UPGRADES.orbs.forEach(u => renderUpgrade(u, rowOrb));
     }
 
-window.doPrestige = async () => {
-    // 1. Validation check
-    if(userData.balance < 50000000) return alert("Need $50 Million!");
-    
-    if(!confirm("Reset everything for Prestige Points?")) return;
-
-    // 2. Calculate points using the same formula shown in the UI
-    const units = userData.balance / 50000000;
-    const pointsToAward = Math.floor(units + Math.pow(units, 1.4));
-
-    // 3. Ensure pointsToAward is a valid number greater than 0
-    if (pointsToAward > 0) {
-        await updateDoc(doc(db, "users", myUid), { 
-            balance: 500, // Reset balance
-            orbs: {},     // Clear inventory
-            clickLevel: 1, // Reset clicker
-            prestigePoints: increment(pointsToAward) // Add the calculated points
-        });
+    window.doPrestige = async () => {
+        if(userData.balance < 50000000) return alert("Need $50 Million!");
+        if(!confirm("Reset everything for Prestige Points?")) return;
+        const units = userData.balance / 50000000;
+        const pointsToAward = Math.floor(units + Math.pow(units, 1.4));
         
-        // 4. Force reload to clear local timers and state
-        location.reload();
-    } else {
-        alert("Not enough balance to earn at least 1 point.");
-    }
-};
+        if (pointsToAward > 0) {
+            await updateDoc(doc(db, "users", myUid), { 
+                balance: 500, 
+                orbs: {}, 
+                lootedOrbs: {},
+                clickLevel: 1, 
+                prestigePoints: increment(pointsToAward) 
+            });
+            location.reload();
+        }
+    };
 
     window.buyPrestige = async (id, cost) => {
         if(userData.prestigePoints < cost || userData.prestigeUpgrades?.includes(id)) return;
         await updateDoc(doc(db, "users", myUid), { prestigePoints: increment(-cost), prestigeUpgrades: arrayUnion(id) });
     };
 
-    window.buyOrb = async (id, cost, owned) => { if(owned < 50 && userData.balance >= cost) await updateDoc(doc(db, "users", myUid), { balance: increment(-cost), [`orbs.${id}`]: increment(1) }); };
-    window.sellOrb = async (id, refund) => { if(userData?.orbs?.[id] > 0) await updateDoc(doc(db, "users", myUid), { balance: increment(refund), [`orbs.${id}`]: increment(-1) }); };
-window.upgradeClicker = async () => { 
-    // Calculate current cost
-    const cost = Math.floor(25 + ((userData.clickLevel || 1) - 1) * 50.5); 
-    
-    // Calculate current base power (before multipliers)
-    const currentBasePower = (userData.clickLevel || 1) <= 1 ? 1 : Math.min(1 + ((userData.clickLevel - 1) * 10), 500);
+    window.buyOrb = async (id, cost, owned) => { 
+        if(owned < 50 && userData.balance >= cost) await updateDoc(doc(db, "users", myUid), { balance: increment(-cost), [`orbs.${id}`]: increment(1) }); 
+    };
 
-    // Only allow upgrade if they have the balance AND haven't hit the 500 cap
-    if(userData.balance >= cost && currentBasePower < 500) {
+    window.sellOrb = async (id, refund) => { 
+        if(userData?.orbs?.[id] > 0) await updateDoc(doc(db, "users", myUid), { balance: increment(refund), [`orbs.${id}`]: increment(-1) }); 
+    };
+
+    window.upgradeClicker = async () => { 
+        const currentLevel = userData.clickLevel || 1;
+        const currentBasePower = currentLevel <= 1 ? 1 : Math.min(1 + ((currentLevel - 1) * 10), 500);
+        const cost = Math.floor(25 + (currentLevel - 1) * 50.5);
+        if(userData.balance >= cost && currentBasePower < 500) {
+            await updateDoc(doc(db, "users", myUid), { balance: increment(-cost), clickLevel: increment(1) }); 
+        }
+    };
+
+    window.buyChest = async (tier, cost) => {
+        if (userData.balance < cost) return alert("Not enough cash!");
+        const possible = CHEST_LOOT_TABLE[tier];
+        const winId = possible[Math.floor(Math.random() * possible.length)];
+        const orbName = [...ORB_DATA, ...MARKET_ORB_DATA].find(o => o.id === winId).name;
+
         await updateDoc(doc(db, "users", myUid), { 
-            balance: increment(-cost), 
-            clickLevel: increment(1) 
-        }); 
-    } else if (currentBasePower >= 500) {
-        alert("Click Power is already at maximum strength!");
-    }
-};
+            balance: increment(-cost),
+            [`lootedOrbs.${winId}`]: increment(1)
+        });
+        alert(`🎁 Chest contains: ${orbName}! (Added to Chest Finds)`);
+    };
+
     document.getElementById('mainClicker').addEventListener('click', (e) => {
         if (!userData) return;
         const p = getPower(userData.clickLevel || 1);
@@ -460,87 +507,74 @@ window.upgradeClicker = async () => {
         });
     };
 
+    window.handleCombinedSend = async () => {
+        const to = document.getElementById('msgTo').value.trim().toLowerCase().replace('@', '');
+        const body = document.getElementById('msgBody').value;
+        const amt = parseInt(document.getElementById('payAmt').value) || 0;
+
+        if (amt > userData.balance) return alert("Insufficient funds!");
+        const q = query(collection(db, "users"), where("username", "==", to));
+        const snap = await getDocs(q);
+        
+        if (snap.empty) return alert("Recipient not found!");
+        const targetUid = snap.docs[0].id;
+
+        await addDoc(collection(db, "messages"), {
+            to: to,
+            from: userData.username,
+            body: body + (amt > 0 ? ` [Sent $${amt.toLocaleString()}]` : ""),
+            date: Date.now()
+        });
+
+        if (amt > 0) {
+            await updateDoc(doc(db, "users", myUid), { balance: increment(-amt) });
+            await updateDoc(doc(db, "users", targetUid), { balance: increment(amt) });
+        }
+        alert("Mail Sent!");
+    };
+
     setInterval(() => {
         if(!userData) return;
-        [...ORB_DATA, ...MARKET_ORB_DATA].forEach(orb => {
-            if(userData.orbs?.[orb.id] > 0) {
-                if(!window[orb.id+'_timer']) { window[orb.id+'_start'] = Date.now(); window[orb.id+'_timer'] = setInterval(() => { updateDoc(doc(db, "users", myUid), { balance: increment(calcIncome(orb, userData.orbs[orb.id])) }); window[orb.id+'_start'] = Date.now(); }, orb.time); }
-                const bar = document.getElementById(`bar-${orb.id}`); if(bar) bar.style.width = Math.min(((Date.now() - window[orb.id+'_start']) / orb.time) * 100, 100) + "%";
+        const allOrbs = [...ORB_DATA, ...MARKET_ORB_DATA];
+        allOrbs.forEach(orb => {
+            const totalOwned = (userData.orbs?.[orb.id] || 0) + (userData.lootedOrbs?.[orb.id] || 0);
+            if(totalOwned > 0) {
+                if(!window[orb.id+'_timer']) { 
+                    window[orb.id+'_start'] = Date.now(); 
+                    window[orb.id+'_timer'] = setInterval(() => { 
+                        updateDoc(doc(db, "users", myUid), { balance: increment(calcIncome(orb, totalOwned)) }); 
+                        window[orb.id+'_start'] = Date.now(); 
+                    }, orb.time); 
+                }
+                const bar = document.getElementById(`bar-${orb.id}`); 
+                if(bar) bar.style.width = Math.min(((Date.now() - window[orb.id+'_start']) / orb.time) * 100, 100) + "%";
             }
         });
     }, 100);
 
-    // Helpers
     window.handleAuth = async () => {
         const u = document.getElementById('loginUser').value.trim().toLowerCase();
         const p = document.getElementById('authPass').value;
-        if(isReg) {
-            const res = await createUserWithEmailAndPassword(auth, document.getElementById('regEmail').value, p);
-            await setDoc(doc(db, "users", res.user.uid), { username: u, email: document.getElementById('regEmail').value, balance: 1000, orbs: {}, clickLevel: 1, prestigePoints: 0, prestigeUpgrades: [] });
-        } else {
-            const s = await getDocs(query(collection(db, "users"), where("username", "==", u)));
-            await signInWithEmailAndPassword(auth, s.docs[0].data().email, p);
-        }
+        const e = document.getElementById('regEmail').value;
+        try {
+            if(isReg) {
+                const res = await createUserWithEmailAndPassword(auth, e, p);
+                await setDoc(doc(db, "users", res.user.uid), { username: u, email: e, balance: 1000, orbs: {}, lootedOrbs: {}, clickLevel: 1, prestigePoints: 0, prestigeUpgrades: [] });
+            } else {
+                const s = await getDocs(query(collection(db, "users"), where("username", "==", u)));
+                if(s.empty) return alert("User not found");
+                await signInWithEmailAndPassword(auth, s.docs[0].data().email, p);
+            }
+        } catch(err) { alert(err.message); }
     };
-    window.toggleAuthMode = () => { isReg = !isReg; document.getElementById('regArea').classList.toggle('hidden', !isReg); };
-    window.logout = () => signOut(auth).then(() => location.reload());
+
+    window.toggleAuthMode = () => { isReg = !isReg; document.getElementById('regArea').classList.toggle('hidden'); };
     window.toggleSettings = () => document.getElementById('settingsMenu').classList.toggle('hidden');
-window.buyChest = async (tier, cost) => {
-        if(userData.balance < cost) return alert("NOT ENOUGH CASH!");
-        
-        // Define possible rewards based on the chest tier
-        let pool = ORB_DATA;
-        if (tier === 'silver' || tier === 'gold' || tier === 'plat') pool = [...ORB_DATA, ...MARKET_ORB_DATA];
-        
-        // Pick a random orb from the pool
-        const reward = pool[Math.floor(Math.random() * pool.length)];
-        
-        // Update balance and add the orb directly to the orbs collection
-        await updateDoc(doc(db, "users", myUid), { 
-            balance: increment(-cost), 
-            [`orbs.${reward.id}`]: increment(1) 
-        });
-        
-        alert(`UNBOXED: ${reward.name}! It has been added to your collection.`);
+    window.updateProfile = async () => {
+        const n = document.getElementById('setNewUser').value.trim();
+        if(n) await updateDoc(doc(db, "users", myUid), { username: n });
     };
-    function renderLootSections() {} // Dummy to prevent error
-function renderCollection() {
-    const standardGrid = document.getElementById('collectionGrid');
-    const lootGrid = document.getElementById('collectionLootGrid');
-    
-    if (!standardGrid || !lootGrid || !userData.orbs) return;
-    
-    // Clear both grids
-    standardGrid.innerHTML = '';
-    lootGrid.innerHTML = '';
-    
-    Object.entries(userData.orbs).forEach(([id, count]) => {
-        if (count <= 0) return;
-
-        // Check which data list the orb belongs to
-        const isStandard = ORB_DATA.find(o => o.id === id);
-        const isLoot = MARKET_ORB_DATA.find(o => o.id === id);
-        const orb = isStandard || isLoot;
-
-        if (!orb) return;
-
-        const div = document.createElement('div');
-        div.className = 'orb-item';
-        div.style.minHeight = '150px';
-        div.innerHTML = `
-            <div class="orb-visual ${getStageClass(count)}" style="color:${orb.color}; background:currentColor; width:40px; height:40px; margin-bottom:10px;"></div>
-            <b style="font-size:16px;">${orb.name}</b>
-            <p style="font-size:14px; color:#94a3b8;">Owned: ${count}</p>
-        `;
-
-        // Sort into the correct section
-        if (isStandard) {
-            standardGrid.appendChild(div);
-        } else {
-            lootGrid.appendChild(div);
-        }
-    });
-}
+    window.logout = () => signOut(auth).then(() => location.reload());
 </script>
 </body>
 </html>
