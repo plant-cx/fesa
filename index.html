@@ -7,6 +7,7 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background: #0f172a; color: #f8fafc; padding: 20px; overflow-x: hidden; font-size: 18px; }
+        
         .container { width: 100%; max-width: 1600px; margin: 0 auto; position: relative; }
         
         .card { background: #1e293b; border-radius: 16px; padding: 30px; border: 1px solid #334155; margin-bottom: 25px; }
@@ -29,7 +30,6 @@
         .orb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-top: 25px; }
         .orb-item { background: #0f172a; border: 2px solid #334155; padding: 20px; border-radius: 16px; position: relative; text-align: center; min-height: 240px; display: flex; flex-direction: column; justify-content: space-between; }
         
-        /* UPDATED GLOW LOGIC */
         .orb-visual { width: 65px; height: 65px; margin: 0 auto 12px; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); filter: drop-shadow(0 0 10px currentColor); }
         .stage-1 { border-radius: 50%; box-shadow: 0 0 20px currentColor; }
         .stage-2 { border-radius: 20%; transform: rotate(45deg); box-shadow: 0 0 30px currentColor; }
@@ -132,8 +132,7 @@
             <div id="tCol" class="tab" onclick="showTab('collection')">COLLECTION</div>
             <div id="tMkt" class="tab" onclick="showTab('marketplace')">MARKET</div>
             <div id="tIn" class="tab" onclick="showTab('inbox')">INBOX</div>
-            <div id="tMsg" class="tab" onclick="showTab('message')">MAIL</div>
-            <div id="tPay" class="tab" onclick="showTab('transfer')">PAY</div>
+            <div id="tMsg" class="tab" onclick="showTab('message')">SEND</div>
         </div>
 
         <div id="earnView" class="tab-view">
@@ -180,15 +179,14 @@
         </div>
 
         <div id="messageView" class="tab-view hidden card" style="max-width: 650px; margin: 0 auto;">
-            <input type="text" id="msgTo" placeholder="To @username">
+            <h3 style="margin-bottom: 20px;">SEND MAIL & CASH</h3>
+            <input type="text" id="msgTo" placeholder="Recipient @username">
             <textarea id="msgBody" rows="4" placeholder="Write your message..."></textarea>
-            <button onclick="sendAction('text')">SEND MAIL</button>
-        </div>
-
-        <div id="transferView" class="tab-view hidden card" style="max-width: 650px; margin: 0 auto;">
-            <input type="text" id="payTo" placeholder="Recipient @username">
-            <input type="number" id="payAmt" placeholder="Amount to send ($)">
-            <button onclick="sendAction('money')" style="background:#10b981">TRANSFER CASH</button>
+            <div style="background: #0f172a; padding: 15px; border-radius: 12px; border: 1px solid #475569; margin-bottom: 15px;">
+                <label style="font-size: 14px; font-weight: 800; color: #94a3b8; display: block; margin-bottom: 8px;">ATTACH CASH (OPTIONAL)</label>
+                <input type="number" id="payAmt" placeholder="Amount to send ($)" style="margin-bottom: 0;">
+            </div>
+            <button onclick="handleCombinedSend()">SEND MAIL</button>
         </div>
     </div>
 </div>
@@ -382,21 +380,42 @@
         } catch (e) { alert(e.message); }
     };
 
-    window.sendAction = async (type) => {
-        const to = document.getElementById(type === 'text' ? 'msgTo' : 'payTo').value.trim().toLowerCase();
-        const amt = type === 'money' ? parseFloat(document.getElementById('payAmt').value || 0) : 0;
+    window.handleCombinedSend = async () => {
+        const to = document.getElementById('msgTo').value.trim().toLowerCase();
+        const body = document.getElementById('msgBody').value.trim();
+        const amt = parseFloat(document.getElementById('payAmt').value || 0);
+        
+        if(!to) return alert("Recipient required");
+        
         const s = await getDocs(query(collection(db, "users"), where("username", "==", to)));
         if(s.empty) return alert("USER NOT FOUND");
-        if(type === 'money') { if(userData.balance < amt) return alert("NO CASH"); await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-amt) }); await updateDoc(doc(db, "users", s.docs[0].id), { balance: increment(amt) }); }
-        await addDoc(collection(db, "messages"), { to, from: userData.username, body: type === 'money' ? `Sent $${amt}` : document.getElementById('msgBody').value, date: Date.now() });
+        
+        let messageText = body;
+        if(amt > 0) {
+            if(userData.balance < amt) return alert("NOT ENOUGH CASH TO ATTACH!");
+            await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-amt) });
+            await updateDoc(doc(db, "users", s.docs[0].id), { balance: increment(amt) });
+            messageText += `\n\n[SYSTEM: Attached $${amt.toLocaleString()}]`;
+        }
+
+        await addDoc(collection(db, "messages"), { 
+            to, 
+            from: userData.username, 
+            body: messageText, 
+            date: Date.now() 
+        });
+        
         alert("SENT!");
+        document.getElementById('msgTo').value = "";
+        document.getElementById('msgBody').value = "";
+        document.getElementById('payAmt').value = "";
     };
 
     window.showTab = (t) => {
         document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
         document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
         document.getElementById(t + 'View').classList.remove('hidden');
-        const m = {earn:'tEar', collection:'tCol', marketplace:'tMkt', inbox:'tIn', message:'tMsg', transfer:'tPay'};
+        const m = {earn:'tEar', collection:'tCol', marketplace:'tMkt', inbox:'tIn', message:'tMsg'};
         document.getElementById(m[t]).classList.add('active');
     };
 
@@ -405,7 +424,7 @@
             if (initialMailLoad) { initialMailLoad = false; return; }
             if (!s.empty) { const b = document.getElementById('notifBanner'); document.getElementById('notifText').innerText = `@${s.docs[0].data().from} sent mail!`; b.classList.add('active'); setTimeout(() => b.classList.remove('active'), 5000); }
         });
-        onSnapshot(query(collection(db, "messages"), where("to", "==", userData.username), orderBy("date", "desc")), s => { document.getElementById('mailBox').innerHTML = s.docs.map(d => `<div class="msg-card"><b>@${d.data().from}</b><p>${d.data().body}</p></div>`).join('') || "NO MESSAGES."; });
+        onSnapshot(query(collection(db, "messages"), where("to", "==", userData.username), orderBy("date", "desc")), s => { document.getElementById('mailBox').innerHTML = s.docs.map(d => `<div class="msg-card"><b>@${d.data().from}</b><p style="white-space: pre-line;">${d.data().body}</p></div>`).join('') || "NO MESSAGES."; });
     };
 
     setInterval(() => {
