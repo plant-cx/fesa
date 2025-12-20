@@ -403,8 +403,23 @@ window.doPrestige = async () => {
 
     window.buyOrb = async (id, cost, owned) => { if(owned < 50 && userData.balance >= cost) await updateDoc(doc(db, "users", myUid), { balance: increment(-cost), [`orbs.${id}`]: increment(1) }); };
     window.sellOrb = async (id, refund) => { if(userData?.orbs?.[id] > 0) await updateDoc(doc(db, "users", myUid), { balance: increment(refund), [`orbs.${id}`]: increment(-1) }); };
-    window.upgradeClicker = async () => { const cost = Math.floor(25 + ((userData.clickLevel || 1) - 1) * 50.5); if(userData.balance >= cost) await updateDoc(doc(db, "users", myUid), { balance: increment(-cost), clickLevel: increment(1) }); };
+window.upgradeClicker = async () => { 
+    // Calculate current cost
+    const cost = Math.floor(25 + ((userData.clickLevel || 1) - 1) * 50.5); 
+    
+    // Calculate current base power (before multipliers)
+    const currentBasePower = (userData.clickLevel || 1) <= 1 ? 1 : Math.min(1 + ((userData.clickLevel - 1) * 10), 500);
 
+    // Only allow upgrade if they have the balance AND haven't hit the 500 cap
+    if(userData.balance >= cost && currentBasePower < 500) {
+        await updateDoc(doc(db, "users", myUid), { 
+            balance: increment(-cost), 
+            clickLevel: increment(1) 
+        }); 
+    } else if (currentBasePower >= 500) {
+        alert("Click Power is already at maximum strength!");
+    }
+};
     document.getElementById('mainClicker').addEventListener('click', (e) => {
         if (!userData) return;
         const p = getPower(userData.clickLevel || 1);
