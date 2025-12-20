@@ -222,6 +222,7 @@
     const db = getFirestore(app);
 
     let userData = null;
+    let myUid = null;
     let isReg = false;
     let initialClickDone = false;
 
@@ -275,6 +276,7 @@
 
     onAuthStateChanged(auth, u => {
         if(u) {
+            myUid = u.uid;
             onSnapshot(doc(db, "users", u.uid), d => {
                 if(d.exists()) {
                     userData = d.data();
@@ -301,11 +303,9 @@
         document.getElementById('clickPowerVal').innerText = getPower(clickLvl).toLocaleString();
         document.getElementById('clickCost').innerText = getClickUpgradeCost(clickLvl).toLocaleString();
         
-        // Prestige UI
         document.getElementById('prestigePointsDisplay').innerText = (userData.prestigePoints || 0).toLocaleString();
         
         const units = (userData.balance || 0) / 50000000;
-        // Formula: 1 unit = 1pt, 2 units (100m) = 4pts, 4 units (200m) = 10pts approx
         let potentialPoints = 0;
         if (userData.balance >= 50000000) {
             potentialPoints = Math.floor(units + Math.pow(units, 1.4));
@@ -324,7 +324,7 @@
     const getPower = (lvl) => {
         let base = lvl <= 1 ? 1 : Math.min(1 + ((lvl - 1) * 10), 500);
         let mult = 1;
-        if(userData.prestigeUpgrades) {
+        if(userData && userData.prestigeUpgrades) {
             PRESTIGE_UPGRADES.clicks.forEach(u => {
                 if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult;
             });
@@ -338,7 +338,7 @@
         if(owned <= 0) return 0;
         let base = Math.floor(orb.baseInc * (Math.pow(2.0, owned) - 1));
         let mult = 1;
-        if(userData.prestigeUpgrades) {
+        if(userData && userData.prestigeUpgrades) {
             PRESTIGE_UPGRADES.orbs.forEach(u => {
                 if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult;
             });
@@ -349,7 +349,7 @@
     const getStageClass = (owned) => owned >= 41 ? 'stage-5' : owned >= 31 ? 'stage-4' : owned >= 21 ? 'stage-3' : owned >= 11 ? 'stage-2' : 'stage-1';
 
     window.buyChest = async (tier, cost) => {
-        if(!userData || userData.balance < cost) return alert("NOT ENOUGH CASH!");
+        if(!userData || !myUid || userData.balance < cost) return alert("NOT ENOUGH CASH!");
         let r = Math.random() * 100;
         let inc, time, type;
         let baseBonus = tier === 'bronze' ? 4 : tier === 'silver' ? 8 : tier === 'gold' ? 13 : tier === 'plat' ? 23 : 0;
@@ -357,7 +357,7 @@
         else if (r < 95) { inc = (Math.floor(Math.random() * 3) + 10) + baseBonus; time = (Math.random() * 3000) + 1000; type = "Rare"; }
         else { inc = (Math.floor(Math.random() * 4) + 12) + baseBonus; time = (Math.random() * 6000) + 4000; type = "Epic"; }
         const name = `${type} Mystery Orb`;
-        await updateDoc(doc(db, "users", auth.currentUser.uid), { 
+        await updateDoc(doc(db, "users", myUid), { 
             balance: increment(-cost), 
             mysteryOrbs: arrayUnion({ name, inc, time, color: "#6366f1", tier, lastClaim: Date.now() }) 
         });
@@ -448,43 +448,45 @@
     }
 
     window.doPrestige = async () => {
-        if(!userData || userData.balance < 50000000) return alert("Need $50 Million to Prestige!");
+        if(!userData || !myUid || userData.balance < 50000000) return alert("Need $50 Million to Prestige!");
         if(!confirm("ARE YOU SURE? This will RESET your Cash, Orbs, and Click Level to gain Prestige Points. You keep mystery items.")) return;
 
         const units = userData.balance / 50000000;
         const points = Math.floor(units + Math.pow(units, 1.4));
 
-        await updateDoc(doc(db, "users", auth.currentUser.uid), {
+        await updateDoc(doc(db, "users", myUid), {
             balance: 1000,
             orbs: {},
             clickLevel: 1,
             prestigePoints: increment(points)
         });
         
-        // Clear intervals to prevent ghosts
         location.reload(); 
     };
 
     window.buyPrestige = async (id, cost) => {
-        if(!userData || (userData.prestigePoints || 0) < cost) return alert("Not enough Points!");
+        if(!userData || !myUid || (userData.prestigePoints || 0) < cost) return alert("Not enough Points!");
         if(userData.prestigeUpgrades?.includes(id)) return;
-        await updateDoc(doc(db, "users", auth.currentUser.uid), {
+        await updateDoc(doc(db, "users", myUid), {
             prestigePoints: increment(-cost),
             prestigeUpgrades: arrayUnion(id)
         });
     };
 
-    window.buyOrb = async (id, cost, owned) => { if(owned < 50 && userData && userData.balance >= cost) await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-cost), [`orbs.${id}`]: increment(1) }); };
-    window.sellOrb = async (id, refund) => { if(userData?.orbs?.[id] > 0) await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(refund), [`orbs.${id}`]: increment(-1) }); };
-    window.upgradeClicker = async () => { const cost = getClickUpgradeCost(userData.clickLevel || 1); if(userData.balance >= cost) await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-cost), clickLevel: increment(1) }); };
+    window.buyOrb = async (id, cost, owned) => { if(owned < 50 && userData && myUid && userData.balance >= cost) await updateDoc(doc(db, "users", myUid), { balance: increment(-cost), [`orbs.${id}`]: increment(1) }); };
+    window.sellOrb = async (id, refund) => { if(userData?.orbs?.[id] > 0 && myUid) await updateDoc(doc(db, "users", myUid), { balance: increment(refund), [`orbs.${id}`]: increment(-1) }); };
+    window.upgradeClicker = async () => { const cost = getClickUpgradeCost(userData.clickLevel || 1); if(userData && myUid && userData.balance >= cost) await updateDoc(doc(db, "users", myUid), { balance: increment(-cost), clickLevel: increment(1) }); };
     
     document.getElementById('mainClicker').addEventListener('click', (e) => {
         if(!initialClickDone) {
             initialClickDone = true;
             document.getElementById('mainClicker').innerText = "💰";
         }
+        if (!userData || !myUid) return;
+
         const p = getPower(userData.clickLevel || 1);
-        updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(p), totalClicks: increment(1) });
+        updateDoc(doc(db, "users", myUid), { balance: increment(p), totalClicks: increment(1) });
+        
         const pop = document.createElement('div'); pop.className = 'popup-anim'; pop.innerText = `+$${p}`;
         pop.style.left = e.clientX + 'px'; pop.style.top = e.clientY + 'px';
         document.body.appendChild(pop); setTimeout(() => pop.remove(), 400); 
@@ -493,12 +495,13 @@
     window.handleCombinedSend = async () => {
         const to = document.getElementById('msgTo').value.trim().toLowerCase();
         const amt = parseFloat(document.getElementById('payAmt').value || 0);
+        if(!myUid) return;
         const s = await getDocs(query(collection(db, "users"), where("username", "==", to)));
         if(s.empty) return alert("USER NOT FOUND");
         let body = document.getElementById('msgBody').value;
         if(amt > 0) {
             if(userData.balance < amt) return alert("NO CASH");
-            await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-amt) });
+            await updateDoc(doc(db, "users", myUid), { balance: increment(-amt) });
             await updateDoc(doc(db, "users", s.docs[0].id), { balance: increment(amt) });
             body += `\n[ATTACHED: $${amt}]`;
         }
@@ -521,22 +524,22 @@
     };
 
     setInterval(() => {
-        if(!userData) return;
+        if(!userData || !myUid) return;
         ORB_DATA.forEach(orb => {
             if(userData.orbs?.[orb.id] > 0) {
-                if(!window[orb.id+'_timer']) { window[orb.id+'_start'] = Date.now(); window[orb.id+'_timer'] = setInterval(() => { updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(calcIncome(orb, userData.orbs[orb.id])) }); window[orb.id+'_start'] = Date.now(); }, orb.time); }
+                if(!window[orb.id+'_timer']) { window[orb.id+'_start'] = Date.now(); window[orb.id+'_timer'] = setInterval(() => { updateDoc(doc(db, "users", myUid), { balance: increment(calcIncome(orb, userData.orbs[orb.id])) }); window[orb.id+'_start'] = Date.now(); }, orb.time); }
                 const bar = document.getElementById(`bar-${orb.id}`); if(bar) bar.style.width = Math.min(((Date.now() - window[orb.id+'_start']) / orb.time) * 100, 100) + "%";
             }
         });
         MARKET_ORB_DATA.forEach(orb => {
             if(userData.orbs?.[orb.id] > 0) {
-                if(!window[orb.id+'_timer']) { window[orb.id+'_start'] = Date.now(); window[orb.id+'_timer'] = setInterval(() => { updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(calcIncome(orb, userData.orbs[orb.id])) }); window[orb.id+'_start'] = Date.now(); }, orb.time); }
+                if(!window[orb.id+'_timer']) { window[orb.id+'_start'] = Date.now(); window[orb.id+'_timer'] = setInterval(() => { updateDoc(doc(db, "users", myUid), { balance: increment(calcIncome(orb, userData.orbs[orb.id])) }); window[orb.id+'_start'] = Date.now(); }, orb.time); }
                 const bar = document.getElementById(`bar-${orb.id}`); if(bar) bar.style.width = Math.min(((Date.now() - window[orb.id+'_start']) / orb.time) * 100, 100) + "%";
             }
         });
         userData.mysteryOrbs?.forEach((m, i) => {
             const key = `myst_${i}_${m.tier}`;
-            if(!window[key+'_timer']) { window[key+'_start'] = Date.now(); window[key+'_timer'] = setInterval(() => { updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(m.inc) }); window[key+'_start'] = Date.now(); }, m.time); }
+            if(!window[key+'_timer']) { window[key+'_start'] = Date.now(); window[key+'_timer'] = setInterval(() => { updateDoc(doc(db, "users", myUid), { balance: increment(m.inc) }); window[key+'_start'] = Date.now(); }, m.time); }
             const bar = document.getElementById(`bar-mystery-${i}-${m.tier}`); if(bar) bar.style.width = Math.min(((Date.now() - window[key+'_start']) / m.time) * 100, 100) + "%";
         });
     }, 100);
