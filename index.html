@@ -296,14 +296,30 @@
         if (incomePerSec <= 5000000000) return 20;
         return 21;
     };
-
-    const updateUI = () => {
+const updateUI = () => {
         if (!userData) return;
+        const currentLevel = userData.clickLevel || 1;
+        const currentBasePower = currentLevel <= 1 ? 1 : Math.min(1 + ((currentLevel - 1) * 10), 500);
+        const cost = Math.floor(25 + (currentLevel - 1) * 50.5);
+        const isMaxed = currentBasePower >= 500;
+
         document.getElementById('userBal').innerText = Math.floor(userData.balance || 0).toLocaleString();
         document.getElementById('userDisplay').innerText = "@" + userData.username;
         document.getElementById('userPfp').src = `https://api.dicebear.com/7.x/identicon/svg?seed=${userData.username}`;
-        document.getElementById('clickPowerVal').innerText = getPower(userData.clickLevel || 1).toLocaleString();
-        document.getElementById('clickCost').innerText = (Math.floor(25 + ((userData.clickLevel || 1) - 1) * 50.5)).toLocaleString();
+        document.getElementById('clickPowerVal').innerText = getPower(currentLevel).toLocaleString();
+        
+        const upgradeBtn = document.getElementById('upgradeClickBtn');
+        const costSpan = document.getElementById('clickCost');
+        
+        if (isMaxed) {
+            upgradeBtn.innerText = "MAXED";
+            upgradeBtn.style.background = "#334155";
+            upgradeBtn.style.cursor = "not-allowed";
+        } else {
+            upgradeBtn.innerHTML = `UPGRADE $<span id="clickCost">${cost.toLocaleString()}</span>`;
+            upgradeBtn.style.background = "#6366f1";
+            upgradeBtn.style.cursor = "pointer";
+        }
         
         const pts = (userData.prestigePoints || 0);
         document.getElementById('prestigePointsDisplay').innerText = pts.toLocaleString();
