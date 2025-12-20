@@ -370,15 +370,22 @@
         PRESTIGE_UPGRADES.orbs.forEach(u => renderUpgrade(u, rowOrb));
     }
 
-    window.doPrestige = async () => {
-        if(userData.balance < 50000000) return alert("Need $50 Million!");
-        if(!confirm("Reset everything for Prestige Points?")) return;
-        const units = userData.balance / 50000000;
-        const points = Math.floor(units + Math.pow(units, 1.4));
-        // Resetting balance to $500
-        await updateDoc(doc(db, "users", myUid), { balance: 500, orbs: {}, clickLevel: 1, prestigePoints: increment(points) });
-        location.reload();
-    };
+window.doPrestige = async () => {
+    if(userData.balance < 50000000) return alert("Need $50 Million!");
+    if(!confirm("Reset everything for Prestige Points?")) return;
+    const units = userData.balance / 50000000;
+    const points = Math.floor(units + Math.pow(units, 1.4));
+    
+    // Updated balance from 1000 to 500 to ensure a fresh start with capital
+    await updateDoc(doc(db, "users", myUid), { 
+        balance: 500, 
+        orbs: {}, 
+        clickLevel: 1, 
+        prestigePoints: increment(points) 
+    });
+    
+    location.reload();
+};
 
     window.buyPrestige = async (id, cost) => {
         if(userData.prestigePoints < cost || userData.prestigeUpgrades?.includes(id)) return;
@@ -438,41 +445,33 @@
     window.toggleAuthMode = () => { isReg = !isReg; document.getElementById('regArea').classList.toggle('hidden', !isReg); };
     window.logout = () => signOut(auth).then(() => location.reload());
     window.toggleSettings = () => document.getElementById('settingsMenu').classList.toggle('hidden');
-    
-    window.buyChest = async (tier, cost) => {
+window.buyChest = async (tier, cost) => {
         if(userData.balance < cost) return alert("NOT ENOUGH CASH!");
-        let pool = [...ORB_DATA, ...MARKET_ORB_DATA];
+        
+        // Define possible rewards based on the chest tier
+        let pool = ORB_DATA;
+        if (tier === 'silver' || tier === 'gold' || tier === 'plat') pool = [...ORB_DATA, ...MARKET_ORB_DATA];
+        
+        // Pick a random orb from the pool
         const reward = pool[Math.floor(Math.random() * pool.length)];
         
+        // Update balance and add the orb directly to the orbs collection
         await updateDoc(doc(db, "users", myUid), { 
             balance: increment(-cost), 
-            [`lootedOrbs.${reward.id}`]: increment(1) 
+            [`orbs.${reward.id}`]: increment(1) 
         });
-        alert(`UNBOXED: ${reward.name}! It is now in your Chest Finds.`);
-    };
-
-    function renderLootSections() {} // Dummy to prevent error
-    
-    function renderCollection() {
-        const standardGrid = document.getElementById('collectionGrid');
-        const lootGrid = document.getElementById('collectionLootGrid');
-        if(!standardGrid || !lootGrid) return;
         
-        standardGrid.innerHTML = '';
-        lootGrid.innerHTML = '';
-
-        // Standard Owned Orbs
+        alert(`UNBOXED: ${reward.name}! It has been added to your collection.`);
+    };
+    function renderLootSections() {} // Dummy to prevent error
+    function renderCollection() {
+        const grid = document.getElementById('collectionGrid');
+        if(!grid) return;
+        grid.innerHTML = '';
         [...ORB_DATA, ...MARKET_ORB_DATA].filter(o => userData.orbs?.[o.id] > 0).forEach(o => {
             const div = document.createElement('div'); div.className = 'orb-item';
             div.innerHTML = `<div class="orb-lvl-badge">LVL ${calculateOrbLevel(o, userData.orbs[o.id])}</div><div class="orb-visual ${getStageClass(userData.orbs[o.id])}" style="color:${o.color}; background:currentColor"></div><b>${o.name}</b><div class="owned-badge">x${userData.orbs[o.id]}</div>`;
-            standardGrid.appendChild(div);
-        });
-
-        // Chest Finds (Looted Orbs)
-        [...ORB_DATA, ...MARKET_ORB_DATA].filter(o => userData.lootedOrbs?.[o.id] > 0).forEach(o => {
-            const div = document.createElement('div'); div.className = 'orb-item';
-            div.innerHTML = `<div class="orb-lvl-badge">LVL ${calculateOrbLevel(o, userData.lootedOrbs[o.id])}</div><div class="orb-visual ${getStageClass(userData.lootedOrbs[o.id])}" style="color:${o.color}; background:currentColor"></div><b>${o.name}</b><div class="owned-badge">x${userData.lootedOrbs[o.id]}</div>`;
-            lootGrid.appendChild(div);
+            grid.appendChild(div);
         });
     }
 </script>
