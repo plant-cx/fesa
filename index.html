@@ -48,7 +48,6 @@
         .clicker-btn { width: 130px; height: 130px; border-radius: 50%; background: radial-gradient(circle, #6366f1, #4338ca); border: 10px solid #312e81; font-size: 45px; margin: 0 auto 15px; display: block; cursor: pointer; transition: transform 0.1s; box-shadow: 0 0 30px rgba(99, 102, 241, 0.4); }
         .clicker-btn:active { transform: scale(0.92); }
         
-        /* UPDATED: Faster popup animation duration */
         @keyframes floatUp {
             0% { transform: translateY(0); opacity: 1; }
             100% { transform: translateY(-40px); opacity: 0; }
@@ -272,7 +271,8 @@
             const owned = userData.orbs?.[orb.id] || 0;
             const isUnlocked = index === 0 || (userData.orbs?.[dataList[index-1].id] > 0);
             const cost = Math.floor(orb.baseCost * Math.pow(1.3, owned));
-            const isMaxed = owned >= 100;
+            // UPDATED: Max amount check changed to 50
+            const isMaxed = owned >= 50;
             const div = document.createElement('div');
             div.className = 'orb-item';
             div.innerHTML = `
@@ -325,7 +325,8 @@
         alert(`UNBOXED: ${randName} (+$${randInc}/5s)`);
     };
 
-    window.buyOrb = async (id, cost) => { if(userData && (userData.orbs?.[id] || 0) < 100 && userData.balance >= cost) await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-cost), [`orbs.${id}`]: increment(1) }); };
+    // UPDATED: Max amount check changed to 50
+    window.buyOrb = async (id, cost) => { if(userData && (userData.orbs?.[id] || 0) < 50 && userData.balance >= cost) await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-cost), [`orbs.${id}`]: increment(1) }); };
     window.sellOrb = async (id, refund) => { if(userData?.orbs?.[id] > 0) await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(refund), [`orbs.${id}`]: increment(-1) }); };
     window.upgradeClicker = async () => { const cost = (userData.clickLevel || 1) * 200; if(userData.balance >= cost) await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-cost), clickLevel: increment(1) }); };
 
@@ -336,7 +337,6 @@
         const pop = document.createElement('div'); pop.className = 'popup-anim'; pop.innerText = `+$${p}`;
         pop.style.position = 'fixed'; pop.style.left = e.clientX + 'px'; pop.style.top = e.clientY + 'px';
         document.body.appendChild(pop); 
-        // UPDATED: Faster removal from DOM to match new animation speed
         setTimeout(() => pop.remove(), 400); 
     });
 
