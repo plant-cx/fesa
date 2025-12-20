@@ -291,26 +291,10 @@
         if (!owned || owned <= 0) return 1;
         const incomePerSec = (orb.baseInc * (Math.pow(2.0, owned) - 1)) / (orb.time / 1000);
         if (incomePerSec <= 10) return 1;
-        if (incomePerSec <= 25) return 2;
-        if (incomePerSec <= 100) return 3;
-        if (incomePerSec <= 500) return 4;
-        if (incomePerSec <= 1500) return 5;
-        if (incomePerSec <= 5000) return 6;
-        if (incomePerSec <= 15000) return 7;
-        if (incomePerSec <= 50000) return 8;
-        if (incomePerSec <= 100000) return 9;
-        if (incomePerSec <= 250000) return 10;
-        if (incomePerSec <= 500000) return 11;
-        if (incomePerSec <= 1000000) return 12;
-        if (incomePerSec <= 2500000) return 13;
-        if (incomePerSec <= 5000000) return 14;
-        if (incomePerSec <= 10000000) return 15;
-        if (incomePerSec <= 50000000) return 16;
-        if (incomePerSec <= 100000000) return 17;
-        if (incomePerSec <= 500000000) return 18;
-        if (incomePerSec <= 1000000000) return 19;
-        if (incomePerSec <= 5000000000) return 20;
-        return 21;
+        if (incomePerSec <= 100) return 5;
+        if (incomePerSec <= 1500) return 10;
+        if (incomePerSec <= 100000) return 15;
+        return 20;
     };
 
     const updateUI = () => {
@@ -354,12 +338,30 @@
         return Math.floor(base * mult);
     };
 
-    const calcIncome = (orb, owned) => {
-        if(owned <= 0) return 0;
-        let base = Math.floor(orb.baseInc * (Math.pow(2.0, owned) - 1));
+    const getLootedOrbValue = (id) => {
+        for (const tier in CHEST_LOOT_TABLE) {
+            const data = CHEST_LOOT_TABLE[tier];
+            if (data.orbs.includes(id)) {
+                return Math.floor(Math.random() * (data.range[1] - data.range[0] + 1)) + data.range[0];
+            }
+        }
+        return 0;
+    };
+
+    const calcIncome = (orb, owned, lootedCount = 0) => {
+        let totalIncome = 0;
+        // Standard purchased income
+        if (owned > 0) {
+            totalIncome += Math.floor(orb.baseInc * (Math.pow(2.0, owned) - 1));
+        }
+        // Looted orb income
+        if (lootedCount > 0) {
+            totalIncome += lootedCount * getLootedOrbValue(orb.id);
+        }
+        
         let mult = 1;
         if(userData?.prestigeUpgrades) PRESTIGE_UPGRADES.orbs.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
-        return Math.floor(base * mult);
+        return Math.floor(totalIncome * mult);
     };
 
     const getStageClass = (owned) => owned >= 41 ? 'stage-5' : owned >= 31 ? 'stage-4' : owned >= 21 ? 'stage-3' : owned >= 11 ? 'stage-2' : 'stage-1';
@@ -370,18 +372,19 @@
         if(!grid) return;
         grid.innerHTML = '';
         dataList.forEach((orb, index) => {
-            const owned = (userData.orbs?.[orb.id] || 0) + (userData.lootedOrbs?.[orb.id] || 0);
-            const boughtOnly = userData.orbs?.[orb.id] || 0;
-            const cost = Math.floor(orb.baseCost * Math.pow(1.3, boughtOnly));
-            const income = calcIncome(orb, owned);
+            const owned = userData.orbs?.[orb.id] || 0;
+            const looted = userData.lootedOrbs?.[orb.id] || 0;
+            const total = owned + looted;
+            const cost = Math.floor(orb.baseCost * Math.pow(1.3, owned));
+            const income = calcIncome(orb, owned, looted);
             const isUnlocked = index === 0 || ((userData.orbs?.[dataList[index-1].id] || 0) + (userData.lootedOrbs?.[dataList[index-1].id] || 0) > 0);
-            const isMaxed = boughtOnly >= 50;
+            const isMaxed = owned >= 50;
             const div = document.createElement('div'); div.className = 'orb-item';
             
             let btnLabel = isMaxed ? "MAXED" : (isUnlocked ? `UPG $${cost.toLocaleString()}` : "LOCKED");
             let btnClass = (userData.balance >= cost && isUnlocked && !isMaxed) ? 'btn-available' : 'btn-locked';
 
-            div.innerHTML = `${isUnlocked ? `<div class="orb-stats-top">${boughtOnly > 0 ? `<button onclick="sellOrb('${orb.id}', ${Math.floor(cost * 0.7)})" class="sell-btn">SELL</button>` : ''}<div class="owned-badge">x${owned}</div></div><div class="orb-lvl-badge">LVL ${calculateOrbLevel(orb, owned)}</div>` : ''}<div class="orb-visual ${getStageClass(owned)}" style="color:${orb.color}; background:currentColor"></div><b>${orb.name}</b>${isUnlocked ? `<div style="color:#10b981; font-weight:800;">+$${income.toLocaleString()}</div><div class="progress-bg"><div class="progress-fill" id="bar-${orb.id}"></div></div>` : ''}<button onclick="buyOrb('${orb.id}', ${cost}, ${boughtOnly})" class="buy-btn ${btnClass}">${btnLabel}</button>`;
+            div.innerHTML = `${isUnlocked ? `<div class="orb-stats-top">${owned > 0 ? `<button onclick="sellOrb('${orb.id}', ${Math.floor(cost * 0.7)})" class="sell-btn">SELL</button>` : ''}<div class="owned-badge">x${total}</div></div><div class="orb-lvl-badge">LVL ${calculateOrbLevel(orb, total)}</div>` : ''}<div class="orb-visual ${getStageClass(total)}" style="color:${orb.color}; background:currentColor"></div><b>${orb.name}</b>${isUnlocked ? `<div style="color:#10b981; font-weight:800;">+$${income.toLocaleString()}</div><div class="progress-bg"><div class="progress-fill" id="bar-${orb.id}"></div></div>` : ''}<button onclick="buyOrb('${orb.id}', ${cost}, ${owned})" class="buy-btn ${btnClass}">${btnLabel}</button>`;
             if (!isUnlocked) div.innerHTML += `<div class="blur-lock"><div class="lock-q">?</div></div>`;
             grid.appendChild(div);
         });
@@ -398,7 +401,7 @@
 
         const allPossibleOrbs = [...ORB_DATA, ...MARKET_ORB_DATA];
 
-        const processList = (dataObj) => {
+        const processList = (dataObj, isLoot) => {
             if(!dataObj) return [];
             return Object.keys(dataObj)
                 .filter(id => dataObj[id] > 0)
@@ -413,25 +416,24 @@
                     if (sortMode === 'desc') return b.orb.name.localeCompare(a.orb.name);
                     if (sortMode === 'count_high') return b.count - a.count;
                     if (sortMode === 'count_low') return a.count - b.count;
-                    if (sortMode === 'id_asc') return a.id.localeCompare(b.id, undefined, {numeric: true});
                     return 0;
                 });
         };
 
-        processList(userData.orbs).forEach(item => {
-            collectionGrid.appendChild(createCollectionItem(item.orb, item.count));
+        processList(userData.orbs, false).forEach(item => {
+            collectionGrid.appendChild(createCollectionItem(item.orb, item.count, false));
         });
 
-        processList(userData.lootedOrbs).forEach(item => {
-            lootGrid.appendChild(createCollectionItem(item.orb, item.count));
+        processList(userData.lootedOrbs, true).forEach(item => {
+            lootGrid.appendChild(createCollectionItem(item.orb, item.count, true));
         });
     }
 
-    function createCollectionItem(orb, count) {
+    function createCollectionItem(orb, count, isLoot) {
         const div = document.createElement('div');
         div.className = 'orb-item';
         div.style.minHeight = '180px';
-        const income = calcIncome(orb, count);
+        const income = isLoot ? calcIncome(orb, 0, count) : calcIncome(orb, count, 0);
         div.innerHTML = `<div class="orb-lvl-badge">LVL ${calculateOrbLevel(orb, count)}</div><div class="orb-visual ${getStageClass(count)}" style="color:${orb.color}; background:currentColor; width:40px; height:40px;"></div><b>${orb.name}</b><p style="font-size:12px;">Owned: ${count}</p><div style="color:#10b981; font-weight:800; font-size:14px;">+$${income.toLocaleString()}</div>`;
         return div;
     }
@@ -457,16 +459,14 @@
         const units = userData.balance / 50000000;
         const pointsToAward = Math.floor(units + Math.pow(units, 1.4));
         
-        if (pointsToAward > 0) {
-            await updateDoc(doc(db, "users", myUid), { 
-                balance: 500, 
-                orbs: {}, 
-                lootedOrbs: {},
-                clickLevel: 1, 
-                prestigePoints: increment(pointsToAward) 
-            });
-            location.reload();
-        }
+        await updateDoc(doc(db, "users", myUid), { 
+            balance: 500, 
+            orbs: {}, 
+            lootedOrbs: {},
+            clickLevel: 1, 
+            prestigePoints: increment(pointsToAward) 
+        });
+        location.reload();
     };
 
     window.buyPrestige = async (id, cost) => {
@@ -499,7 +499,6 @@
         const cashBonus = Math.floor(Math.random() * (data.range[1] - data.range[0] + 1)) + data.range[0];
 
         let updates = { balance: increment(-cost + cashBonus) };
-        if (!userData.lootedOrbs) updates.lootedOrbs = {};
         updates[`lootedOrbs.${winId}`] = increment(1);
 
         await updateDoc(doc(db, "users", myUid), updates);
@@ -543,10 +542,7 @@
         const targetUid = snap.docs[0].id;
 
         await addDoc(collection(db, "messages"), {
-            to: to,
-            from: userData.username,
-            body: body + (amt > 0 ? ` [Sent $${amt.toLocaleString()}]` : ""),
-            date: Date.now()
+            to: to, from: userData.username, body: body + (amt > 0 ? ` [Sent $${amt.toLocaleString()}]` : ""), date: Date.now()
         });
 
         if (amt > 0) {
@@ -560,12 +556,16 @@
         if(!userData) return;
         const allOrbs = [...ORB_DATA, ...MARKET_ORB_DATA];
         allOrbs.forEach(orb => {
-            const totalOwned = (userData.orbs?.[orb.id] || 0) + (userData.lootedOrbs?.[orb.id] || 0);
+            const owned = userData.orbs?.[orb.id] || 0;
+            const looted = userData.lootedOrbs?.[orb.id] || 0;
+            const totalOwned = owned + looted;
+
             if(totalOwned > 0) {
                 if(!window[orb.id+'_timer']) { 
                     window[orb.id+'_start'] = Date.now(); 
                     window[orb.id+'_timer'] = setInterval(() => { 
-                        updateDoc(doc(db, "users", myUid), { balance: increment(calcIncome(orb, totalOwned)) }); 
+                        const incomePerCycle = calcIncome(orb, owned, looted);
+                        updateDoc(doc(db, "users", myUid), { balance: increment(incomePerCycle) }); 
                         window[orb.id+'_start'] = Date.now(); 
                     }, orb.time); 
                 }
@@ -585,14 +585,7 @@
             if(isReg) {
                 const res = await createUserWithEmailAndPassword(auth, e, p);
                 await setDoc(doc(db, "users", res.user.uid), { 
-                    username: u, 
-                    email: e, 
-                    balance: 1000, 
-                    orbs: {}, 
-                    lootedOrbs: {}, 
-                    clickLevel: 1, 
-                    prestigePoints: 0, 
-                    prestigeUpgrades: [] 
+                    username: u, email: e, balance: 1000, orbs: {}, lootedOrbs: {}, clickLevel: 1, prestigePoints: 0, prestigeUpgrades: [] 
                 });
             } else {
                 const q = query(collection(db, "users"), where("username", "==", u));
