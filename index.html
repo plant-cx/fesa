@@ -55,6 +55,13 @@
         .loot-section-title { font-size: 24px; font-weight: 900; color: #94a3b8; margin: 30px 0 15px; border-left: 5px solid #6366f1; padding-left: 15px; }
         .notif-banner { position: fixed; top: 25px; left: -400px; width: 320px; background: #6366f1; color: white; padding: 20px; border-radius: 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); z-index: 99999; display: flex; align-items: center; gap: 15px; font-weight: 800; font-size: 18px; transition: left 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 2px solid #818cf8; }
         .notif-banner.active { left: 25px; }
+
+        /* Prestige Styles */
+        .prestige-banner { background: linear-gradient(135deg, #4f46e5, #9333ea); padding: 30px; border-radius: 16px; margin-bottom: 25px; text-align: center; border: 2px solid #a855f7; }
+        .prestige-row { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 25px; }
+        .prestige-card { min-width: 200px; background: #1e293b; border: 2px solid #475569; padding: 15px; border-radius: 12px; text-align: center; display: flex; flex-direction: column; justify-content: space-between; }
+        .prestige-card.owned { border-color: #10b981; opacity: 0.7; }
+        .p-btn { font-size: 12px; padding: 8px; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -93,6 +100,7 @@
             <div id="tEar" class="tab active" onclick="showTab('earn')">EARN</div>
             <div id="tCol" class="tab" onclick="showTab('collection')">COLLECTION</div>
             <div id="tMkt" class="tab" onclick="showTab('marketplace')">MARKET</div>
+            <div id="tPres" class="tab" onclick="showTab('prestige')" style="color:#d8b4fe">PRESTIGE</div>
             <div id="tIn" class="tab" onclick="showTab('inbox')">INBOX</div>
             <div id="tMsg" class="tab" onclick="showTab('message')">SEND</div>
         </div>
@@ -167,6 +175,27 @@
             <div id="lootContainer"></div>
         </div>
 
+        <div id="prestigeView" class="tab-view hidden">
+            <div class="prestige-banner">
+                <h2 style="font-size:36px; margin-bottom:10px;">PRESTIGE</h2>
+                <p style="color:#d8b4fe; margin-bottom:20px;">Reset your money, clicks, and orbs to gain Prestige Points!</p>
+                <div style="font-size:24px; font-weight:900; background:rgba(0,0,0,0.3); padding:15px; border-radius:12px; display:inline-block; border:1px solid #a855f7;">
+                    POINTS: <span id="prestigePointsDisplay" style="color:#facc15">0</span>
+                </div>
+                <div style="margin-top:25px;">
+                    <div style="margin-bottom:10px; font-size:14px; color:#cbd5e1;">Available on Reset: <b id="pendingPrestigePoints" style="color:#facc15; font-size:18px;">0</b> Points</div>
+                    <button id="doPrestigeBtn" onclick="doPrestige()" style="background:#ef4444; max-width:300px;">PRESTIGE NOW</button>
+                    <p style="font-size:12px; margin-top:5px; color:#94a3b8;">Requirement: $50,000,000</p>
+                </div>
+            </div>
+
+            <h3 style="margin-bottom:15px; color:#a855f7; border-left:4px solid #a855f7; padding-left:10px;">🖱️ CLICK MULTIPLIERS</h3>
+            <div class="prestige-row" id="pRowClick"></div>
+
+            <h3 style="margin-bottom:15px; color:#38bdf8; border-left:4px solid #38bdf8; padding-left:10px;">🔮 ORB MULTIPLIERS</h3>
+            <div class="prestige-row" id="pRowOrb"></div>
+        </div>
+
         <div id="inboxView" class="tab-view hidden"><div id="mailBox">Loading...</div></div>
 
         <div id="messageView" class="tab-view hidden card" style="max-width: 650px; margin: 0 auto;">
@@ -227,6 +256,23 @@
         { id: 'h_orb5', name: 'Cosmic Orb', baseCost: 100000000000, baseInc: 25000000000, time: 8000, color: '#6366f1' }
     ];
 
+    const PRESTIGE_UPGRADES = {
+        clicks: [
+            { id: 'p_click_1', name: 'Iron Clicks', mult: 1.1, cost: 1 },
+            { id: 'p_click_2', name: 'Golden Finger', mult: 1.25, cost: 3 },
+            { id: 'p_click_3', name: 'Titan Tap', mult: 1.5, cost: 10 },
+            { id: 'p_click_4', name: 'Godly Touch', mult: 2.0, cost: 25 },
+            { id: 'p_click_5', name: 'Cosmic Click', mult: 5.0, cost: 100 }
+        ],
+        orbs: [
+            { id: 'p_orb_1', name: 'Orb Polish', mult: 1.1, cost: 2 },
+            { id: 'p_orb_2', name: 'Mana Infusion', mult: 1.25, cost: 5 },
+            { id: 'p_orb_3', name: 'Time Warp', mult: 1.5, cost: 15 },
+            { id: 'p_orb_4', name: 'Star Power', mult: 2.0, cost: 40 },
+            { id: 'p_orb_5', name: 'Dark Matter', mult: 5.0, cost: 150 }
+        ]
+    };
+
     onAuthStateChanged(auth, u => {
         if(u) {
             onSnapshot(doc(db, "users", u.uid), d => {
@@ -237,6 +283,7 @@
                     renderOrbs('marketOrbGrid', MARKET_ORB_DATA);
                     renderLootSections();
                     renderCollection();
+                    renderPrestige();
                     loadInbox();
                     document.getElementById('authScreen').classList.add('hidden');
                     document.getElementById('appScreen').classList.remove('hidden');
@@ -253,11 +300,52 @@
         const clickLvl = userData.clickLevel || 1;
         document.getElementById('clickPowerVal').innerText = getPower(clickLvl).toLocaleString();
         document.getElementById('clickCost').innerText = getClickUpgradeCost(clickLvl).toLocaleString();
+        
+        // Prestige UI
+        document.getElementById('prestigePointsDisplay').innerText = (userData.prestigePoints || 0).toLocaleString();
+        
+        const units = (userData.balance || 0) / 50000000;
+        // Formula: 1 unit = 1pt, 2 units (100m) = 4pts, 4 units (200m) = 10pts approx
+        let potentialPoints = 0;
+        if (userData.balance >= 50000000) {
+            potentialPoints = Math.floor(units + Math.pow(units, 1.4));
+        }
+        document.getElementById('pendingPrestigePoints').innerText = potentialPoints.toLocaleString();
+        const pBtn = document.getElementById('doPrestigeBtn');
+        if(userData.balance < 50000000) {
+            pBtn.style.opacity = "0.5";
+            pBtn.style.cursor = "not-allowed";
+        } else {
+            pBtn.style.opacity = "1";
+            pBtn.style.cursor = "pointer";
+        }
     };
 
-    const getPower = (lvl) => lvl <= 1 ? 1 : Math.min(1 + ((lvl - 1) * 10), 500);
+    const getPower = (lvl) => {
+        let base = lvl <= 1 ? 1 : Math.min(1 + ((lvl - 1) * 10), 500);
+        let mult = 1;
+        if(userData.prestigeUpgrades) {
+            PRESTIGE_UPGRADES.clicks.forEach(u => {
+                if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult;
+            });
+        }
+        return Math.floor(base * mult);
+    };
+
     const getClickUpgradeCost = (lvl) => lvl >= 51 ? Infinity : Math.floor(25 + ((lvl - 1) * 50.5));
-    const calcIncome = (orb, owned) => owned > 0 ? Math.floor(orb.baseInc * (Math.pow(2.0, owned) - 1)) : 0;
+    
+    const calcIncome = (orb, owned) => {
+        if(owned <= 0) return 0;
+        let base = Math.floor(orb.baseInc * (Math.pow(2.0, owned) - 1));
+        let mult = 1;
+        if(userData.prestigeUpgrades) {
+            PRESTIGE_UPGRADES.orbs.forEach(u => {
+                if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult;
+            });
+        }
+        return Math.floor(base * mult);
+    };
+
     const getStageClass = (owned) => owned >= 41 ? 'stage-5' : owned >= 31 ? 'stage-4' : owned >= 21 ? 'stage-3' : owned >= 11 ? 'stage-2' : 'stage-1';
 
     window.buyChest = async (tier, cost) => {
@@ -333,6 +421,59 @@
         });
     }
 
+    function renderPrestige() {
+        const rowClick = document.getElementById('pRowClick');
+        const rowOrb = document.getElementById('pRowOrb');
+        rowClick.innerHTML = ''; rowOrb.innerHTML = '';
+        
+        const renderUpgrade = (u, container) => {
+            const owned = userData.prestigeUpgrades?.includes(u.id);
+            const div = document.createElement('div');
+            div.className = `prestige-card ${owned ? 'owned' : ''}`;
+            div.innerHTML = `
+                <div>
+                    <b style="color:${owned ? '#10b981' : 'white'}">${u.name}</b>
+                    <p style="font-size:12px; margin-top:5px; color:#cbd5e1;">x${u.mult} Multiplier</p>
+                </div>
+                ${owned 
+                    ? `<button class="buy-btn btn-locked" style="margin-top:10px; background:#064e3b !important; color:#34d399 !important;">OWNED</button>` 
+                    : `<button onclick="buyPrestige('${u.id}', ${u.cost})" class="buy-btn ${userData.prestigePoints >= u.cost ? 'btn-available' : 'btn-locked'}">UNLOCK ${u.cost} PTS</button>`
+                }
+            `;
+            container.appendChild(div);
+        };
+
+        PRESTIGE_UPGRADES.clicks.forEach(u => renderUpgrade(u, rowClick));
+        PRESTIGE_UPGRADES.orbs.forEach(u => renderUpgrade(u, rowOrb));
+    }
+
+    window.doPrestige = async () => {
+        if(!userData || userData.balance < 50000000) return alert("Need $50 Million to Prestige!");
+        if(!confirm("ARE YOU SURE? This will RESET your Cash, Orbs, and Click Level to gain Prestige Points. You keep mystery items.")) return;
+
+        const units = userData.balance / 50000000;
+        const points = Math.floor(units + Math.pow(units, 1.4));
+
+        await updateDoc(doc(db, "users", auth.currentUser.uid), {
+            balance: 1000,
+            orbs: {},
+            clickLevel: 1,
+            prestigePoints: increment(points)
+        });
+        
+        // Clear intervals to prevent ghosts
+        location.reload(); 
+    };
+
+    window.buyPrestige = async (id, cost) => {
+        if(!userData || (userData.prestigePoints || 0) < cost) return alert("Not enough Points!");
+        if(userData.prestigeUpgrades?.includes(id)) return;
+        await updateDoc(doc(db, "users", auth.currentUser.uid), {
+            prestigePoints: increment(-cost),
+            prestigeUpgrades: arrayUnion(id)
+        });
+    };
+
     window.buyOrb = async (id, cost, owned) => { if(owned < 50 && userData && userData.balance >= cost) await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-cost), [`orbs.${id}`]: increment(1) }); };
     window.sellOrb = async (id, refund) => { if(userData?.orbs?.[id] > 0) await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(refund), [`orbs.${id}`]: increment(-1) }); };
     window.upgradeClicker = async () => { const cost = getClickUpgradeCost(userData.clickLevel || 1); if(userData.balance >= cost) await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-cost), clickLevel: increment(1) }); };
@@ -369,7 +510,7 @@
         document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
         document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
         document.getElementById(t + 'View').classList.remove('hidden');
-        const m = {earn:'tEar', collection:'tCol', marketplace:'tMkt', inbox:'tIn', message:'tMsg'};
+        const m = {earn:'tEar', collection:'tCol', marketplace:'tMkt', prestige: 'tPres', inbox:'tIn', message:'tMsg'};
         document.getElementById(m[t]).classList.add('active');
     };
 
@@ -405,7 +546,7 @@
         const p = document.getElementById('authPass').value;
         if(isReg) {
             const res = await createUserWithEmailAndPassword(auth, document.getElementById('regEmail').value, p);
-            await setDoc(doc(db, "users", res.user.uid), { username: u, email: document.getElementById('regEmail').value, balance: 1000, orbs: {}, clickLevel: 1, mysteryOrbs: [] });
+            await setDoc(doc(db, "users", res.user.uid), { username: u, email: document.getElementById('regEmail').value, balance: 1000, orbs: {}, clickLevel: 1, mysteryOrbs: [], prestigePoints: 0, prestigeUpgrades: [] });
         } else {
             const s = await getDocs(query(collection(db, "users"), where("username", "==", u)));
             await signInWithEmailAndPassword(auth, s.docs[0].data().email, p);
