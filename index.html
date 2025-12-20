@@ -371,20 +371,29 @@
     }
 
 window.doPrestige = async () => {
+    // 1. Validation check
     if(userData.balance < 50000000) return alert("Need $50 Million!");
+    
     if(!confirm("Reset everything for Prestige Points?")) return;
+
+    // 2. Calculate points using the same formula shown in the UI
     const units = userData.balance / 50000000;
-    const points = Math.floor(units + Math.pow(units, 1.4));
-    
-    // Updated balance from 1000 to 500 to ensure a fresh start with capital
-    await updateDoc(doc(db, "users", myUid), { 
-        balance: 500, 
-        orbs: {}, 
-        clickLevel: 1, 
-        prestigePoints: increment(points) 
-    });
-    
-    location.reload();
+    const pointsToAward = Math.floor(units + Math.pow(units, 1.4));
+
+    // 3. Ensure pointsToAward is a valid number greater than 0
+    if (pointsToAward > 0) {
+        await updateDoc(doc(db, "users", myUid), { 
+            balance: 500, // Reset balance
+            orbs: {},     // Clear inventory
+            clickLevel: 1, // Reset clicker
+            prestigePoints: increment(pointsToAward) // Add the calculated points
+        });
+        
+        // 4. Force reload to clear local timers and state
+        location.reload();
+    } else {
+        alert("Not enough balance to earn at least 1 point.");
+    }
 };
 
     window.buyPrestige = async (id, cost) => {
