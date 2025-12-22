@@ -58,22 +58,42 @@
         .prestige-row { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 25px; }
         .prestige-card { min-width: 200px; background: #1e293b; border: 2px solid #475569; padding: 15px; border-radius: 12px; text-align: center; }
         .prestige-card.owned { border-color: #10b981; opacity: 0.7; }
+        
         .chest-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 40px; }
-        .chest-card { background: #1e293b; padding: 20px; border-radius: 20px; text-align: center; border: 2px solid #334155; }
+        .chest-card { background: #1e293b; padding: 20px; border-radius: 20px; text-align: center; border: 2px solid #334155; transition: 0.2s; }
+        .chest-card:hover { transform: translateY(-3px); border-color: #6366f1; }
         .chest-icon { font-size: 40px; margin-bottom: 10px; }
         .loot-section-title { font-size: 24px; font-weight: 900; color: #94a3b8; margin: 30px 0 15px; border-left: 5px solid #6366f1; padding-left: 15px; }
+        .loot-category-header { text-align: center; margin: 40px 0 20px; font-size: 20px; font-weight: 800; padding-bottom: 10px; border-bottom: 1px solid #334155; color: #f8fafc; text-transform: uppercase; }
+        
         .notif-banner { position: fixed; top: 25px; left: -400px; width: 320px; background: #6366f1; color: white; padding: 20px; border-radius: 16px; z-index: 99999; display: flex; align-items: center; gap: 15px; transition: left 0.5s; border: 2px solid #818cf8; }
         .notif-banner.active { left: 25px; }
 
-        /* New Loot History Styles */
-        .loot-history-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 15px; }
-        .loot-win-card { background: #0f172a; border: 2px solid #10b981; padding: 15px; border-radius: 12px; text-align: center; animation: slideInDown 0.4s ease-out; }
-        @keyframes slideInDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        /* Unique Loot Styles */
+        .unique-loot-card { border: 2px dashed #475569; background: #0f172a; }
+        .tier-bronze { border-color: #d97706; box-shadow: 0 0 10px rgba(217, 119, 6, 0.1); }
+        .tier-silver { border-color: #cbd5e1; box-shadow: 0 0 10px rgba(203, 213, 225, 0.1); }
+        .tier-gold { border-color: #facc15; box-shadow: 0 0 15px rgba(250, 204, 21, 0.2); }
+        .tier-champion { border-color: #a855f7; box-shadow: 0 0 20px rgba(168, 85, 247, 0.3); }
+
+        .loot-popup-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; display:flex; justify-content:center; align-items:center; }
+        .loot-popup-card { background: #1e293b; padding:40px; border-radius:20px; text-align:center; max-width:400px; width:90%; border:2px solid #6366f1; animation: popIn 0.3s ease-out; }
+        @keyframes popIn { 0% { transform: scale(0.5); opacity:0; } 100% { transform: scale(1); opacity:1; } }
     </style>
 </head>
 <body>
 
 <div id="notifBanner" class="notif-banner"><div style="width:12px;height:12px;background:#10b981;border-radius:50%"></div><span id="notifText">@user sent mail!</span></div>
+
+<div id="lootPopup" class="loot-popup-overlay hidden">
+    <div class="loot-popup-card">
+        <h2 style="color:#facc15; margin-bottom:20px;">CHEST OPENED!</h2>
+        <div id="lootRevealVisual" class="orb-visual stage-3" style="width:100px; height:100px; margin: 0 auto 20px;"></div>
+        <h3 id="lootRevealName" style="font-size:24px; margin-bottom:10px;">Unknown Orb</h3>
+        <p id="lootRevealStats" style="color:#94a3b8; font-size:16px; margin-bottom:25px;">Stats...</p>
+        <button onclick="document.getElementById('lootPopup').classList.add('hidden')">COLLECT</button>
+    </div>
+</div>
 
 <div class="container">
     <div id="authScreen" class="card" style="max-width: 650px; margin: 0 auto;">
@@ -140,36 +160,51 @@
                     <option value="asc">Name (A-Z)</option>
                     <option value="desc">Name (Z-A)</option>
                     <option value="count_high">Highest Count</option>
-                    <option value="count_low">Lowest Count</option>
                 </select>
             </div>
             <h3 style="text-align:center; color:#6366f1; margin-bottom:25px; font-size:28px;">YOUR COLLECTION</h3>
             <div id="standardOrbsSection">
-                <div class="loot-section-title">OWNED ORBS</div>
+                <div class="loot-section-title">OWNED STANDARD ORBS</div>
                 <div class="orb-grid" id="collectionGrid"></div>
-            </div>
-            <div id="lootedOrbsSection">
-                <div class="loot-section-title">CHEST FINDS</div>
-                <div class="orb-grid" id="collectionLootGrid"></div>
             </div>
         </div>
 
         <div id="marketplaceView" class="tab-view hidden">
-            <h3 style="text-align:center; color:#f59e0b; margin-bottom:15px;">💎 HYPER RARE MARKET</h3>
-            <div class="orb-grid" id="marketOrbGrid" style="margin-bottom: 50px;"></div>
             <h3 style="text-align:center; color:#6366f1; margin-bottom:15px;">🎁 MYSTERY CHESTS</h3>
             <div class="chest-grid">
-                <div class="chest-card"><div class="chest-icon">🪵</div><div class="chest-title">WOOD CHEST</div><div class="chest-cost">$250</div><button class="buy-btn btn-available" onclick="buyChest('wood', 250)">BUY</button></div>
-                <div class="chest-card"><div class="chest-icon">🥉</div><div class="chest-title">BRONZE CHEST</div><div class="chest-cost">$1,000</div><button class="buy-btn btn-available" onclick="buyChest('bronze', 1000)">BUY</button></div>
-                <div class="chest-card"><div class="chest-icon">🥈</div><div class="chest-title">SILVER CHEST</div><div class="chest-cost">$25,000</div><button class="buy-btn btn-available" onclick="buyChest('silver', 25000)">BUY</button></div>
-                <div class="chest-card"><div class="chest-icon">🥇</div><div class="chest-title">GOLD CHEST</div><div class="chest-cost">$500,000</div><button class="buy-btn btn-available" onclick="buyChest('gold', 500000)">BUY</button></div>
-                <div class="chest-card"><div class="chest-icon">🏆</div><div class="chest-title">CHAMPION CHEST</div><div class="chest-cost">$2,500,000</div><button class="buy-btn btn-available" onclick="buyChest('champion', 2500000)">BUY</button></div>
+                <div class="chest-card">
+                    <div class="chest-icon">🥉</div>
+                    <div class="chest-title">BRONZE CHEST</div>
+                    <div class="chest-cost" style="color:#d97706; font-weight:bold;">$1,000</div>
+                    <p style="font-size:12px; color:#94a3b8; margin:5px 0;">Contains: Random Bronze Artifact</p>
+                    <button class="buy-btn btn-available" onclick="buyChest('bronze', 1000)">BUY</button>
+                </div>
+                <div class="chest-card">
+                    <div class="chest-icon">🥈</div>
+                    <div class="chest-title">SILVER CHEST</div>
+                    <div class="chest-cost" style="color:#cbd5e1; font-weight:bold;">$25,000</div>
+                    <p style="font-size:12px; color:#94a3b8; margin:5px 0;">Contains: Random Silver Artifact</p>
+                    <button class="buy-btn btn-available" onclick="buyChest('silver', 25000)">BUY</button>
+                </div>
+                <div class="chest-card">
+                    <div class="chest-icon">🥇</div>
+                    <div class="chest-title">GOLD CHEST</div>
+                    <div class="chest-cost" style="color:#facc15; font-weight:bold;">$500,000</div>
+                    <p style="font-size:12px; color:#94a3b8; margin:5px 0;">Contains: Random Gold Artifact</p>
+                    <button class="buy-btn btn-available" onclick="buyChest('gold', 500000)">BUY</button>
+                </div>
+                <div class="chest-card">
+                    <div class="chest-icon">🏆</div>
+                    <div class="chest-title">CHAMPION CHEST</div>
+                    <div class="chest-cost" style="color:#a855f7; font-weight:bold;">$2,500,000</div>
+                    <p style="font-size:12px; color:#94a3b8; margin:5px 0;">Contains: Random Champion Artifact</p>
+                    <button class="buy-btn btn-available" onclick="buyChest('champion', 2500000)">BUY</button>
+                </div>
             </div>
             
-            <div id="chestLootHistory" class="hidden">
-                <div class="loot-section-title">RECENT CHEST FINDS</div>
-                <div class="loot-history-grid" id="lootHistoryGrid"></div>
-            </div>
+            <h3 style="text-align:center; color:#f59e0b; margin-top:40px; margin-bottom:15px;">💎 YOUR LOOTED ARTIFACTS</h3>
+            <div id="lootMarketplaceContainer">
+                </div>
         </div>
 
         <div id="prestigeView" class="tab-view hidden">
@@ -220,6 +255,7 @@
     let isReg = false;
     let localBalanceAccumulator = 0;
     const orbProgress = {}; 
+    const uniqueOrbProgress = {};
 
     const ORB_DATA = [
         { id: 'orb1', name: 'Blue Orb', baseCost: 350, baseInc: 15, time: 5000, color: '#3b82f6' },
@@ -231,34 +267,8 @@
         { id: 'orb7', name: 'Pink Orb', baseCost: 1000000, baseInc: 120000, time: 8000, color: '#ec4899' },
         { id: 'orb8', name: 'White Orb', baseCost: 4000000, baseInc: 500000, time: 10000, color: '#f8fafc' },
         { id: 'orb9', name: 'Void Orb', baseCost: 20000000, baseInc: 3000000, time: 12000, color: '#475569' },
-        { id: 'orb10', name: 'Solar Orb', baseCost: 80000000, baseInc: 15000000, time: 15000, color: '#fbbf24' },
-        { id: 'orb11', name: 'Nebula.Ghost', baseCost: 250000000, baseInc: 45000000, time: 10000, color: '#c084fc' },
-        { id: 'orb12', name: 'Quasar_X', baseCost: 1000000000, baseInc: 180000000, time: 8000, color: '#22d3ee' },
-        { id: 'orb13', name: 'Abyssal.Viper', baseCost: 5000000000, baseInc: 750000000, time: 12000, color: '#1e293b' },
-        { id: 'orb14', name: 'Titan_Forge', baseCost: 20000000000, baseInc: 3000000000, time: 15000, color: '#fca5a5' },
-        { id: 'orb15', name: 'Neon.Demon', baseCost: 100000000000, baseInc: 15000000000, time: 6000, color: '#2dd4bf' },
-        { id: 'orb16', name: 'Zenith_Core', baseCost: 500000000000, baseInc: 80000000000, time: 10000, color: '#eab308' },
-        { id: 'orb17', name: 'Cyber.Skull', baseCost: 2500000000000, baseInc: 400000000000, time: 9000, color: '#f472b6' },
-        { id: 'orb18', name: 'Omega_Pulse', baseCost: 10000000000000, baseInc: 2000000000000, time: 12000, color: '#6366f1' },
-        { id: 'orb19', name: 'Star.Eater', baseCost: 50000000000000, baseInc: 10000000000000, time: 15000, color: '#fb7185' },
-        { id: 'orb20', name: 'Infinity_God', baseCost: 250000000000000, baseInc: 60000000000000, time: 20000, color: '#ffffff' }
+        { id: 'orb10', name: 'Solar Orb', baseCost: 80000000, baseInc: 15000000, time: 15000, color: '#fbbf24' }
     ];
-
-    const MARKET_ORB_DATA = [
-        { id: 'h_orb1', name: 'Diamond Orb', baseCost: 100000000, baseInc: 50000000, time: 10000, color: '#e2e8f0' },
-        { id: 'h_orb2', name: 'Emerald Orb', baseCost: 500000000, baseInc: 250000000, time: 12000, color: '#10b981' },
-        { id: 'h_orb3', name: 'Ruby Orb', baseCost: 2500000000, baseInc: 1000000000, time: 15000, color: '#dc2626' },
-        { id: 'h_orb4', name: 'Obsidian Orb', baseCost: 10000000000, baseInc: 5000000000, time: 10000, color: '#1e293b' },
-        { id: 'h_orb5', name: 'Cosmic Orb', baseCost: 100000000000, baseInc: 25000000000, time: 8000, color: '#6366f1' }
-    ];
-
-    const CHEST_LOOT_TABLE = {
-        wood: { orbs: ['orb1', 'orb2'], range: [0, 10] },
-        bronze: { orbs: ['orb3', 'orb4'], range: [15, 50] },
-        silver: { orbs: ['orb5', 'orb6', 'orb7', 'h_orb1'], range: [60, 200] },
-        gold: { orbs: ['orb8', 'orb9', 'orb10', 'h_orb2'], range: [250, 600] },
-        champion: { orbs: ['orb15', 'orb20', 'h_orb5'], range: [750, 1500] }
-    };
 
     const PRESTIGE_UPGRADES = {
         clicks: [
@@ -277,6 +287,23 @@
         ]
     };
 
+    // --- PROCEDURAL GENERATION DATA ---
+    const NAME_PREFIXES = ["Mystic", "Ancient", "Lost", "Cosmic", "Dark", "Radiant", "Frozen", "Burning", "Neon", "Shadow", "Holy", "Cursed"];
+    const NAME_SUFFIXES = ["Sphere", "Prism", "Shard", "Gem", "Heart", "Soul", "Star", "Relic", "Crystal", "Core", "Eye", "Fragment"];
+
+    const getRandomColor = () => {
+        const letters = '0123456789ABCDEF';
+        let color = '#';
+        for (let i = 0; i < 6; i++) { color += letters[Math.floor(Math.random() * 16)]; }
+        return color;
+    };
+
+    const getRandomName = () => {
+        const p = NAME_PREFIXES[Math.floor(Math.random() * NAME_PREFIXES.length)];
+        const s = NAME_SUFFIXES[Math.floor(Math.random() * NAME_SUFFIXES.length)];
+        return `${p} ${s}`;
+    };
+
     onAuthStateChanged(auth, u => {
         if(u) {
             myUid = u.uid;
@@ -285,9 +312,9 @@
                     userData = d.data();
                     updateUI();
                     renderOrbs('orbGrid', ORB_DATA);
-                    renderOrbs('marketOrbGrid', MARKET_ORB_DATA);
                     renderCollection();
                     renderPrestige();
+                    renderUniqueLoot(); // New function
                     loadInbox();
                     document.getElementById('authScreen').classList.add('hidden');
                     document.getElementById('appScreen').classList.remove('hidden');
@@ -349,18 +376,9 @@
         return Math.floor(base * mult);
     };
 
-    const getLootedOrbValue = (id) => {
-        for (const tier in CHEST_LOOT_TABLE) {
-            const data = CHEST_LOOT_TABLE[tier];
-            if (data.orbs.includes(id)) return Math.floor((data.range[0] + data.range[1]) / 2);
-        }
-        return 0;
-    };
-
-    const calcIncome = (orb, owned, lootedCount = 0) => {
+    const calcIncome = (orb, owned) => {
         let totalIncome = 0;
         if (owned > 0) totalIncome += Math.floor(orb.baseInc * (Math.pow(2.0, owned) - 1));
-        if (lootedCount > 0) totalIncome += lootedCount * getLootedOrbValue(orb.id);
         
         let mult = 1;
         if(userData?.prestigeUpgrades) PRESTIGE_UPGRADES.orbs.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
@@ -376,146 +394,335 @@
         grid.innerHTML = '';
         dataList.forEach((orb, index) => {
             const owned = userData.orbs?.[orb.id] || 0;
-            const looted = userData.lootedOrbs?.[orb.id] || 0;
-            const total = owned + looted;
             const cost = Math.floor(orb.baseCost * Math.pow(1.3, owned));
-            const income = calcIncome(orb, owned, looted);
-            const isUnlocked = index === 0 || ((userData.orbs?.[dataList[index-1].id] || 0) + (userData.lootedOrbs?.[dataList[index-1].id] || 0) > 0);
+            const income = calcIncome(orb, owned);
+            const isUnlocked = index === 0 || ((userData.orbs?.[dataList[index-1].id] || 0) > 0);
             const isMaxed = owned >= 50;
             const div = document.createElement('div'); div.className = 'orb-item';
             
             let btnLabel = isMaxed ? "MAXED" : (isUnlocked ? `UPG $${cost.toLocaleString()}` : "LOCKED");
             let btnClass = (userData.balance >= cost && isUnlocked && !isMaxed) ? 'btn-available' : 'btn-locked';
 
-            div.innerHTML = `${isUnlocked ? `<div class="orb-stats-top">${owned > 0 ? `<button onclick="sellOrb('${orb.id}', ${Math.floor(cost * 0.7)})" class="sell-btn">SELL</button>` : ''}<div class="owned-badge">x${total}</div></div><div class="orb-lvl-badge">LVL ${calculateOrbLevel(orb, total)}</div>` : ''}<div class="orb-visual ${getStageClass(total)}" style="background:currentColor; color:${orb.color};"></div><b>${orb.name}</b>${isUnlocked ? `<div style="color:#10b981; font-weight:800;">+$${income.toLocaleString()}</div><div class="progress-bg"><div class="progress-fill" id="bar-${orb.id}"></div></div>` : ''}<button onclick="buyOrb('${orb.id}', ${cost}, ${owned})" class="buy-btn ${btnClass}">${btnLabel}</button>`;
+            div.innerHTML = `${isUnlocked ? `<div class="orb-stats-top">${owned > 0 ? `<button onclick="sellOrb('${orb.id}', ${Math.floor(cost * 0.7)})" class="sell-btn">SELL</button>` : ''}<div class="owned-badge">x${owned}</div></div><div class="orb-lvl-badge">LVL ${calculateOrbLevel(orb, owned)}</div>` : ''}<div class="orb-visual ${getStageClass(owned)}" style="background:currentColor; color:${orb.color};"></div><b>${orb.name}</b>${isUnlocked ? `<div style="color:#10b981; font-weight:800;">+$${income.toLocaleString()}</div><div class="progress-bg"><div class="progress-fill" id="bar-${orb.id}"></div></div>` : ''}<button onclick="buyOrb('${orb.id}', ${cost}, ${owned})" class="buy-btn ${btnClass}">${btnLabel}</button>`;
             if (!isUnlocked) div.innerHTML += `<div class="blur-lock"><div class="lock-q">?</div></div>`;
             grid.appendChild(div);
         });
     }
 
+    // --- PROCEDURAL CHEST LOGIC ---
+    window.buyChest = async (tier, cost) => {
+        if (userData.balance < cost) return alert("Insufficient Funds!");
+        
+        let minCash, maxCash, minTime, maxTime;
+        
+        // Tier Logic based on user request
+        if (tier === 'bronze') {
+            minCash = 1; maxCash = 40; minTime = 1000; maxTime = 10000;
+        } else if (tier === 'silver') {
+            minCash = 45; maxCash = 150; minTime = 1000; maxTime = 8000;
+        } else if (tier === 'gold') {
+            minCash = 200; maxCash = 600; minTime = 1000; maxTime = 6000;
+        } else if (tier === 'champion') {
+            minCash = 1000; maxCash = 5000; minTime = 1000; maxTime = 5000;
+        }
+
+        const randomInc = Math.floor(Math.random() * (maxCash - minCash + 1)) + minCash;
+        const randomTime = Math.floor(Math.random() * (maxTime - minTime + 1)) + minTime;
+        
+        const newOrb = {
+            id: 'u_' + Date.now() + '_' + Math.floor(Math.random()*1000),
+            name: getRandomName(),
+            color: getRandomColor(),
+            income: randomInc,
+            time: randomTime,
+            tier: tier,
+            acquiredAt: Date.now()
+        };
+
+        // UI Reveal
+        const popup = document.getElementById('lootPopup');
+        document.getElementById('lootRevealName').innerText = newOrb.name;
+        document.getElementById('lootRevealName').style.color = newOrb.color;
+        document.getElementById('lootRevealStats').innerText = `Tier: ${tier.toUpperCase()} | $${newOrb.income}/every ${(newOrb.time/1000).toFixed(1)}s`;
+        const visual = document.getElementById('lootRevealVisual');
+        visual.style.color = newOrb.color;
+        visual.style.boxShadow = `0 0 30px ${newOrb.color}`;
+        
+        popup.classList.remove('hidden');
+
+        // Save to DB
+        await updateDoc(doc(db, "users", myUid), {
+            balance: increment(-cost),
+            uniqueOrbs: arrayUnion(newOrb)
+        });
+    };
+
+    function renderUniqueLoot() {
+        const container = document.getElementById('lootMarketplaceContainer');
+        if (!container || !userData.uniqueOrbs) return;
+        
+        container.innerHTML = '';
+        
+        const tiers = ['bronze', 'silver', 'gold', 'champion'];
+        
+        tiers.forEach(tier => {
+            const orbsInTier = userData.uniqueOrbs.filter(o => o.tier === tier);
+            if (orbsInTier.length > 0) {
+                const header = document.createElement('div');
+                header.className = 'loot-category-header';
+                header.innerText = `${tier.toUpperCase()} ARTIFACTS`;
+                header.style.color = tier === 'bronze' ? '#d97706' : tier === 'silver' ? '#cbd5e1' : tier === 'gold' ? '#facc15' : '#a855f7';
+                container.appendChild(header);
+
+                const grid = document.createElement('div');
+                grid.className = 'orb-grid';
+                
+                orbsInTier.forEach(orb => {
+                    const div = document.createElement('div');
+                    div.className = `orb-item unique-loot-card tier-${tier}`;
+                    // Calculate multiplier for unique orbs too
+                    let mult = 1;
+                    if(userData?.prestigeUpgrades) PRESTIGE_UPGRADES.orbs.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
+                    const finalInc = Math.floor(orb.income * mult);
+
+                    div.innerHTML = `
+                        <div class="orb-visual stage-3" style="background:currentColor; color:${orb.color}; width:50px; height:50px;"></div>
+                        <b style="font-size:16px;">${orb.name}</b>
+                        <div style="color:#10b981; font-weight:800; font-size:14px; margin-top:5px;">+$${finalInc.toLocaleString()}</div>
+                        <div style="font-size:12px; color:#94a3b8;">Every ${(orb.time/1000).toFixed(1)}s</div>
+                        <div class="progress-bg" style="margin-top:10px;"><div class="progress-fill" id="unique-bar-${orb.id}"></div></div>
+                    `;
+                    grid.appendChild(div);
+                });
+                container.appendChild(grid);
+            }
+        });
+        
+        if (userData.uniqueOrbs.length === 0) {
+            container.innerHTML = `<p style="text-align:center; color:#64748b; margin-top:20px;">No artifacts found. Buy chests to find them!</p>`;
+        }
+    }
+
     window.renderCollection = () => {
         if (!userData) return;
         const collectionGrid = document.getElementById('collectionGrid');
-        const lootGrid = document.getElementById('collectionLootGrid');
-        if (!collectionGrid || !lootGrid) return;
-        const sortMode = document.getElementById('collectionSortOrder').value;
+        if (!collectionGrid) return;
         
         collectionGrid.innerHTML = '';
-        lootGrid.innerHTML = '';
 
-        const allPossibleOrbs = [...ORB_DATA, ...MARKET_ORB_DATA];
-
-        const processList = (dataObj) => {
-            if(!dataObj) return [];
-            return Object.keys(dataObj).filter(id => dataObj[id] > 0).map(id => ({ 
-                id, count: dataObj[id], orb: allPossibleOrbs.find(o => o.id === id) 
-            })).filter(item => item.orb).sort((a, b) => {
-                if (sortMode === 'id_asc') return allPossibleOrbs.findIndex(o => o.id === a.id) - allPossibleOrbs.findIndex(o => o.id === b.id);
-                if (sortMode === 'asc') return a.orb.name.localeCompare(b.orb.name);
-                if (sortMode === 'desc') return b.orb.name.localeCompare(a.orb.name);
-                if (sortMode === 'count_high') return b.count - a.count;
-                if (sortMode === 'count_low') return a.count - b.count;
-                return 0;
-            });
-        };
-
-        processList(userData.orbs).forEach(item => { collectionGrid.appendChild(createCollectionItem(item.orb, item.count, false)); });
-        processList(userData.lootedOrbs).forEach(item => { lootGrid.appendChild(createCollectionItem(item.orb, item.count, true)); });
-    }
-
-    function createCollectionItem(orb, count, isLoot) {
-        const div = document.createElement('div');
-        div.className = 'orb-item';
-        div.style.minHeight = '220px';
-        const income = isLoot ? calcIncome(orb, 0, count) : calcIncome(orb, count, 0);
-        div.innerHTML = `<div class="orb-lvl-badge">LVL ${calculateOrbLevel(orb, count)}</div><div class="orb-visual ${getStageClass(count)}" style="background:currentColor; color:${orb.color}; width:40px; height:40px;"></div><b>${orb.name}</b><p style="font-size:12px;">Owned: ${count}</p><div style="color:#10b981; font-weight:800; font-size:14px;">+$${income.toLocaleString()}</div><div class="progress-bg" style="margin-top:10px;"><div class="progress-fill" id="col-bar-${orb.id}${isLoot ? '-loot' : ''}"></div></div>`;
-        return div;
+        ORB_DATA.forEach(orb => {
+            const count = userData.orbs?.[orb.id] || 0;
+            if (count > 0) {
+                const div = document.createElement('div');
+                div.className = 'orb-item';
+                div.style.minHeight = '220px';
+                const income = calcIncome(orb, count);
+                div.innerHTML = `<div class="orb-lvl-badge">LVL ${calculateOrbLevel(orb, count)}</div><div class="orb-visual ${getStageClass(count)}" style="background:currentColor; color:${orb.color}; width:40px; height:40px;"></div><b>${orb.name}</b><p style="font-size:12px;">Owned: ${count}</p><div style="color:#10b981; font-weight:800; font-size:14px;">+$${income.toLocaleString()}</div><div class="progress-bg" style="margin-top:10px;"><div class="progress-fill" id="col-bar-${orb.id}"></div></div>`;
+                collectionGrid.appendChild(div);
+            }
+        });
     }
 
     function renderPrestige() {
         const rowClick = document.getElementById('pRowClick');
         const rowOrb = document.getElementById('pRowOrb');
+        if(!rowClick || !rowOrb) return;
+        
         rowClick.innerHTML = ''; rowOrb.innerHTML = '';
+
         const renderUpgrade = (u, container) => {
             const owned = userData.prestigeUpgrades?.includes(u.id);
+            const canAfford = (userData.prestigePoints || 0) >= u.cost;
             const div = document.createElement('div');
             div.className = `prestige-card ${owned ? 'owned' : ''}`;
-            div.innerHTML = `<div><b style="color:${owned ? '#10b981' : 'white'}">${u.name}</b><p style="font-size:12px; margin-top:5px; color:#cbd5e1;">x${u.mult} Mult</p></div>${owned ? `<button class="buy-btn btn-locked">OWNED</button>` : `<button onclick="buyPrestige('${u.id}', ${u.cost})" class="buy-btn ${userData.prestigePoints >= u.cost ? 'btn-available' : 'btn-locked'}">UNLOCK ${u.cost} PTS</button>`}`;
+            div.innerHTML = `
+                <div style="font-size:18px; margin-bottom:5px;">${u.name}</div>
+                <div style="color:#facc15; font-weight:900;">${u.mult}x Boost</div>
+                <div style="margin:10px 0; font-size:12px; color:#94a3b8;">Cost: ${u.cost} Pts</div>
+                <button 
+                    onclick="buyPrestigeUpgrade('${u.id}', ${u.cost})" 
+                    class="buy-btn ${owned ? 'hidden' : (canAfford ? 'btn-available' : 'btn-locked')}"
+                    style="padding:8px; font-size:12px;">
+                    ${owned ? 'OWNED' : 'BUY UPGRADE'}
+                </button>
+            `;
             container.appendChild(div);
         };
+
         PRESTIGE_UPGRADES.clicks.forEach(u => renderUpgrade(u, rowClick));
         PRESTIGE_UPGRADES.orbs.forEach(u => renderUpgrade(u, rowOrb));
     }
 
-    window.doPrestige = async () => {
-        if(userData.balance < 50000000) return alert("Need $50 Million!");
-        if(!confirm("Reset everything for Prestige Points?")) return;
-        const units = userData.balance / 50000000;
-        const pointsToAward = Math.floor(units + Math.pow(units, 1.4));
-        await updateDoc(doc(db, "users", myUid), { balance: 500, orbs: {}, lootedOrbs: {}, clickLevel: 1, prestigePoints: increment(pointsToAward) });
-        location.reload();
+    // --- GAME ACTIONS ---
+    window.upgradeClicker = async () => {
+        const currentLevel = userData.clickLevel || 1;
+        const cost = Math.floor(25 + (currentLevel - 1) * 50.5);
+        if (userData.balance >= cost && currentLevel < 50) {
+            await updateDoc(doc(db, "users", myUid), {
+                balance: increment(-cost),
+                clickLevel: increment(1)
+            });
+        }
     };
 
-    window.buyPrestige = async (id, cost) => {
-        if(userData.prestigePoints < cost || userData.prestigeUpgrades?.includes(id)) return;
-        await updateDoc(doc(db, "users", myUid), { prestigePoints: increment(-cost), prestigeUpgrades: arrayUnion(id) });
-    };
-
-    window.buyOrb = async (id, cost, owned) => { 
-        if(owned < 50 && userData.balance >= cost) await updateDoc(doc(db, "users", myUid), { balance: increment(-cost), [`orbs.${id}`]: increment(1) }); 
+    window.buyOrb = async (id, cost, currentOwned) => {
+        if (userData.balance >= cost && currentOwned < 50) {
+            const update = { balance: increment(-cost) };
+            update[`orbs.${id}`] = increment(1);
+            await updateDoc(doc(db, "users", myUid), update);
+        }
     };
 
     window.sellOrb = async (id, refund) => { 
         if(userData?.orbs?.[id] > 0) await updateDoc(doc(db, "users", myUid), { balance: increment(refund), [`orbs.${id}`]: increment(-1) }); 
     };
 
-    window.upgradeClicker = async () => { 
-        const currentLevel = userData.clickLevel || 1;
-        const currentBasePower = currentLevel <= 1 ? 1 : Math.min(1 + ((currentLevel - 1) * 10), 500);
-        const cost = Math.floor(25 + (currentLevel - 1) * 50.5);
-        if(userData.balance >= cost && currentBasePower < 500) await updateDoc(doc(db, "users", myUid), { balance: increment(-cost), clickLevel: increment(1) }); 
+    window.buyPrestigeUpgrade = async (id, cost) => {
+       if(userData.prestigePoints < cost || userData.prestigeUpgrades?.includes(id)) return;
+       await updateDoc(doc(db, "users", myUid), { prestigePoints: increment(-cost), prestigeUpgrades: arrayUnion(id) });
     };
 
-    window.buyChest = async (tier, cost) => {
-        if (userData.balance < cost) return alert("Not enough cash!");
-        const data = CHEST_LOOT_TABLE[tier];
-        const winId = data.orbs[Math.floor(Math.random() * data.orbs.length)];
-        const orbObj = [...ORB_DATA, ...MARKET_ORB_DATA].find(o => o.id === winId);
-        const cashBonus = Math.floor(Math.random() * (data.range[1] - data.range[0] + 1)) + data.range[0];
+    window.doPrestige = async () => {
+        const units = (userData.balance || 0) / 50000000;
+        if (userData.balance < 50000000) return;
         
-        // Remove alert and show in UI instead
-        const historyDiv = document.getElementById('chestLootHistory');
-        const historyGrid = document.getElementById('lootHistoryGrid');
-        historyDiv.classList.remove('hidden');
-        
-        const winCard = document.createElement('div');
-        winCard.className = 'loot-win-card';
-        winCard.innerHTML = `<div style="font-size:12px; color:#94a3b8; margin-bottom:5px;">${tier.toUpperCase()} CHEST</div><b style="color:${orbObj.color}">${orbObj.name}</b><div style="color:#10b981; font-size:14px; font-weight:800; margin-top:5px;">+$${cashBonus.toLocaleString()}</div>`;
-        
-        historyGrid.prepend(winCard);
-        if(historyGrid.children.length > 5) historyGrid.lastElementChild.remove();
-
-        let updates = { balance: increment(-cost + cashBonus) };
-        updates[`lootedOrbs.${winId}`] = increment(1);
-        await updateDoc(doc(db, "users", myUid), updates);
+        const pointsToAdd = Math.floor(units + Math.pow(units, 1.4));
+        await updateDoc(doc(db, "users", myUid), {
+            balance: 0,
+            clickLevel: 1,
+            orbs: {},
+            uniqueOrbs: [], // Reset looted artifacts on prestige
+            prestigePoints: increment(pointsToAdd)
+        });
+        location.reload();
     };
 
-    document.getElementById('mainClicker').addEventListener('click', (e) => {
+    // --- ENGINE ---
+    let lastTime = Date.now();
+    
+    setInterval(() => {
         if (!userData) return;
-        const p = getPower(userData.clickLevel || 1);
-        updateDoc(doc(db, "users", myUid), { balance: increment(p) });
-        const pop = document.createElement('div'); pop.className = 'popup-anim'; pop.innerText = `+$${p}`;
-        pop.style.left = e.clientX + 'px'; pop.style.top = e.clientY + 'px';
-        document.body.appendChild(pop); setTimeout(() => pop.remove(), 400); 
-    });
+        const now = Date.now();
+        const deltaTime = now - lastTime;
+        lastTime = now;
 
-    window.showTab = (t) => {
+        // 1. Standard Orbs Logic
+        ORB_DATA.forEach(orb => {
+            const owned = userData.orbs?.[orb.id] || 0;
+            if (owned > 0) {
+                if (!orbProgress[orb.id]) orbProgress[orb.id] = 0;
+                orbProgress[orb.id] += deltaTime;
+
+                if (orbProgress[orb.id] >= orb.time) {
+                    const cycles = Math.floor(orbProgress[orb.id] / orb.time);
+                    orbProgress[orb.id] %= orb.time;
+                    localBalanceAccumulator += calcIncome(orb, owned) * cycles;
+                }
+                
+                const pct = (orbProgress[orb.id] / orb.time) * 100;
+                const b1 = document.getElementById(`bar-${orb.id}`); if(b1) b1.style.width = pct + "%";
+                const b2 = document.getElementById(`col-bar-${orb.id}`); if(b2) b2.style.width = pct + "%";
+            }
+        });
+
+        // 2. Unique Loot Logic
+        if (userData.uniqueOrbs) {
+            let orbMult = 1;
+            if(userData.prestigeUpgrades) PRESTIGE_UPGRADES.orbs.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) orbMult *= u.mult; });
+
+            userData.uniqueOrbs.forEach(orb => {
+                if (!uniqueOrbProgress[orb.id]) uniqueOrbProgress[orb.id] = 0;
+                uniqueOrbProgress[orb.id] += deltaTime;
+
+                if (uniqueOrbProgress[orb.id] >= orb.time) {
+                    const cycles = Math.floor(uniqueOrbProgress[orb.id] / orb.time);
+                    uniqueOrbProgress[orb.id] %= orb.time;
+                    const income = Math.floor(orb.income * orbMult);
+                    localBalanceAccumulator += income * cycles;
+                }
+                
+                const pct = (uniqueOrbProgress[orb.id] / orb.time) * 100;
+                const bar = document.getElementById(`unique-bar-${orb.id}`);
+                if(bar) bar.style.width = pct + "%";
+            });
+        }
+
+        updateUI();
+    }, 100);
+
+    // Save local accumulation to Firebase every 5 seconds
+    setInterval(async () => {
+        if (localBalanceAccumulator > 0 && myUid) {
+            const toAdd = Math.floor(localBalanceAccumulator);
+            localBalanceAccumulator -= toAdd;
+            try {
+                await updateDoc(doc(db, "users", myUid), { balance: increment(toAdd) });
+            } catch (e) {
+                localBalanceAccumulator += toAdd; // refund on fail
+            }
+        }
+    }, 5000);
+
+    // Tab Switching
+    window.showTab = (tabId) => {
         document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
-        document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
-        document.getElementById(t + 'View').classList.remove('hidden');
-        if(document.getElementById('t' + t.charAt(0).toUpperCase() + t.slice(1, 3))) document.getElementById('t' + t.charAt(0).toUpperCase() + t.slice(1, 3)).classList.add('active');
-        if(t === 'collection') renderCollection();
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.getElementById(tabId + 'View').classList.remove('hidden');
+        const tabBtn = document.getElementById('t' + tabId.charAt(0).toUpperCase() + tabId.slice(1, 3));
+        if(tabBtn) tabBtn.classList.add('active');
+        
+        if (tabId === 'marketplace') renderUniqueLoot();
+        if (tabId === 'collection') renderCollection();
     };
+
+    // Clicker logic
+    document.getElementById('mainClicker').onclick = (e) => {
+        const power = getPower(userData.clickLevel || 1);
+        localBalanceAccumulator += power;
+        const pop = document.createElement('div');
+        pop.className = 'popup-anim';
+        pop.innerText = `+$${power}`;
+        pop.style.left = e.pageX + "px"; pop.style.top = e.pageY + "px";
+        document.body.appendChild(pop);
+        setTimeout(() => pop.remove(), 400);
+    };
+
+    // --- AUTH & MISC ---
+    const handleAuth = async () => {
+        const u = document.getElementById('loginUser').value.trim().toLowerCase();
+        const p = document.getElementById('authPass').value;
+        const e = document.getElementById('regEmail').value;
+        if (!u || !p || (isReg && !e)) return alert("Please fill all fields");
+        try {
+            if(isReg) {
+                const res = await createUserWithEmailAndPassword(auth, e, p);
+                await setDoc(doc(db, "users", res.user.uid), { 
+                    username: u, 
+                    email: e, 
+                    balance: 1000, 
+                    orbs: {}, 
+                    uniqueOrbs: [], // New array for loot
+                    clickLevel: 1, 
+                    prestigePoints: 0, 
+                    prestigeUpgrades: [] 
+                });
+            } else {
+                const q = query(collection(db, "users"), where("username", "==", u));
+                const s = await getDocs(q);
+                if(s.empty) return alert("User not found");
+                await signInWithEmailAndPassword(auth, s.docs[0].data().email, p);
+            }
+        } catch(err) { alert(err.message); }
+    };
+
+    document.getElementById('authBtn').onclick = handleAuth;
+    document.getElementById('toggleAuth').onclick = () => { isReg = !isReg; document.getElementById('regArea').classList.toggle('hidden'); };
+    window.toggleSettings = () => document.getElementById('settingsMenu').classList.toggle('hidden');
+    window.updateProfile = async () => {
+        const n = document.getElementById('setNewUser').value.trim();
+        if(n) await updateDoc(doc(db, "users", myUid), { username: n });
+    };
+    window.logout = () => signOut(auth).then(() => location.reload());
 
     const loadInbox = () => {
         onSnapshot(query(collection(db, "messages"), where("to", "==", userData.username), orderBy("date", "desc")), s => {
@@ -539,68 +746,6 @@
         }
         alert("Mail Sent!");
     };
-
-    let lastPulseTime = Date.now();
-    setInterval(() => {
-        if(!userData) return;
-        const now = Date.now();
-        const deltaTime = now - lastPulseTime;
-        lastPulseTime = now;
-        [...ORB_DATA, ...MARKET_ORB_DATA].forEach(orb => {
-            const owned = userData.orbs?.[orb.id] || 0;
-            const looted = userData.lootedOrbs?.[orb.id] || 0;
-            if((owned + looted) > 0) {
-                if(!orbProgress[orb.id]) orbProgress[orb.id] = { elapsed: 0 };
-                const state = orbProgress[orb.id];
-                state.elapsed += deltaTime;
-                if(state.elapsed >= orb.time) {
-                    const cycles = Math.floor(state.elapsed / orb.time);
-                    state.elapsed %= orb.time;
-                    localBalanceAccumulator += calcIncome(orb, owned, looted) * cycles;
-                    document.getElementById('userBal').innerText = Math.floor((userData.balance || 0) + localBalanceAccumulator).toLocaleString();
-                }
-                const progressWidth = Math.min((state.elapsed / orb.time) * 100, 100) + "%";
-                const mainBar = document.getElementById(`bar-${orb.id}`); if(mainBar) mainBar.style.width = progressWidth;
-                const colBar = document.getElementById(`col-bar-${orb.id}`); if(colBar) colBar.style.width = progressWidth;
-                const lootBar = document.getElementById(`col-bar-${orb.id}-loot`); if(lootBar) lootBar.style.width = progressWidth;
-            }
-        });
-    }, 100);
-
-    setInterval(async () => {
-        if (localBalanceAccumulator > 0 && myUid) {
-            const amountToSync = localBalanceAccumulator;
-            localBalanceAccumulator -= amountToSync; 
-            try { await updateDoc(doc(db, "users", myUid), { balance: increment(amountToSync) }); } catch (e) { localBalanceAccumulator += amountToSync; }
-        }
-    }, 500);
-
-    const handleAuth = async () => {
-        const u = document.getElementById('loginUser').value.trim().toLowerCase();
-        const p = document.getElementById('authPass').value;
-        const e = document.getElementById('regEmail').value;
-        if (!u || !p || (isReg && !e)) return alert("Please fill all fields");
-        try {
-            if(isReg) {
-                const res = await createUserWithEmailAndPassword(auth, e, p);
-                await setDoc(doc(db, "users", res.user.uid), { username: u, email: e, balance: 1000, orbs: {}, lootedOrbs: {}, clickLevel: 1, prestigePoints: 0, prestigeUpgrades: [] });
-            } else {
-                const q = query(collection(db, "users"), where("username", "==", u));
-                const s = await getDocs(q);
-                if(s.empty) return alert("User not found");
-                await signInWithEmailAndPassword(auth, s.docs[0].data().email, p);
-            }
-        } catch(err) { alert(err.message); }
-    };
-
-    document.getElementById('authBtn').onclick = handleAuth;
-    document.getElementById('toggleAuth').onclick = () => { isReg = !isReg; document.getElementById('regArea').classList.toggle('hidden'); };
-    window.toggleSettings = () => document.getElementById('settingsMenu').classList.toggle('hidden');
-    window.updateProfile = async () => {
-        const n = document.getElementById('setNewUser').value.trim();
-        if(n) await updateDoc(doc(db, "users", myUid), { username: n });
-    };
-    window.logout = () => signOut(auth).then(() => location.reload());
 </script>
 </body>
 </html>
