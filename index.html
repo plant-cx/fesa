@@ -219,10 +219,27 @@
                     <p style="font-size:12px; margin-top:5px; color:#94a3b8;">Requirement: $50,000,000</p>
                 </div>
             </div>
+            
             <h3 style="margin-bottom:15px; color:#a855f7; border-left:4px solid #a855f7; padding-left:10px;">🖱️ CLICK MULTIPLIERS</h3>
             <div class="prestige-row" id="pRowClick"></div>
+            
             <h3 style="margin-bottom:15px; color:#38bdf8; border-left:4px solid #38bdf8; padding-left:10px;">🔮 ORB MULTIPLIERS</h3>
             <div class="prestige-row" id="pRowOrb"></div>
+
+            <h3 style="margin-bottom:15px; color:#f59e0b; border-left:4px solid #f59e0b; padding-left:10px;">💎 ARTIFACT HUNTERS (Loot Boost)</h3>
+            <div class="prestige-row" id="pRowArtifacts"></div>
+
+            <h3 style="margin-bottom:15px; color:#2dd4bf; border-left:4px solid #2dd4bf; padding-left:10px;">🌍 GLOBAL EMPIRE (All Income)</h3>
+            <div class="prestige-row" id="pRowGlobal"></div>
+
+            <h3 style="margin-bottom:15px; color:#f43f5e; border-left:4px solid #f43f5e; padding-left:10px;">⚡ CLICK FRENZY (Click Stack)</h3>
+            <div class="prestige-row" id="pRowFrenzy"></div>
+
+            <h3 style="margin-bottom:15px; color:#8b5cf6; border-left:4px solid #8b5cf6; padding-left:10px;">🌀 ORB SYNERGY (Orb Stack)</h3>
+            <div class="prestige-row" id="pRowSynergy"></div>
+
+            <h3 style="margin-bottom:15px; color:#facc15; border-left:4px solid #facc15; padding-left:10px;">⚛️ QUANTUM MASTERY (Ultimate)</h3>
+            <div class="prestige-row" id="pRowMastery"></div>
         </div>
 
         <div id="inboxView" class="tab-view hidden"><div id="mailBox">Loading...</div></div>
@@ -270,6 +287,7 @@
         { id: 'orb10', name: 'Solar Orb', baseCost: 80000000, baseInc: 15000000, time: 15000, color: '#fbbf24' }
     ];
 
+    // EXPANDED PRESTIGE UPGRADES
     const PRESTIGE_UPGRADES = {
         clicks: [
             { id: 'p_click_1', name: 'Iron Clicks', mult: 1.1, cost: 1 },
@@ -284,6 +302,41 @@
             { id: 'p_orb_3', name: 'Time Warp', mult: 1.5, cost: 15 },
             { id: 'p_orb_4', name: 'Star Power', mult: 2.0, cost: 40 },
             { id: 'p_orb_5', name: 'Dark Matter', mult: 5.0, cost: 150 }
+        ],
+        artifacts: [
+            { id: 'p_art_1', name: 'Loot Scope', mult: 1.2, cost: 5 },
+            { id: 'p_art_2', name: 'Treasure Map', mult: 1.5, cost: 15 },
+            { id: 'p_art_3', name: 'Ancient Key', mult: 2.0, cost: 50 },
+            { id: 'p_art_4', name: 'Midas Touch', mult: 3.0, cost: 125 },
+            { id: 'p_art_5', name: 'Dragon Hoard', mult: 6.0, cost: 300 }
+        ],
+        global: [
+            { id: 'p_glo_1', name: 'Small Tax', mult: 1.1, cost: 10 },
+            { id: 'p_glo_2', name: 'Big Business', mult: 1.25, cost: 30 },
+            { id: 'p_glo_3', name: 'Monopoly', mult: 1.5, cost: 80 },
+            { id: 'p_glo_4', name: 'World Bank', mult: 2.0, cost: 200 },
+            { id: 'p_glo_5', name: 'Galactic Trade', mult: 4.0, cost: 500 }
+        ],
+        frenzy: [
+            { id: 'p_frz_1', name: 'Coffee Shot', mult: 1.3, cost: 20 },
+            { id: 'p_frz_2', name: 'Energy Drink', mult: 1.6, cost: 50 },
+            { id: 'p_frz_3', name: 'Adrenaline', mult: 2.2, cost: 120 },
+            { id: 'p_frz_4', name: 'Berserk Mode', mult: 3.0, cost: 300 },
+            { id: 'p_frz_5', name: 'Super Saiyan', mult: 7.0, cost: 800 }
+        ],
+        synergy: [
+            { id: 'p_syn_1', name: 'Linked Orbs', mult: 1.3, cost: 25 },
+            { id: 'p_syn_2', name: 'Mana Web', mult: 1.6, cost: 60 },
+            { id: 'p_syn_3', name: 'Harmony', mult: 2.2, cost: 140 },
+            { id: 'p_syn_4', name: 'Convergence', mult: 3.0, cost: 350 },
+            { id: 'p_syn_5', name: 'Singularity', mult: 7.0, cost: 900 }
+        ],
+        mastery: [
+            { id: 'p_mas_1', name: 'Quantum Bit', mult: 2.0, cost: 500 },
+            { id: 'p_mas_2', name: 'Time Crystal', mult: 3.0, cost: 1000 },
+            { id: 'p_mas_3', name: 'Reality Bend', mult: 5.0, cost: 2500 },
+            { id: 'p_mas_4', name: 'Universe Core', mult: 10.0, cost: 5000 },
+            { id: 'p_mas_5', name: 'Game Admin', mult: 50.0, cost: 10000 }
         ]
     };
 
@@ -314,7 +367,7 @@
                     renderOrbs('orbGrid', ORB_DATA);
                     renderCollection();
                     renderPrestige();
-                    renderUniqueLoot(); // New function
+                    renderUniqueLoot(); 
                     loadInbox();
                     document.getElementById('authScreen').classList.add('hidden');
                     document.getElementById('appScreen').classList.remove('hidden');
@@ -372,7 +425,13 @@
     const getPower = (lvl) => {
         let base = lvl <= 1 ? 1 : Math.min(1 + ((lvl - 1) * 10), 500);
         let mult = 1;
-        if(userData?.prestigeUpgrades) PRESTIGE_UPGRADES.clicks.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
+        // Apply Click, Global, Frenzy, and Mastery Multipliers
+        if(userData?.prestigeUpgrades) {
+            PRESTIGE_UPGRADES.clicks.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
+            PRESTIGE_UPGRADES.global.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
+            PRESTIGE_UPGRADES.frenzy.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
+            PRESTIGE_UPGRADES.mastery.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
+        }
         return Math.floor(base * mult);
     };
 
@@ -381,7 +440,13 @@
         if (owned > 0) totalIncome += Math.floor(orb.baseInc * (Math.pow(2.0, owned) - 1));
         
         let mult = 1;
-        if(userData?.prestigeUpgrades) PRESTIGE_UPGRADES.orbs.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
+        // Apply Orbs, Global, Synergy, and Mastery Multipliers
+        if(userData?.prestigeUpgrades) {
+            PRESTIGE_UPGRADES.orbs.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
+            PRESTIGE_UPGRADES.global.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
+            PRESTIGE_UPGRADES.synergy.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
+            PRESTIGE_UPGRADES.mastery.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
+        }
         return Math.floor(totalIncome * mult);
     };
 
@@ -480,9 +545,16 @@
                 orbsInTier.forEach(orb => {
                     const div = document.createElement('div');
                     div.className = `orb-item unique-loot-card tier-${tier}`;
-                    // Calculate multiplier for unique orbs too
+                    
+                    // Apply Loot, Global, and Mastery Multipliers to visual display
                     let mult = 1;
-                    if(userData?.prestigeUpgrades) PRESTIGE_UPGRADES.orbs.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
+                    if(userData?.prestigeUpgrades) {
+                        PRESTIGE_UPGRADES.orbs.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; }); // Standard orb mult applies to loot too? Let's keep it consistent with previous logic
+                        PRESTIGE_UPGRADES.artifacts.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
+                        PRESTIGE_UPGRADES.global.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
+                        PRESTIGE_UPGRADES.mastery.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
+                    }
+                    
                     const finalInc = Math.floor(orb.income * mult);
 
                     div.innerHTML = `
@@ -526,9 +598,16 @@
     function renderPrestige() {
         const rowClick = document.getElementById('pRowClick');
         const rowOrb = document.getElementById('pRowOrb');
+        const rowArtifacts = document.getElementById('pRowArtifacts');
+        const rowGlobal = document.getElementById('pRowGlobal');
+        const rowFrenzy = document.getElementById('pRowFrenzy');
+        const rowSynergy = document.getElementById('pRowSynergy');
+        const rowMastery = document.getElementById('pRowMastery');
+        
         if(!rowClick || !rowOrb) return;
         
-        rowClick.innerHTML = ''; rowOrb.innerHTML = '';
+        // Clear all rows
+        [rowClick, rowOrb, rowArtifacts, rowGlobal, rowFrenzy, rowSynergy, rowMastery].forEach(r => { if(r) r.innerHTML = ''; });
 
         const renderUpgrade = (u, container) => {
             const owned = userData.prestigeUpgrades?.includes(u.id);
@@ -551,6 +630,13 @@
 
         PRESTIGE_UPGRADES.clicks.forEach(u => renderUpgrade(u, rowClick));
         PRESTIGE_UPGRADES.orbs.forEach(u => renderUpgrade(u, rowOrb));
+        
+        // Render New Rows
+        PRESTIGE_UPGRADES.artifacts.forEach(u => renderUpgrade(u, rowArtifacts));
+        PRESTIGE_UPGRADES.global.forEach(u => renderUpgrade(u, rowGlobal));
+        PRESTIGE_UPGRADES.frenzy.forEach(u => renderUpgrade(u, rowFrenzy));
+        PRESTIGE_UPGRADES.synergy.forEach(u => renderUpgrade(u, rowSynergy));
+        PRESTIGE_UPGRADES.mastery.forEach(u => renderUpgrade(u, rowMastery));
     }
 
     // --- GAME ACTIONS ---
@@ -627,8 +713,14 @@
 
         // 2. Unique Loot Logic
         if (userData.uniqueOrbs) {
+            // Apply Multipliers for Loot
             let orbMult = 1;
-            if(userData.prestigeUpgrades) PRESTIGE_UPGRADES.orbs.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) orbMult *= u.mult; });
+            if(userData.prestigeUpgrades) {
+                PRESTIGE_UPGRADES.orbs.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) orbMult *= u.mult; });
+                PRESTIGE_UPGRADES.artifacts.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) orbMult *= u.mult; });
+                PRESTIGE_UPGRADES.global.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) orbMult *= u.mult; });
+                PRESTIGE_UPGRADES.mastery.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) orbMult *= u.mult; });
+            }
 
             userData.uniqueOrbs.forEach(orb => {
                 if (!uniqueOrbProgress[orb.id]) uniqueOrbProgress[orb.id] = 0;
@@ -749,3 +841,4 @@
 </script>
 </body>
 </html>
+
