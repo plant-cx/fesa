@@ -64,6 +64,11 @@
         .loot-section-title { font-size: 24px; font-weight: 900; color: #94a3b8; margin: 30px 0 15px; border-left: 5px solid #6366f1; padding-left: 15px; }
         .notif-banner { position: fixed; top: 25px; left: -400px; width: 320px; background: #6366f1; color: white; padding: 20px; border-radius: 16px; z-index: 99999; display: flex; align-items: center; gap: 15px; transition: left 0.5s; border: 2px solid #818cf8; }
         .notif-banner.active { left: 25px; }
+
+        /* New Loot History Styles */
+        .loot-history-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 15px; }
+        .loot-win-card { background: #0f172a; border: 2px solid #10b981; padding: 15px; border-radius: 12px; text-align: center; animation: slideInDown 0.4s ease-out; }
+        @keyframes slideInDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     </style>
 </head>
 <body>
@@ -160,7 +165,11 @@
                 <div class="chest-card"><div class="chest-icon">🥇</div><div class="chest-title">GOLD CHEST</div><div class="chest-cost">$500,000</div><button class="buy-btn btn-available" onclick="buyChest('gold', 500000)">BUY</button></div>
                 <div class="chest-card"><div class="chest-icon">🏆</div><div class="chest-title">CHAMPION CHEST</div><div class="chest-cost">$2,500,000</div><button class="buy-btn btn-available" onclick="buyChest('champion', 2500000)">BUY</button></div>
             </div>
-            <div id="lootContainer"></div>
+            
+            <div id="chestLootHistory" class="hidden">
+                <div class="loot-section-title">RECENT CHEST FINDS</div>
+                <div class="loot-history-grid" id="lootHistoryGrid"></div>
+            </div>
         </div>
 
         <div id="prestigeView" class="tab-view hidden">
@@ -471,12 +480,24 @@
         if (userData.balance < cost) return alert("Not enough cash!");
         const data = CHEST_LOOT_TABLE[tier];
         const winId = data.orbs[Math.floor(Math.random() * data.orbs.length)];
-        const orbName = [...ORB_DATA, ...MARKET_ORB_DATA].find(o => o.id === winId).name;
+        const orbObj = [...ORB_DATA, ...MARKET_ORB_DATA].find(o => o.id === winId);
         const cashBonus = Math.floor(Math.random() * (data.range[1] - data.range[0] + 1)) + data.range[0];
+        
+        // Remove alert and show in UI instead
+        const historyDiv = document.getElementById('chestLootHistory');
+        const historyGrid = document.getElementById('lootHistoryGrid');
+        historyDiv.classList.remove('hidden');
+        
+        const winCard = document.createElement('div');
+        winCard.className = 'loot-win-card';
+        winCard.innerHTML = `<div style="font-size:12px; color:#94a3b8; margin-bottom:5px;">${tier.toUpperCase()} CHEST</div><b style="color:${orbObj.color}">${orbObj.name}</b><div style="color:#10b981; font-size:14px; font-weight:800; margin-top:5px;">+$${cashBonus.toLocaleString()}</div>`;
+        
+        historyGrid.prepend(winCard);
+        if(historyGrid.children.length > 5) historyGrid.lastElementChild.remove();
+
         let updates = { balance: increment(-cost + cashBonus) };
         updates[`lootedOrbs.${winId}`] = increment(1);
         await updateDoc(doc(db, "users", myUid), updates);
-        alert(`🎁 Chest contains: ${orbName}!\n💰 Plus a $${cashBonus} cash find!`);
     };
 
     document.getElementById('mainClicker').addEventListener('click', (e) => {
