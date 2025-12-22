@@ -432,42 +432,40 @@
             grid.appendChild(div);
         });
     }
+window.renderCollection = () => {
+    if (!userData) return;
+    const grid = document.getElementById('collectionGrid');
+    grid.innerHTML = '';
+    Object.keys(userData.orbs || {}).forEach(id => {
+        if(userData.orbs[id] > 0) {
+            const orb = [...ORB_DATA, ...MARKET_ORB_DATA].find(o => o.id === id);
+            if(orb) {
+                const div = document.createElement('div'); 
+                div.className = 'orb-item'; 
+                div.style.minHeight = '200px'; // Slightly taller to fit the speed text
+                
+                // Calculate seconds for display
+                const speedInSeconds = (orb.time / 1000).toFixed(1);
+                const incomePerCycle = (orb.baseInc * userData.orbs[id]);
 
-    window.renderCollection = () => {
-        if (!userData) return;
-        const collectionGrid = document.getElementById('collectionGrid');
-        const lootGrid = document.getElementById('collectionLootGrid');
-        if (!collectionGrid || !lootGrid) return;
-        const sortMode = document.getElementById('collectionSortOrder').value;
-        
-        collectionGrid.innerHTML = '';
-        lootGrid.innerHTML = '';
-
-        const allPossibleOrbs = [...ORB_DATA, ...MARKET_ORB_DATA];
-
-        const processList = (dataObj) => {
-            if(!dataObj) return [];
-            return Object.keys(dataObj)
-                .filter(id => dataObj[id] > 0)
-                .map(id => ({ 
-                    id, 
-                    count: dataObj[id], 
-                    orb: allPossibleOrbs.find(o => o.id === id) 
-                }))
-                .filter(item => item.orb)
-                .sort((a, b) => {
-                    if (sortMode === 'id_asc') {
-                        const indexA = allPossibleOrbs.findIndex(o => o.id === a.id);
-                        const indexB = allPossibleOrbs.findIndex(o => o.id === b.id);
-                        return indexA - indexB;
-                    }
-                    if (sortMode === 'asc') return a.orb.name.localeCompare(b.orb.name);
-                    if (sortMode === 'desc') return b.orb.name.localeCompare(a.orb.name);
-                    if (sortMode === 'count_high') return b.count - a.count;
-                    if (sortMode === 'count_low') return a.count - b.count;
-                    return 0;
-                });
-        };
+                div.innerHTML = `
+                    <div class="orb-visual ${getStageClass(userData.orbs[id])}" style="color:${orb.color}; width:40px; height:40px;"></div>
+                    <b>${orb.name}</b>
+                    <div style="font-size:13px; color:#94a3b8; margin: 5px 0;">
+                        Owned: <span style="color:white; font-weight:800;">${userData.orbs[id]}</span>
+                    </div>
+                    <div style="color:#10b981; font-weight:800; font-size:16px;">
+                        +$${incomePerCycle.toLocaleString()}
+                    </div>
+                    <div style="font-size:12px; color:#6366f1; font-weight:700; margin-top:4px;">
+                        ⏱ EVERY ${speedInSeconds}s
+                    </div>
+                `;
+                grid.appendChild(div);
+            }
+        }
+    });
+};
 
         processList(userData.orbs).forEach(item => {
             collectionGrid.appendChild(createCollectionItem(item.orb, item.count, false));
