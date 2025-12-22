@@ -28,13 +28,57 @@
         .orb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-top: 25px; }
         .orb-item { background: #0f172a; border: 2px solid #334155; padding: 20px; border-radius: 16px; position: relative; text-align: center; min-height: 240px; display: flex; flex-direction: column; justify-content: space-between; }
         
-        .orb-visual { width: 65px; height: 65px; margin: 0 auto 12px; transition: all 0.5s; filter: drop-shadow(0 0 10px currentColor); }
-        .stage-1 { border-radius: 50%; box-shadow: 0 0 20px currentColor; }
-        .stage-2 { border-radius: 10%; transform: rotate(45deg); box-shadow: 0 0 25px currentColor; }
-        .stage-3 { clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%); border-radius: 15px; filter: drop-shadow(0 0 15px currentColor) brightness(1.2); }
-        .stage-4 { clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%); filter: drop-shadow(0 0 20px currentColor) brightness(1.5); }
-        .stage-5 { border-radius: 8px; animation: rotateSquare 3s linear infinite; filter: drop-shadow(0 0 30px currentColor) brightness(1.8); }
-        @keyframes rotateSquare { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        /* --- BRIGHT & SOFT ORB VISUALS --- */
+        .orb-visual { 
+            width: 65px; 
+            height: 65px; 
+            margin: 0 auto 12px; 
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            position: relative;
+        }
+
+        .stage-1 { 
+            border-radius: 50%; 
+            box-shadow: 0 0 15px currentColor; 
+        }
+
+        .stage-2 { 
+            border-radius: 12px; 
+            transform: rotate(45deg); 
+            box-shadow: 0 0 20px currentColor; 
+        }
+
+        /* The Star/Pentagon tier - Soft & glowing */
+        .stage-3 { 
+            clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%); 
+            filter: drop-shadow(0 0 12px currentColor) brightness(1.2);
+            animation: softPulse 3s ease-in-out infinite;
+        }
+
+        /* The Hexagon tier - Bright & shining */
+        .stage-4 { 
+            clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%); 
+            filter: drop-shadow(0 0 18px currentColor) brightness(1.4);
+            animation: softPulse 2.5s ease-in-out infinite;
+        }
+
+        /* Final tier - Ultra Bright Square */
+        .stage-5 { 
+            border-radius: 8px; 
+            filter: drop-shadow(0 0 25px currentColor) brightness(1.7);
+            animation: rotateGlow 4s linear infinite;
+        }
+
+        @keyframes softPulse {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 10px currentColor) brightness(1.2); }
+            50% { transform: scale(1.08); filter: drop-shadow(0 0 22px currentColor) brightness(1.5); }
+        }
+
+        @keyframes rotateGlow {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.1); filter: drop-shadow(0 0 35px currentColor) brightness(2); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
         
         .orb-lvl-badge { position: absolute; top: 10px; right: 10px; background: #6366f1; color: white; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 900; border: 1px solid #818cf8; z-index: 5; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
         
@@ -162,7 +206,6 @@
                 <div class="chest-card"><div class="chest-icon">🥇</div><div class="chest-title">GOLD CHEST</div><div class="chest-cost">$500,000</div><button class="buy-btn btn-available" onclick="buyChest('gold', 500000)">BUY</button></div>
                 <div class="chest-card"><div class="chest-icon">🏆</div><div class="chest-title">CHAMPION CHEST</div><div class="chest-cost">$2,500,000</div><button class="buy-btn btn-available" onclick="buyChest('champion', 2500000)">BUY</button></div>
             </div>
-            <div id="lootContainer"></div>
         </div>
 
         <div id="prestigeView" class="tab-view hidden">
@@ -203,7 +246,15 @@
     import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, updateDoc, onSnapshot, query, collection, where, getDocs, increment, orderBy, addDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    const firebaseConfig = { apiKey: "AIzaSyBo2zhESYzv1OChHSAfSb2GLiP6XtI6q1s", authDomain: "mailcash-3da79.firebaseapp.com", projectId: "mailcash-3da79", storageBucket: "mailcash-3da79.firebasestorage.app", messagingSenderId: "9602664972", appId: "1:9602664972:web:2ded4f3a7f583558513c29" };
+    const firebaseConfig = { 
+        apiKey: "AIzaSyBo2zhESYzv1OChHSAfSb2GLiP6XtI6q1s", 
+        authDomain: "mailcash-3da79.firebaseapp.com", 
+        projectId: "mailcash-3da79", 
+        storageBucket: "mailcash-3da79.firebasestorage.app", 
+        messagingSenderId: "9602664972", 
+        appId: "1:9602664972:web:2ded4f3a7f583558513c29" 
+    };
+    
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
@@ -386,13 +437,18 @@
             let btnLabel = isMaxed ? "MAXED" : (isUnlocked ? `UPG $${cost.toLocaleString()}` : "LOCKED");
             let btnClass = (userData.balance >= cost && isUnlocked && !isMaxed) ? 'btn-available' : 'btn-locked';
 
-            div.innerHTML = `${isUnlocked ? `<div class="orb-stats-top">${owned > 0 ? `<button onclick="sellOrb('${orb.id}', ${Math.floor(cost * 0.7)})" class="sell-btn">SELL</button>` : ''}<div class="owned-badge">x${total}</div></div><div class="orb-lvl-badge">LVL ${calculateOrbLevel(orb, total)}</div>` : ''}<div class="orb-visual ${getStageClass(total)}" style="color:${orb.color}; background:currentColor"></div><b>${orb.name}</b>${isUnlocked ? `<div style="color:#10b981; font-weight:800;">+$${income.toLocaleString()}</div><div class="progress-bg"><div class="progress-fill" id="bar-${orb.id}"></div></div>` : ''}<button onclick="buyOrb('${orb.id}', ${cost}, ${owned})" class="buy-btn ${btnClass}">${btnLabel}</button>`;
+            div.innerHTML = `
+                ${isUnlocked ? `<div class="orb-stats-top">${owned > 0 ? `<button onclick="sellOrb('${orb.id}', ${Math.floor(cost * 0.7)})" class="sell-btn">SELL</button>` : ''}<div class="owned-badge">x${total}</div></div><div class="orb-lvl-badge">LVL ${calculateOrbLevel(orb, total)}</div>` : ''}
+                <div class="orb-visual ${getStageClass(total)}" style="background:currentColor; color:${orb.color};"></div>
+                <b>${orb.name}</b>
+                ${isUnlocked ? `<div style="color:#10b981; font-weight:800;">+$${income.toLocaleString()}</div><div class="progress-bg"><div class="progress-fill" id="bar-${orb.id}"></div></div>` : ''}
+                <button onclick="buyOrb('${orb.id}', ${cost}, ${owned})" class="buy-btn ${btnClass}">${btnLabel}</button>
+            `;
             if (!isUnlocked) div.innerHTML += `<div class="blur-lock"><div class="lock-q">?</div></div>`;
             grid.appendChild(div);
         });
     }
 
-    // --- STABLE COLLECTION RENDERING ---
     window.renderCollection = () => {
         if (!userData) return;
         const collectionGrid = document.getElementById('collectionGrid');
@@ -443,7 +499,7 @@
         div.className = 'orb-item';
         div.style.minHeight = '180px';
         const income = isLoot ? calcIncome(orb, 0, count) : calcIncome(orb, count, 0);
-        div.innerHTML = `<div class="orb-lvl-badge">LVL ${calculateOrbLevel(orb, count)}</div><div class="orb-visual ${getStageClass(count)}" style="color:${orb.color}; background:currentColor; width:40px; height:40px;"></div><b>${orb.name}</b><p style="font-size:12px;">Owned: ${count}</p><div style="color:#10b981; font-weight:800; font-size:14px;">+$${income.toLocaleString()}</div>`;
+        div.innerHTML = `<div class="orb-lvl-badge">LVL ${calculateOrbLevel(orb, count)}</div><div class="orb-visual ${getStageClass(count)}" style="background:currentColor; color:${orb.color}; width:40px; height:40px;"></div><b>${orb.name}</b><p style="font-size:12px;">Owned: ${count}</p><div style="color:#10b981; font-weight:800; font-size:14px;">+$${income.toLocaleString()}</div>`;
         return div;
     }
 
@@ -602,7 +658,7 @@
         });
     }, 100);
 
-    // Rapid Sync (500ms): Pushes local bucket to Firebase accurately
+    // Rapid Sync (500ms)
     setInterval(async () => {
         if (localBalanceAccumulator > 0 && myUid) {
             const amountToSync = localBalanceAccumulator;
