@@ -212,6 +212,7 @@
     let myUid = null;
     let isReg = false;
     let localBalanceAccumulator = 0;
+    const orbProgress = {}; // Tracks ms progress for each orb
 
     const ORB_DATA = [
         { id: 'orb1', name: 'Blue Orb', baseCost: 350, baseInc: 15, time: 5000, color: '#3b82f6' },
@@ -305,7 +306,6 @@
         const cost = Math.floor(25 + (currentLevel - 1) * 50.5);
         const isMaxed = currentBasePower >= 500;
 
-        // Visual balance shows DB balance + what's in the local bucket
         const totalVisualBal = Math.floor((userData.balance || 0) + localBalanceAccumulator);
         document.getElementById('userBal').innerText = totalVisualBal.toLocaleString();
         
@@ -559,9 +559,15 @@
         alert("Mail Sent!");
     };
 
-    // --- ACCURATE ORB REGISTRATION & SYNC ---
+    // --- NEW GLOBAL PULSE SYSTEM (FOR ACCURACY & INSTANT UPGRADES) ---
+    let lastPulseTime = Date.now();
+
     setInterval(() => {
         if(!userData) return;
+        const now = Date.now();
+        const deltaTime = now - lastPulseTime;
+        lastPulseTime = now;
+
         const allOrbs = [...ORB_DATA, ...MARKET_ORB_DATA];
         allOrbs.forEach(orb => {
             const owned = userData.orbs?.[orb.id] || 0;
@@ -569,22 +575,33 @@
             const totalOwned = owned + looted;
 
             if(totalOwned > 0) {
-                if(!window[orb.id+'_timer']) { 
-                    window[orb.id+'_start'] = Date.now(); 
-                    window[orb.id+'_timer'] = setInterval(() => { 
-                        const incomePerCycle = calcIncome(orb, owned, looted);
-                        if (incomePerCycle > 0) {
-                            localBalanceAccumulator += incomePerCycle;
-                            // Update display immediately for better feel
-                            const displayBal = (userData.balance || 0) + localBalanceAccumulator;
-                            const balEl = document.getElementById('userBal');
-                            if(balEl) balEl.innerText = Math.floor(displayBal).toLocaleString();
-                        }
-                        window[orb.id+'_start'] = Date.now(); 
-                    }, orb.time); 
+                // Initialize state if first time seeing this orb
+                if(!orbProgress[orb.id]) {
+                    orbProgress[orb.id] = { elapsed: 0 };
                 }
+
+                const state = orbProgress[orb.id];
+                state.elapsed += deltaTime;
+
+                if(state.elapsed >= orb.time) {
+                    const cycles = Math.floor(state.elapsed / orb.time);
+                    state.elapsed %= orb.time; // Carry over remainder
+
+                    // RE-CALCULATE income here so it uses the latest 'owned' count immediately
+                    const currentIncome = calcIncome(orb, owned, looted);
+                    const earned = currentIncome * cycles;
+                    
+                    if(earned > 0) {
+                        localBalanceAccumulator += earned;
+                        // Update visual balance instantly
+                        const displayBal = (userData.balance || 0) + localBalanceAccumulator;
+                        const balEl = document.getElementById('userBal');
+                        if(balEl) balEl.innerText = Math.floor(displayBal).toLocaleString();
+                    }
+                }
+
                 const bar = document.getElementById(`bar-${orb.id}`); 
-                if(bar) bar.style.width = Math.min(((Date.now() - window[orb.id+'_start']) / orb.time) * 100, 100) + "%";
+                if(bar) bar.style.width = Math.min((state.elapsed / orb.time) * 100, 100) + "%";
             }
         });
     }, 100);
