@@ -212,6 +212,7 @@
     let myUid = null;
     let isReg = false;
     let localBalanceAccumulator = 0;
+    const orbProgress = {}; 
 
     const ORB_DATA = [
         { id: 'orb1', name: 'Blue Orb', baseCost: 350, baseInc: 15, time: 5000, color: '#3b82f6' },
@@ -305,13 +306,12 @@
         const cost = Math.floor(25 + (currentLevel - 1) * 50.5);
         const isMaxed = currentBasePower >= 500;
 
-        // Visual balance shows DB balance + what's in the local bucket
         const totalVisualBal = Math.floor((userData.balance || 0) + localBalanceAccumulator);
         document.getElementById('userBal').innerText = totalVisualBal.toLocaleString();
         
         document.getElementById('userDisplay').innerText = "@" + userData.username;
         document.getElementById('userPfp').src = `https://api.dicebear.com/7.x/identicon/svg?seed=${userData.username}`;
-        document.getElementById('clickPowerVal').innerText = getPower(currentLevel).toLocaleString();
+        document.getElementById('clickPowerVal').innerText = getPower(userData.clickLevel || 1).toLocaleString();
         
         const upgradeBtn = document.getElementById('upgradeClickBtn');
         if (isMaxed) {
@@ -392,10 +392,12 @@
         });
     }
 
+    // --- STABLE COLLECTION RENDERING ---
     window.renderCollection = () => {
         if (!userData) return;
         const collectionGrid = document.getElementById('collectionGrid');
         const lootGrid = document.getElementById('collectionLootGrid');
+        if (!collectionGrid || !lootGrid) return;
         const sortMode = document.getElementById('collectionSortOrder').value;
         
         collectionGrid.innerHTML = '';
@@ -559,9 +561,15 @@
         alert("Mail Sent!");
     };
 
-    // --- ACCURATE ORB REGISTRATION & SYNC ---
+    // --- ACCURATE GLOBAL PULSE PAYMENT SYSTEM ---
+    let lastPulseTime = Date.now();
+
     setInterval(() => {
         if(!userData) return;
+        const now = Date.now();
+        const deltaTime = now - lastPulseTime;
+        lastPulseTime = now;
+
         const allOrbs = [...ORB_DATA, ...MARKET_ORB_DATA];
         allOrbs.forEach(orb => {
             const owned = userData.orbs?.[orb.id] || 0;
@@ -569,22 +577,27 @@
             const totalOwned = owned + looted;
 
             if(totalOwned > 0) {
-                if(!window[orb.id+'_timer']) { 
-                    window[orb.id+'_start'] = Date.now(); 
-                    window[orb.id+'_timer'] = setInterval(() => { 
-                        const incomePerCycle = calcIncome(orb, owned, looted);
-                        if (incomePerCycle > 0) {
-                            localBalanceAccumulator += incomePerCycle;
-                            // Update display immediately for better feel
-                            const displayBal = (userData.balance || 0) + localBalanceAccumulator;
-                            const balEl = document.getElementById('userBal');
-                            if(balEl) balEl.innerText = Math.floor(displayBal).toLocaleString();
-                        }
-                        window[orb.id+'_start'] = Date.now(); 
-                    }, orb.time); 
+                if(!orbProgress[orb.id]) orbProgress[orb.id] = { elapsed: 0 };
+
+                const state = orbProgress[orb.id];
+                state.elapsed += deltaTime;
+
+                if(state.elapsed >= orb.time) {
+                    const cycles = Math.floor(state.elapsed / orb.time);
+                    state.elapsed %= orb.time;
+
+                    const currentIncome = calcIncome(orb, owned, looted);
+                    const earned = currentIncome * cycles;
+                    
+                    if(earned > 0) {
+                        localBalanceAccumulator += earned;
+                        const displayBal = (userData.balance || 0) + localBalanceAccumulator;
+                        const balEl = document.getElementById('userBal');
+                        if(balEl) balEl.innerText = Math.floor(displayBal).toLocaleString();
+                    }
                 }
                 const bar = document.getElementById(`bar-${orb.id}`); 
-                if(bar) bar.style.width = Math.min(((Date.now() - window[orb.id+'_start']) / orb.time) * 100, 100) + "%";
+                if(bar) bar.style.width = Math.min((state.elapsed / orb.time) * 100, 100) + "%";
             }
         });
     }, 100);
@@ -597,7 +610,7 @@
             try {
                 await updateDoc(doc(db, "users", myUid), { balance: increment(amountToSync) });
             } catch (e) {
-                localBalanceAccumulator += amountToSync; // Re-add if failed
+                localBalanceAccumulator += amountToSync; 
                 console.error("Sync error:", e);
             }
         }
