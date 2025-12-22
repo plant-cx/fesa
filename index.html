@@ -64,6 +64,11 @@
         .loot-section-title { font-size: 24px; font-weight: 900; color: #94a3b8; margin: 30px 0 15px; border-left: 5px solid #6366f1; padding-left: 15px; }
         .notif-banner { position: fixed; top: 25px; left: -400px; width: 320px; background: #6366f1; color: white; padding: 20px; border-radius: 16px; z-index: 99999; display: flex; align-items: center; gap: 15px; transition: left 0.5s; border: 2px solid #818cf8; }
         .notif-banner.active { left: 25px; }
+
+        /* New Loot History Styles */
+        .loot-history-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 15px; }
+        .loot-win-card { background: #0f172a; border: 2px solid #10b981; padding: 15px; border-radius: 12px; text-align: center; animation: slideInDown 0.4s ease-out; }
+        @keyframes slideInDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     </style>
 </head>
 <body>
@@ -161,13 +166,9 @@
                 <div class="chest-card"><div class="chest-icon">🏆</div><div class="chest-title">CHAMPION CHEST</div><div class="chest-cost">$2,500,000</div><button class="buy-btn btn-available" onclick="buyChest('champion', 2500000)">BUY</button></div>
             </div>
             
-            <div id="chestLootContainer">
-                <div class="loot-section-title" style="color:#facc15">✨ LEGENDARY FINDS</div>
-                <div class="orb-grid" id="legendaryLootGrid"></div>
-                <div class="loot-section-title" style="color:#a855f7">🟣 EPIC FINDS</div>
-                <div class="orb-grid" id="epicLootGrid"></div>
-                <div class="loot-section-title" style="color:#38bdf8">🔵 RARE FINDS</div>
-                <div class="orb-grid" id="rareLootGrid"></div>
+            <div id="chestLootHistory" class="hidden">
+                <div class="loot-section-title">RECENT CHEST FINDS</div>
+                <div class="loot-history-grid" id="lootHistoryGrid"></div>
             </div>
         </div>
 
@@ -287,7 +288,6 @@
                     renderOrbs('marketOrbGrid', MARKET_ORB_DATA);
                     renderCollection();
                     renderPrestige();
-                    renderLootInMarket();
                     loadInbox();
                     document.getElementById('authScreen').classList.add('hidden');
                     document.getElementById('appScreen').classList.remove('hidden');
@@ -350,10 +350,9 @@
     };
 
     const getLootedOrbValue = (id) => {
-        const baseId = id.split('_unique_')[0];
         for (const tier in CHEST_LOOT_TABLE) {
             const data = CHEST_LOOT_TABLE[tier];
-            if (data.orbs.includes(baseId)) return Math.floor((data.range[0] + data.range[1]) / 2);
+            if (data.orbs.includes(id)) return Math.floor((data.range[0] + data.range[1]) / 2);
         }
         return 0;
     };
@@ -377,10 +376,11 @@
         grid.innerHTML = '';
         dataList.forEach((orb, index) => {
             const owned = userData.orbs?.[orb.id] || 0;
-            const total = owned;
+            const looted = userData.lootedOrbs?.[orb.id] || 0;
+            const total = owned + looted;
             const cost = Math.floor(orb.baseCost * Math.pow(1.3, owned));
-            const income = calcIncome(orb, owned, 0);
-            const isUnlocked = index === 0 || ((userData.orbs?.[dataList[index-1].id] || 0) > 0);
+            const income = calcIncome(orb, owned, looted);
+            const isUnlocked = index === 0 || ((userData.orbs?.[dataList[index-1].id] || 0) + (userData.lootedOrbs?.[dataList[index-1].id] || 0) > 0);
             const isMaxed = owned >= 50;
             const div = document.createElement('div'); div.className = 'orb-item';
             
@@ -393,27 +393,6 @@
         });
     }
 
-    const renderLootInMarket = () => {
-        const legGrid = document.getElementById('legendaryLootGrid');
-        const epicGrid = document.getElementById('epicLootGrid');
-        const rareGrid = document.getElementById('rareLootGrid');
-        if(!legGrid || !epicGrid || !rareGrid) return;
-        
-        legGrid.innerHTML = ''; epicGrid.innerHTML = ''; rareGrid.innerHTML = '';
-        const allPossibleOrbs = [...ORB_DATA, ...MARKET_ORB_DATA];
-
-        Object.keys(userData.lootedOrbs || {}).forEach(uid => {
-            const baseId = uid.split('_unique_')[0];
-            const orb = allPossibleOrbs.find(o => o.id === baseId);
-            if(!orb) return;
-            const val = getLootedOrbValue(uid);
-            const item = createCollectionItem(orb, 1, true, uid);
-            if(val > 1000000) legGrid.appendChild(item);
-            else if(val > 50000) epicGrid.appendChild(item);
-            else rareGrid.appendChild(item);
-        });
-    };
-
     window.renderCollection = () => {
         if (!userData) return;
         const collectionGrid = document.getElementById('collectionGrid');
@@ -423,27 +402,33 @@
         
         collectionGrid.innerHTML = '';
         lootGrid.innerHTML = '';
+
         const allPossibleOrbs = [...ORB_DATA, ...MARKET_ORB_DATA];
 
-        // Normal Orbs
-        Object.keys(userData.orbs || {}).filter(id => userData.orbs[id] > 0).map(id => ({ 
-            id, count: userData.orbs[id], orb: allPossibleOrbs.find(o => o.id === id) 
-        })).forEach(item => { collectionGrid.appendChild(createCollectionItem(item.orb, item.count, false, item.id)); });
+        const processList = (dataObj) => {
+            if(!dataObj) return [];
+            return Object.keys(dataObj).filter(id => dataObj[id] > 0).map(id => ({ 
+                id, count: dataObj[id], orb: allPossibleOrbs.find(o => o.id === id) 
+            })).filter(item => item.orb).sort((a, b) => {
+                if (sortMode === 'id_asc') return allPossibleOrbs.findIndex(o => o.id === a.id) - allPossibleOrbs.findIndex(o => o.id === b.id);
+                if (sortMode === 'asc') return a.orb.name.localeCompare(b.orb.name);
+                if (sortMode === 'desc') return b.orb.name.localeCompare(a.orb.name);
+                if (sortMode === 'count_high') return b.count - a.count;
+                if (sortMode === 'count_low') return a.count - b.count;
+                return 0;
+            });
+        };
 
-        // Looted Unique Orbs
-        Object.keys(userData.lootedOrbs || {}).forEach(uid => {
-            const baseId = uid.split('_unique_')[0];
-            const orb = allPossibleOrbs.find(o => o.id === baseId);
-            lootGrid.appendChild(createCollectionItem(orb, 1, true, uid));
-        });
+        processList(userData.orbs).forEach(item => { collectionGrid.appendChild(createCollectionItem(item.orb, item.count, false)); });
+        processList(userData.lootedOrbs).forEach(item => { lootGrid.appendChild(createCollectionItem(item.orb, item.count, true)); });
     }
 
-    function createCollectionItem(orb, count, isLoot, uniqueId) {
+    function createCollectionItem(orb, count, isLoot) {
         const div = document.createElement('div');
         div.className = 'orb-item';
         div.style.minHeight = '220px';
         const income = isLoot ? calcIncome(orb, 0, count) : calcIncome(orb, count, 0);
-        div.innerHTML = `<div class="orb-lvl-badge">LVL ${calculateOrbLevel(orb, count)}</div><div class="orb-visual ${getStageClass(count)}" style="background:currentColor; color:${orb.color}; width:40px; height:40px;"></div><b>${orb.name}</b><p style="font-size:11px;">${isLoot ? 'UNIQUE FIND' : 'Owned: ' + count}</p><div style="color:#10b981; font-weight:800; font-size:14px;">+$${income.toLocaleString()}</div><div class="progress-bg" style="margin-top:10px;"><div class="progress-fill" id="col-bar-${uniqueId}"></div></div>`;
+        div.innerHTML = `<div class="orb-lvl-badge">LVL ${calculateOrbLevel(orb, count)}</div><div class="orb-visual ${getStageClass(count)}" style="background:currentColor; color:${orb.color}; width:40px; height:40px;"></div><b>${orb.name}</b><p style="font-size:12px;">Owned: ${count}</p><div style="color:#10b981; font-weight:800; font-size:14px;">+$${income.toLocaleString()}</div><div class="progress-bg" style="margin-top:10px;"><div class="progress-fill" id="col-bar-${orb.id}${isLoot ? '-loot' : ''}"></div></div>`;
         return div;
     }
 
@@ -494,11 +479,24 @@
     window.buyChest = async (tier, cost) => {
         if (userData.balance < cost) return alert("Not enough cash!");
         const data = CHEST_LOOT_TABLE[tier];
-        const baseWinId = data.orbs[Math.floor(Math.random() * data.orbs.length)];
-        const uniqueId = `${baseWinId}_unique_${Date.now()}`;
+        const winId = data.orbs[Math.floor(Math.random() * data.orbs.length)];
+        const orbObj = [...ORB_DATA, ...MARKET_ORB_DATA].find(o => o.id === winId);
         const cashBonus = Math.floor(Math.random() * (data.range[1] - data.range[0] + 1)) + data.range[0];
+        
+        // Remove alert and show in UI instead
+        const historyDiv = document.getElementById('chestLootHistory');
+        const historyGrid = document.getElementById('lootHistoryGrid');
+        historyDiv.classList.remove('hidden');
+        
+        const winCard = document.createElement('div');
+        winCard.className = 'loot-win-card';
+        winCard.innerHTML = `<div style="font-size:12px; color:#94a3b8; margin-bottom:5px;">${tier.toUpperCase()} CHEST</div><b style="color:${orbObj.color}">${orbObj.name}</b><div style="color:#10b981; font-size:14px; font-weight:800; margin-top:5px;">+$${cashBonus.toLocaleString()}</div>`;
+        
+        historyGrid.prepend(winCard);
+        if(historyGrid.children.length > 5) historyGrid.lastElementChild.remove();
+
         let updates = { balance: increment(-cost + cashBonus) };
-        updates[`lootedOrbs.${uniqueId}`] = 1;
+        updates[`lootedOrbs.${winId}`] = increment(1);
         await updateDoc(doc(db, "users", myUid), updates);
     };
 
@@ -548,42 +546,25 @@
         const now = Date.now();
         const deltaTime = now - lastPulseTime;
         lastPulseTime = now;
-        
-        const allPossibleOrbs = [...ORB_DATA, ...MARKET_ORB_DATA];
-
-        // Process Standard
-        allPossibleOrbs.forEach(orb => {
+        [...ORB_DATA, ...MARKET_ORB_DATA].forEach(orb => {
             const owned = userData.orbs?.[orb.id] || 0;
-            if(owned > 0) {
+            const looted = userData.lootedOrbs?.[orb.id] || 0;
+            if((owned + looted) > 0) {
                 if(!orbProgress[orb.id]) orbProgress[orb.id] = { elapsed: 0 };
                 const state = orbProgress[orb.id];
                 state.elapsed += deltaTime;
                 if(state.elapsed >= orb.time) {
-                    localBalanceAccumulator += calcIncome(orb, owned, 0);
+                    const cycles = Math.floor(state.elapsed / orb.time);
                     state.elapsed %= orb.time;
+                    localBalanceAccumulator += calcIncome(orb, owned, looted) * cycles;
+                    document.getElementById('userBal').innerText = Math.floor((userData.balance || 0) + localBalanceAccumulator).toLocaleString();
                 }
-                const progressWidth = (state.elapsed / orb.time) * 100 + "%";
-                if(document.getElementById(`bar-${orb.id}`)) document.getElementById(`bar-${orb.id}`).style.width = progressWidth;
-                if(document.getElementById(`col-bar-${orb.id}`)) document.getElementById(`col-bar-${orb.id}`).style.width = progressWidth;
+                const progressWidth = Math.min((state.elapsed / orb.time) * 100, 100) + "%";
+                const mainBar = document.getElementById(`bar-${orb.id}`); if(mainBar) mainBar.style.width = progressWidth;
+                const colBar = document.getElementById(`col-bar-${orb.id}`); if(colBar) colBar.style.width = progressWidth;
+                const lootBar = document.getElementById(`col-bar-${orb.id}-loot`); if(lootBar) lootBar.style.width = progressWidth;
             }
         });
-
-        // Process Looted
-        Object.keys(userData.lootedOrbs || {}).forEach(uid => {
-            const baseId = uid.split('_unique_')[0];
-            const orb = allPossibleOrbs.find(o => o.id === baseId);
-            if(!orb) return;
-            if(!orbProgress[uid]) orbProgress[uid] = { elapsed: 0 };
-            const state = orbProgress[uid];
-            state.elapsed += deltaTime;
-            if(state.elapsed >= orb.time) {
-                localBalanceAccumulator += calcIncome(orb, 0, 1);
-                state.elapsed %= orb.time;
-            }
-            if(document.getElementById(`col-bar-${uid}`)) document.getElementById(`col-bar-${uid}`).style.width = (state.elapsed / orb.time) * 100 + "%";
-        });
-        
-        document.getElementById('userBal').innerText = Math.floor((userData.balance || 0) + localBalanceAccumulator).toLocaleString();
     }, 100);
 
     setInterval(async () => {
