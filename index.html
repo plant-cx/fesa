@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MailCash | Ultimate Edition</title>
+    <title>MailCash | Hardcore Edition</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background: #0f172a; color: #f8fafc; padding: 20px; overflow-x: hidden; font-size: 18px; }
@@ -16,7 +16,10 @@
         button { width: 100%; padding: 16px; background: #6366f1; color: white; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; transition: 0.2s; font-size: 18px; text-transform: uppercase; letter-spacing: 0.5px; }
         .buy-btn { padding: 10px 16px; font-size: 16px; } /* Smaller Buy Button */
         
-        button:disabled { background: #334155; color: #64748b; cursor: not-allowed; }
+        button:disabled, .btn-locked { background: #334155 !important; color: #64748b !important; cursor: not-allowed; border: 1px solid #475569; }
+        .btn-available { background: #6366f1; }
+        .btn-available:hover { background: #4f46e5; transform: translateY(-2px); }
+
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; position: relative; gap: 10px; flex-wrap: wrap; }
         .balance-pill { background: #064e3b; color: #34d399; padding: 12px 24px; border-radius: 50px; font-weight: 900; border: 2px solid #059669; font-size: 22px; }
         
@@ -344,6 +347,7 @@
 <div class="container">
     <div id="authScreen" class="card" style="max-width: 650px; margin: 0 auto;">
         <h2 style="font-size:32px; margin-bottom:25px; text-align:center;">MailCash</h2>
+        <p style="text-align:center; margin-bottom:20px; color:#94a3b8;">The Economy is Harder. The Rewards are Greater.</p>
         <input type="text" id="loginUser" placeholder="Username">
         <div id="regArea" class="hidden"><input type="email" id="regEmail" placeholder="Email Address"></div>
         <input type="password" id="authPass" placeholder="Password">
@@ -449,30 +453,31 @@
 
         <div id="marketplaceView" class="tab-view hidden">
             <h3 style="text-align:center; color:#6366f1; margin-bottom:15px;">🎁 MYSTERY CHESTS</h3>
+            <p style="text-align:center; color:#94a3b8; margin-bottom:25px; font-size:14px;">High Risk, High Reward.</p>
             <div class="chest-grid">
                 <div class="chest-card">
                     <div class="chest-icon">🥉</div>
                     <div class="chest-title">BRONZE CHEST</div>
-                    <div class="chest-cost" style="color:#d97706; font-weight:bold;">$1,000</div>
-                    <button class="buy-btn btn-available" onclick="buyChest('bronze', 1000)">BUY</button>
+                    <div class="chest-cost" style="color:#d97706; font-weight:bold;">$25,000</div>
+                    <button class="buy-btn btn-available" onclick="buyChest('bronze', 25000)">BUY</button>
                 </div>
                 <div class="chest-card">
                     <div class="chest-icon">🥈</div>
                     <div class="chest-title">SILVER CHEST</div>
-                    <div class="chest-cost" style="color:#cbd5e1; font-weight:bold;">$25,000</div>
-                    <button class="buy-btn btn-available" onclick="buyChest('silver', 25000)">BUY</button>
+                    <div class="chest-cost" style="color:#cbd5e1; font-weight:bold;">$250,000</div>
+                    <button class="buy-btn btn-available" onclick="buyChest('silver', 250000)">BUY</button>
                 </div>
                 <div class="chest-card">
                     <div class="chest-icon">🥇</div>
                     <div class="chest-title">GOLD CHEST</div>
-                    <div class="chest-cost" style="color:#facc15; font-weight:bold;">$500,000</div>
-                    <button class="buy-btn btn-available" onclick="buyChest('gold', 500000)">BUY</button>
+                    <div class="chest-cost" style="color:#facc15; font-weight:bold;">$10,000,000</div>
+                    <button class="buy-btn btn-available" onclick="buyChest('gold', 10000000)">BUY</button>
                 </div>
                 <div class="chest-card">
                     <div class="chest-icon">🏆</div>
                     <div class="chest-title">CHAMPION CHEST</div>
-                    <div class="chest-cost" style="color:#a855f7; font-weight:bold;">$2,500,000</div>
-                    <button class="buy-btn btn-available" onclick="buyChest('champion', 2500000)">BUY</button>
+                    <div class="chest-cost" style="color:#a855f7; font-weight:bold;">$500,000,000</div>
+                    <button class="buy-btn btn-available" onclick="buyChest('champion', 500000000)">BUY</button>
                 </div>
             </div>
             
@@ -488,6 +493,7 @@
                 </div>
                 <div style="margin-top:25px;">
                     <div style="margin-bottom:10px; font-size:14px; color:#cbd5e1;">Available on Reset: <b id="pendingPrestigePoints" style="color:#facc15; font-size:18px;">0</b> Points</div>
+                    <p style="font-size:12px; color:#94a3b8; margin-bottom:10px;">Requires $1 Billion Balance to Prestige</p>
                     <button id="doPrestigeBtn" onclick="doPrestige()" style="background:#ef4444; max-width:300px;">RESET & PRESTIGE NOW</button>
                 </div>
             </div>
@@ -538,28 +544,63 @@
     let searchFilter = "";
     let selectedResearchOrb = null;
 
+    /* --- HARDCORE BALANCE UPDATE --- 
+       Logic: Slower starts, massive gaps between tiers, more rewarding scaling.
+       Timer: Varied times (0.6s to 30s) creates rhythm.
+    */
     const ORB_DATA = [
-        { id: 'orb1', name: 'Blue Orb', baseCost: 350, baseInc: 15, time: 5000, color: '#3b82f6' },
-        { id: 'orb2', name: 'Red Orb', baseCost: 3000, baseInc: 200, time: 7000, color: '#ef4444' },
-        { id: 'orb3', name: 'Green Orb', baseCost: 15000, baseInc: 850, time: 6000, color: '#10b981' },
-        { id: 'orb4', name: 'Gold Orb', baseCost: 50000, baseInc: 3500, time: 4000, color: '#f59e0b' },
-        { id: 'orb5', name: 'Purple Orb', baseCost: 150000, baseInc: 12000, time: 5000, color: '#8b5cf6' },
-        { id: 'orb6', name: 'Cyan Orb', baseCost: 400000, baseInc: 40000, time: 5000, color: '#06b6d4' },
-        { id: 'orb7', name: 'Pink Orb', baseCost: 1000000, baseInc: 120000, time: 8000, color: '#ec4899' },
-        { id: 'orb8', name: 'White Orb', baseCost: 4000000, baseInc: 500000, time: 10000, color: '#f8fafc' },
-        { id: 'orb9', name: 'Void Orb', baseCost: 20000000, baseInc: 3000000, time: 12000, color: '#475569' },
-        { id: 'orb10', name: 'Solar Orb', baseCost: 80000000, baseInc: 15000000, time: 15000, color: '#fbbf24' }
+        { id: 'orb1', name: 'Apprentice Orb', baseCost: 15, baseInc: 1, time: 600, color: '#3b82f6' }, // Fast tick, low yield (Hook)
+        { id: 'orb2', name: 'Red Dwarf', baseCost: 500, baseInc: 25, time: 2500, color: '#ef4444' }, // First hurdle
+        { id: 'orb3', name: 'Emerald Core', baseCost: 12000, baseInc: 350, time: 5000, color: '#10b981' }, // Mid-game start
+        { id: 'orb4', name: 'Golden Sun', baseCost: 150000, baseInc: 2200, time: 10000, color: '#f59e0b' },
+        { id: 'orb5', name: 'Void Eye', baseCost: 2000000, baseInc: 15000, time: 4000, color: '#8b5cf6' }, // Fast ticker, expensive
+        { id: 'orb6', name: 'Cyan Nova', baseCost: 25000000, baseInc: 300000, time: 12000, color: '#06b6d4' },
+        { id: 'orb7', name: 'Plasma Heart', baseCost: 450000000, baseInc: 2500000, time: 8000, color: '#ec4899' },
+        { id: 'orb8', name: 'Neutron Star', baseCost: 8000000000, baseInc: 35000000, time: 20000, color: '#f8fafc' }, // The Wall
+        { id: 'orb9', name: 'Dark Matter', baseCost: 150000000000, baseInc: 500000000, time: 30000, color: '#475569' },
+        { id: 'orb10', name: 'Singularity', baseCost: 5000000000000, baseInc: 12000000000, time: 15000, color: '#fbbf24' }
     ];
 
     const RESEARCH_TYPES = ['core', 'magic', 'power', 'wisdom', 'strength'];
-    const RESEARCH_COST = 50000; // Cost per level
+    // Base Research cost, scales with level
+    const RESEARCH_BASE_COST = 25000; 
 
     const PRESTIGE_UPGRADES = {
-        clicks: [{ id: 'p_click_1', name: 'Iron Clicks', mult: 1.1, cost: 1 }, { id: 'p_click_2', name: 'Golden Finger', mult: 1.25, cost: 3 }, { id: 'p_click_3', name: 'Titan Tap', mult: 1.5, cost: 10 }, { id: 'p_click_4', name: 'Godly Touch', mult: 2.0, cost: 25 }, { id: 'p_click_5', name: 'Cosmic Click', mult: 5.0, cost: 100 }],
-        orbs: [{ id: 'p_orb_1', name: 'Orb Polish', mult: 1.1, cost: 2 }, { id: 'p_orb_2', name: 'Mana Infusion', mult: 1.25, cost: 5 }, { id: 'p_orb_3', name: 'Time Warp', mult: 1.5, cost: 15 }, { id: 'p_orb_4', name: 'Star Power', mult: 2.0, cost: 40 }, { id: 'p_orb_5', name: 'Dark Matter', mult: 5.0, cost: 150 }],
-        artifacts: [{ id: 'p_art_1', name: 'Loot Scope', mult: 1.2, cost: 5 }, { id: 'p_art_2', name: 'Treasure Map', mult: 1.5, cost: 15 }, { id: 'p_art_3', name: 'Ancient Key', mult: 2.0, cost: 50 }, { id: 'p_art_4', name: 'Midas Touch', mult: 3.0, cost: 125 }, { id: 'p_art_5', name: 'Dragon Hoard', mult: 6.0, cost: 300 }],
-        global: [{ id: 'p_glo_1', name: 'Small Tax', mult: 1.1, cost: 10 }, { id: 'p_glo_2', name: 'Big Business', mult: 1.25, cost: 30 }, { id: 'p_glo_3', name: 'Monopoly', mult: 1.5, cost: 80 }, { id: 'p_glo_4', name: 'World Bank', mult: 2.0, cost: 200 }, { id: 'p_glo_5', name: 'Galactic Trade', mult: 4.0, cost: 500 }],
-        frenzy: [{ id: 'p_frz_1', name: 'Coffee Shot', mult: 1.3, cost: 20 }, { id: 'p_frz_2', name: 'Energy Drink', mult: 1.6, cost: 50 }, { id: 'p_frz_3', name: 'Adrenaline', mult: 2.2, cost: 120 }, { id: 'p_frz_4', name: 'Berserk Mode', mult: 3.0, cost: 300 }, { id: 'p_frz_5', name: 'Super Saiyan', mult: 7.0, cost: 800 }]
+        clicks: [
+            { id: 'p_click_1', name: 'Iron Clicks', mult: 1.5, cost: 5 }, 
+            { id: 'p_click_2', name: 'Golden Finger', mult: 2.5, cost: 25 }, 
+            { id: 'p_click_3', name: 'Titan Tap', mult: 5.0, cost: 100 }, 
+            { id: 'p_click_4', name: 'Godly Touch', mult: 10.0, cost: 500 }, 
+            { id: 'p_click_5', name: 'Cosmic Click', mult: 50.0, cost: 2500 }
+        ],
+        orbs: [
+            { id: 'p_orb_1', name: 'Orb Polish', mult: 1.2, cost: 10 }, 
+            { id: 'p_orb_2', name: 'Mana Infusion', mult: 1.5, cost: 40 }, 
+            { id: 'p_orb_3', name: 'Time Warp', mult: 2.0, cost: 150 }, 
+            { id: 'p_orb_4', name: 'Star Power', mult: 4.0, cost: 600 }, 
+            { id: 'p_orb_5', name: 'Dark Matter', mult: 10.0, cost: 3000 }
+        ],
+        artifacts: [
+            { id: 'p_art_1', name: 'Loot Scope', mult: 1.5, cost: 50 }, 
+            { id: 'p_art_2', name: 'Treasure Map', mult: 2.5, cost: 200 }, 
+            { id: 'p_art_3', name: 'Ancient Key', mult: 5.0, cost: 800 }, 
+            { id: 'p_art_4', name: 'Midas Touch', mult: 10.0, cost: 2500 }, 
+            { id: 'p_art_5', name: 'Dragon Hoard', mult: 25.0, cost: 10000 }
+        ],
+        global: [
+            { id: 'p_glo_1', name: 'Small Tax', mult: 1.1, cost: 100 }, 
+            { id: 'p_glo_2', name: 'Big Business', mult: 1.25, cost: 500 }, 
+            { id: 'p_glo_3', name: 'Monopoly', mult: 1.5, cost: 2000 }, 
+            { id: 'p_glo_4', name: 'World Bank', mult: 2.0, cost: 8000 }, 
+            { id: 'p_glo_5', name: 'Galactic Trade', mult: 5.0, cost: 25000 }
+        ],
+        frenzy: [
+            { id: 'p_frz_1', name: 'Coffee Shot', mult: 2.0, cost: 50 }, 
+            { id: 'p_frz_2', name: 'Energy Drink', mult: 4.0, cost: 250 }, 
+            { id: 'p_frz_3', name: 'Adrenaline', mult: 8.0, cost: 1000 }, 
+            { id: 'p_frz_4', name: 'Berserk Mode', mult: 16.0, cost: 5000 }, 
+            { id: 'p_frz_5', name: 'Super Saiyan', mult: 50.0, cost: 20000 }
+        ]
     };
 
     const NAME_PREFIXES = ["Mystic", "Ancient", "Lost", "Cosmic", "Dark", "Radiant", "Frozen", "Burning", "Neon", "Shadow", "Holy", "Cursed"];
@@ -589,27 +630,20 @@
         }
     });
 
-    // --- CELESTIAL VISUAL FX GENERATOR (UPDATED 4-LINE LOGIC) ---
     const generateOrbHTML = (orb, count, isResearchPreview = false) => {
         const r = userData.research?.[orb.id] || {};
         let celestialHTML = '';
 
-        // Check for Level 5 (Maxed) Research Stats
         const effects = [];
-        
-        if ((r['core'] || 0) >= 5) effects.push('fx-core');       // Blue
-        if ((r['magic'] || 0) >= 5) effects.push('fx-magic');     // Purple
-        if ((r['power'] || 0) >= 5) effects.push('fx-power');     // Red
-        if ((r['wisdom'] || 0) >= 5) effects.push('fx-wisdom');   // Green
-        if ((r['strength'] || 0) >= 5) effects.push('fx-strength'); // Orange
+        if ((r['core'] || 0) >= 5) effects.push('fx-core');       
+        if ((r['magic'] || 0) >= 5) effects.push('fx-magic');     
+        if ((r['power'] || 0) >= 5) effects.push('fx-power');     
+        if ((r['wisdom'] || 0) >= 5) effects.push('fx-wisdom');   
+        if ((r['strength'] || 0) >= 5) effects.push('fx-strength');
 
-        // If any maxed stats exist (or if strictly 4 lines requested as per update)
         if (effects.length > 0) {
             const fxClass = effects[0]; 
-            
-            // Loop 4 times to create 4 systems
             let systemsHTML = '';
-            // Define 4 systems with increasing stagger delays for visual variety
             const systemConfigs = [
                 { cls: 'sys-1', delay: '0s' },
                 { cls: 'sys-2', delay: '-2s' },
@@ -636,7 +670,6 @@
             `;
         }
         
-        // Render Standard Orb
         if (isResearchPreview) {
             return `<div style="position:relative;">
                         ${celestialHTML}
@@ -651,13 +684,11 @@
                 </div>`;
     };
 
-    // --- RESEARCH LOGIC ---
     function renderResearch() {
         const list = document.getElementById('researchOrbList');
         const currentId = selectedResearchOrb;
         list.innerHTML = '';
         
-        // Populate list
         ORB_DATA.forEach(orb => {
             if(userData.orbs?.[orb.id] > 0) {
                 const item = document.createElement('div');
@@ -668,7 +699,6 @@
             }
         });
 
-        // Update Panel if open
         if(currentId) {
             const orb = ORB_DATA.find(o => o.id === currentId);
             if(orb) updateResearchPanel(orb);
@@ -685,8 +715,6 @@
     function updateResearchPanel(orb) {
         document.getElementById('researchOrbName').innerText = orb.name;
         
-        // --- COLORED ANIMATION UPDATE ---
-        // We set the color of the container, which the rings inherit via currentColor
         const visBox = document.getElementById('researchVisualBox');
         visBox.style.color = orb.color; 
         
@@ -699,6 +727,9 @@
 
         RESEARCH_TYPES.forEach(type => {
             const level = r[type] || 0;
+            // Dynamic Research Cost Calculation
+            const dynCost = Math.floor(RESEARCH_BASE_COST * Math.pow(1.8, level));
+
             const row = document.createElement('div');
             row.className = 'stat-row';
             let canUpgrade = false;
@@ -707,38 +738,37 @@
             if (level < 5) {
                 if (level < 2) canUpgrade = true;
                 else if (!currentSpec || currentSpec === type) canUpgrade = true;
-                btnText = `UPGRADE ($${RESEARCH_COST.toLocaleString()})`;
+                btnText = `UPGRADE ($${dynCost.toLocaleString()})`;
             }
 
-            const canAfford = userData.balance >= RESEARCH_COST;
+            const canAfford = userData.balance >= dynCost;
             
             row.innerHTML = `
                 <div>
                     <div class="stat-name">${type} (Lvl ${level})</div>
                     <div class="progress-bg" style="width:150px"><div class="progress-fill" style="width:${(level/5)*100}%"></div></div>
                 </div>
-                <button onclick="buyResearch('${orb.id}', '${type}')" ${canUpgrade && canAfford ? '' : 'disabled'} style="font-size:12px; padding:8px;">${btnText}</button>
+                <button onclick="buyResearch('${orb.id}', '${type}', ${dynCost})" ${canUpgrade && canAfford ? '' : 'disabled'} style="font-size:12px; padding:8px;">${btnText}</button>
             `;
             container.appendChild(row);
         });
     }
 
-    window.buyResearch = async (orbId, type) => {
-        if(userData.balance < RESEARCH_COST) return;
+    window.buyResearch = async (orbId, type, cost) => {
+        if(userData.balance < cost) return;
         const currentLvl = (userData.research?.[orbId]?.[type] || 0);
         const r = userData.research?.[orbId] || {};
         const currentSpec = RESEARCH_TYPES.find(t => (r[t] || 0) > 2);
         if (currentLvl >= 5) return;
         if (currentLvl >= 2 && currentSpec && currentSpec !== type) return;
         
-        // Optimistic update for Research
-        userData.balance -= RESEARCH_COST;
+        userData.balance -= cost;
         if (!userData.research[orbId]) userData.research[orbId] = {};
         userData.research[orbId][type] = (userData.research[orbId][type] || 0) + 1;
         updateResearchPanel(ORB_DATA.find(o => o.id === orbId));
         updateUI();
 
-        await updateDoc(doc(db, "users", myUid), { balance: increment(-RESEARCH_COST), [`research.${orbId}.${type}`]: increment(1) });
+        await updateDoc(doc(db, "users", myUid), { balance: increment(-cost), [`research.${orbId}.${type}`]: increment(1) });
     };
 
     window.handleSearch = () => {
@@ -747,7 +777,6 @@
         renderCollection();
     };
 
-    // --- LEVEL LOGIC UPDATE: GOES UP INDIVIDUALLY (Level = Count) ---
     const calculateOrbLevel = (orb, owned) => {
         return owned > 0 ? owned : 1;
     };
@@ -755,22 +784,24 @@
     const updateUI = () => {
         if (!userData) return;
         const currentLevel = userData.clickLevel || 1;
-        const currentBasePower = currentLevel <= 1 ? 1 : Math.min(1 + ((currentLevel - 1) * 10), 500);
-        const cost = Math.floor(25 + (currentLevel - 1) * 50.5);
-        const isMaxed = currentBasePower >= 500;
+        
+        // --- HARDCORE CLICKER SCALING ---
+        // Cost rises faster (1.5x) to prevent cheap spamming
+        const clickCost = Math.floor(100 * Math.pow(1.5, currentLevel - 1));
         const totalVisualBal = Math.floor((userData.balance || 0) + localBalanceAccumulator);
+        
         document.getElementById('userBal').innerText = totalVisualBal.toLocaleString();
         document.getElementById('userDisplay').innerText = "@" + userData.username;
         document.getElementById('userPfp').src = `https://api.dicebear.com/7.x/identicon/svg?seed=${userData.username}`;
-        document.getElementById('clickPowerVal').innerText = getPower(userData.clickLevel || 1).toLocaleString();
+        document.getElementById('clickPowerVal').innerText = getPower(currentLevel).toLocaleString();
         
         const upgradeBtn = document.getElementById('upgradeClickBtn');
-        if (isMaxed) {
+        if (currentLevel >= 100) {
             upgradeBtn.innerText = "MAXED";
             upgradeBtn.style.background = "#334155";
             upgradeBtn.style.cursor = "not-allowed";
         } else {
-            upgradeBtn.innerHTML = `UPGRADE $<span id="clickCost">${cost.toLocaleString()}</span>`;
+            upgradeBtn.innerHTML = `UPGRADE $<span id="clickCost">${clickCost.toLocaleString()}</span>`;
             upgradeBtn.style.background = "#6366f1";
             upgradeBtn.style.cursor = "pointer";
         }
@@ -779,15 +810,17 @@
         document.getElementById('prestigePointsDisplay').innerText = pts.toLocaleString();
         document.getElementById('headerPoints').innerText = `(${pts.toLocaleString()})`;
         
-        const units = (userData.balance || 0) / 50000000;
+        // --- HARDER PRESTIGE THRESHOLD ---
+        const units = (userData.balance || 0) / 1000000000; // Requires 1 Billion
         let potentialPoints = 0;
-        if (userData.balance >= 50000000) potentialPoints = Math.floor(units + Math.pow(units, 1.4));
+        if (userData.balance >= 1000000000) potentialPoints = Math.floor(units + Math.pow(units, 1.2)); // Slower curve
         document.getElementById('pendingPrestigePoints').innerText = potentialPoints.toLocaleString();
-        document.getElementById('doPrestigeBtn').style.opacity = userData.balance < 50000000 ? "0.5" : "1";
+        document.getElementById('doPrestigeBtn').style.opacity = userData.balance < 1000000000 ? "0.5" : "1";
     };
 
     const getPower = (lvl) => {
-        let base = lvl <= 1 ? 1 : Math.min(1 + ((lvl - 1) * 10), 500);
+        // Base power linear but weak
+        let base = lvl * 2; 
         let mult = 1;
         if(userData?.prestigeUpgrades) {
             PRESTIGE_UPGRADES.clicks.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
@@ -799,8 +832,14 @@
 
     const calcIncome = (orb, owned) => {
         let totalIncome = 0;
-        if (owned > 0) totalIncome += Math.floor(orb.baseInc * (Math.pow(2.0, owned) - 1));
-        let mult = 1;
+        // Standard Idle Formula: Base * owned
+        if (owned > 0) totalIncome = orb.baseInc * owned;
+        
+        // Research Multipliers
+        const r = userData.research?.[orb.id] || {};
+        const researchMult = 1 + ((r['core']||0) * 0.5) + ((r['power']||0) * 1);
+
+        let mult = 1 * researchMult;
         if(userData?.prestigeUpgrades) {
             PRESTIGE_UPGRADES.orbs.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
             PRESTIGE_UPGRADES.global.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
@@ -808,7 +847,7 @@
         return Math.floor(totalIncome * mult);
     };
 
-    const getStageClass = (owned) => owned >= 41 ? 'stage-5' : owned >= 31 ? 'stage-4' : owned >= 21 ? 'stage-3' : owned >= 11 ? 'stage-2' : 'stage-1';
+    const getStageClass = (owned) => owned >= 80 ? 'stage-5' : owned >= 50 ? 'stage-4' : owned >= 25 ? 'stage-3' : owned >= 10 ? 'stage-2' : 'stage-1';
 
     function renderOrbs(gridId, dataList) {
         if (!userData) return;
@@ -819,10 +858,15 @@
             if(searchFilter && !orb.name.toLowerCase().includes(searchFilter)) return;
 
             const owned = userData.orbs?.[orb.id] || 0;
-            const cost = Math.floor(orb.baseCost * Math.pow(1.3, owned));
+            
+            // --- NEW PRICE SCALING FORMULA ---
+            // Base * 1.15^owned (Standard Idle Curve)
+            // Allows higher owned counts, but initial prices are higher.
+            const cost = Math.floor(orb.baseCost * Math.pow(1.15, owned));
+            
             const income = calcIncome(orb, owned);
             const isUnlocked = index === 0 || ((userData.orbs?.[dataList[index-1].id] || 0) > 0);
-            const isMaxed = owned >= 50;
+            const isMaxed = owned >= 200;
             const div = document.createElement('div'); div.className = 'orb-item';
             
             let btnLabel = isMaxed ? "MAXED" : (isUnlocked ? `$${cost.toLocaleString()}` : "LOCKED");
@@ -832,14 +876,14 @@
 
             div.innerHTML = `
                 ${isUnlocked ? `
-                    <button class="sell-btn-corner" onclick="sellOrb('${orb.id}', ${Math.floor(cost * 0.7)})" title="Sell Orb">SELL</button>
+                    <button class="sell-btn-corner" onclick="sellOrb('${orb.id}', ${Math.floor(cost * 0.5)})" title="Sell Orb (50% Value)">SELL</button>
                     <div class="orb-lvl-badge">LVL ${calculateOrbLevel(orb, owned)}</div>
                 ` : ''}
                 ${visualHTML}
                 <b>${orb.name}</b>
                 ${isUnlocked ? `
                     <div style="color:#10b981; font-weight:800;">+$${income.toLocaleString()}</div>
-                    <div class="owned-counter">Count: ${owned}</div>
+                    <div class="owned-counter">Owned: ${owned}</div>
                     <div class="progress-bg"><div class="progress-fill" id="bar-${orb.id}"></div></div>
                 ` : ''}
                 <button onclick="buyOrb('${orb.id}', ${cost}, ${owned})" class="buy-btn ${btnClass}">${btnLabel}</button>
@@ -849,18 +893,15 @@
         });
     }
 
-    // --- OPTIMIZED BUYING (No Latency) ---
     window.buyOrb = async (id, cost, currentOwned) => {
-        if (userData.balance >= cost && currentOwned < 50) {
-            // 1. Optimistic UI Update
+        if (userData.balance >= cost && currentOwned < 200) {
             userData.balance -= cost;
             if(!userData.orbs[id]) userData.orbs[id] = 0;
             userData.orbs[id]++;
             
             updateUI();
-            renderOrbs('orbGrid', ORB_DATA); // Re-render immediately
+            renderOrbs('orbGrid', ORB_DATA); 
 
-            // 2. Background DB Update
             const update = { balance: increment(-cost) }; update[`orbs.${id}`] = increment(1);
             await updateDoc(doc(db, "users", myUid), update);
         }
@@ -868,7 +909,6 @@
 
     window.sellOrb = async (id, refund) => { 
         if(userData?.orbs?.[id] > 0) {
-            // Optimistic Sell
             userData.balance += refund;
             userData.orbs[id]--;
             updateUI();
@@ -881,22 +921,22 @@
     window.buyChest = async (tier, cost) => {
         if (userData.balance < cost) return alert("Insufficient Funds!");
         let minCash, maxCash, minTime, maxTime;
-        if (tier === 'bronze') { minCash = 1; maxCash = 40; minTime = 1000; maxTime = 10000; }
-        else if (tier === 'silver') { minCash = 45; maxCash = 150; minTime = 1000; maxTime = 8000; }
-        else if (tier === 'gold') { minCash = 200; maxCash = 600; minTime = 1000; maxTime = 6000; }
-        else if (tier === 'champion') { minCash = 1000; maxCash = 5000; minTime = 1000; maxTime = 5000; }
+        // High variance gambling
+        if (tier === 'bronze') { minCash = 100; maxCash = 5000; minTime = 500; maxTime = 15000; }
+        else if (tier === 'silver') { minCash = 5000; maxCash = 50000; minTime = 500; maxTime = 12000; }
+        else if (tier === 'gold') { minCash = 100000; maxCash = 5000000; minTime = 500; maxTime = 10000; }
+        else if (tier === 'champion') { minCash = 5000000; maxCash = 500000000; minTime = 200; maxTime = 5000; }
 
         const newOrb = { id: 'u_' + Date.now() + '_' + Math.floor(Math.random()*1000), name: getRandomName(), color: getRandomColor(), income: Math.floor(Math.random() * (maxCash - minCash + 1)) + minCash, time: Math.floor(Math.random() * (maxTime - minTime + 1)) + minTime, tier: tier, acquiredAt: Date.now() };
 
         const popup = document.getElementById('lootPopup');
         document.getElementById('lootRevealName').innerText = newOrb.name;
         document.getElementById('lootRevealName').style.color = newOrb.color;
-        document.getElementById('lootRevealStats').innerText = `Tier: ${tier.toUpperCase()} | $${newOrb.income}/every ${(newOrb.time/1000).toFixed(1)}s`;
+        document.getElementById('lootRevealStats').innerText = `Tier: ${tier.toUpperCase()} | $${newOrb.income.toLocaleString()}/every ${(newOrb.time/1000).toFixed(1)}s`;
         const visual = document.getElementById('lootRevealVisual');
         visual.innerHTML = `<div class="orb-visual stage-3" style="width:100px; height:100px; background:${newOrb.color}; box-shadow:0 0 30px ${newOrb.color};"></div>`;
         popup.classList.remove('hidden');
 
-        // Optimistic Loot
         userData.balance -= cost;
         if(!userData.uniqueOrbs) userData.uniqueOrbs = [];
         userData.uniqueOrbs.push(newOrb);
@@ -933,7 +973,6 @@
         });
     }
 
-    // --- UPDATED COLLECTION RENDER (INCLUDES CHEST ORBS) ---
     window.renderCollection = () => {
         if (!userData) return;
         const collectionGrid = document.getElementById('collectionGrid');
@@ -967,12 +1006,11 @@
                 const div = document.createElement('div');
                 div.className = 'orb-item'; div.style.minHeight = '220px';
                 
-                // Calculate income for visual
                 let mult = 1;
                 if(userData?.prestigeUpgrades) {
-                      PRESTIGE_UPGRADES.orbs.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
-                      PRESTIGE_UPGRADES.artifacts.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
-                      PRESTIGE_UPGRADES.global.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
+                        PRESTIGE_UPGRADES.orbs.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
+                        PRESTIGE_UPGRADES.artifacts.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
+                        PRESTIGE_UPGRADES.global.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
                 }
                 const finalInc = Math.floor(orb.income * mult);
 
@@ -1013,8 +1051,8 @@
 
     window.upgradeClicker = async () => {
         const currentLevel = userData.clickLevel || 1;
-        const cost = Math.floor(25 + (currentLevel - 1) * 50.5);
-        if (userData.balance >= cost && currentLevel < 50) {
+        const cost = Math.floor(100 * Math.pow(1.5, currentLevel - 1));
+        if (userData.balance >= cost && currentLevel < 100) {
             userData.balance -= cost;
             userData.clickLevel = (userData.clickLevel || 1) + 1;
             updateUI();
@@ -1033,9 +1071,9 @@
     };
 
     window.doPrestige = async () => {
-        const units = (userData.balance || 0) / 50000000;
-        if (userData.balance < 50000000) return;
-        const pointsToAdd = Math.floor(units + Math.pow(units, 1.4));
+        const units = (userData.balance || 0) / 1000000000;
+        if (userData.balance < 1000000000) return;
+        const pointsToAdd = Math.floor(units + Math.pow(units, 1.2));
         await updateDoc(doc(db, "users", myUid), { balance: 0, clickLevel: 1, orbs: {}, uniqueOrbs: [], research: {}, prestigePoints: increment(pointsToAdd) });
         location.reload();
     };
@@ -1114,7 +1152,7 @@
         try {
             if(isReg) {
                 const res = await createUserWithEmailAndPassword(auth, e, p);
-                await setDoc(doc(db, "users", res.user.uid), { username: u, email: e, balance: 1000, orbs: {}, uniqueOrbs: [], research: {}, clickLevel: 1, prestigePoints: 0, prestigeUpgrades: [] });
+                await setDoc(doc(db, "users", res.user.uid), { username: u, email: e, balance: 25, orbs: {}, uniqueOrbs: [], research: {}, clickLevel: 1, prestigePoints: 0, prestigeUpgrades: [] });
             } else {
                 const q = query(collection(db, "users"), where("username", "==", u));
                 const s = await getDocs(q);
