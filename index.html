@@ -46,6 +46,70 @@
         @keyframes orbPulseDiamond { 50% { transform: rotate(45deg) scale(1.1); } }
         @keyframes slowRotateGlow { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
+        /* --- CELESTIAL VISUAL FX ENGINE (NEW) --- */
+        .celestial-wrapper {
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 100%; height: 100%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 1; /* Behind the orb mostly */
+        }
+
+        /* The Colored Light/Glow */
+        .celestial-glow {
+            position: absolute; top: 50%; left: 50%;
+            width: 140%; height: 140%;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(circle, currentColor 0%, transparent 70%);
+            opacity: 0.3;
+            mix-blend-mode: screen;
+            animation: pulseGlow 3s infinite alternate;
+        }
+
+        /* Gyroscope Rings */
+        .c-ring {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border: 2px solid transparent;
+            border-top: 2px solid currentColor;
+            border-bottom: 2px solid currentColor;
+            border-radius: 50%;
+            box-shadow: 0 0 10px currentColor;
+            animation: cSpin 6s linear infinite;
+        }
+
+        .c-ring.ring-inner { width: 110%; height: 110%; margin: -5%; animation-duration: 4s; opacity: 0.8; }
+        .c-ring.ring-outer { width: 150%; height: 150%; margin: -25%; animation-duration: 10s; opacity: 0.5; border-left: 1px dotted currentColor; }
+
+        /* Orbiting Squares */
+        .c-orbit-track {
+            position: absolute; top: 50%; left: 50%;
+            width: 160%; height: 160%;
+            transform: translate(-50%, -50%);
+            animation: cOrbit 5s linear infinite;
+        }
+        
+        .c-square {
+            position: absolute;
+            width: 8px; height: 8px;
+            background: currentColor;
+            box-shadow: 0 0 10px currentColor;
+            top: 0; left: 50%;
+            transform: translate(-50%, -50%) rotate(45deg);
+        }
+        
+        /* Specific Colors based on Research Type */
+        .fx-core { color: #3b82f6; }    /* Blue */
+        .fx-magic { color: #a855f7; }   /* Purple */
+        .fx-power { color: #ef4444; }   /* Red */
+        .fx-wisdom { color: #10b981; }  /* Green */
+        .fx-strength { color: #f97316; } /* Orange */
+
+        @keyframes pulseGlow { 0% { opacity: 0.2; transform: translate(-50%, -50%) scale(0.9); } 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1.1); } }
+        @keyframes cSpin { 0% { transform: rotateX(60deg) rotateZ(0deg); } 100% { transform: rotateX(60deg) rotateZ(360deg); } }
+        @keyframes cOrbit { 0% { transform: translate(-50%, -50%) rotate(0deg); } 100% { transform: translate(-50%, -50%) rotate(360deg); } }
+
         /* --- ORB LAYOUT STYLES --- */
         .orb-item .orb-lvl-badge { 
             position: absolute; 
@@ -467,16 +531,53 @@
         }
     });
 
+    // --- CELESTIAL VISUAL FX GENERATOR ---
     const generateOrbHTML = (orb, count, isResearchPreview = false) => {
         const r = userData.research?.[orb.id] || {};
+        let celestialHTML = '';
+
+        // Check for Level 5 (Maxed) Research Stats
+        const effects = [];
         
+        if ((r['core'] || 0) >= 5) effects.push('fx-core');       // Blue
+        if ((r['magic'] || 0) >= 5) effects.push('fx-magic');     // Purple
+        if ((r['power'] || 0) >= 5) effects.push('fx-power');     // Red
+        if ((r['wisdom'] || 0) >= 5) effects.push('fx-wisdom');   // Green
+        if ((r['strength'] || 0) >= 5) effects.push('fx-strength'); // Orange
+
+        // If any maxed stats exist, generate the animations
+        if (effects.length > 0) {
+            // We use the first maxed stat to determine the primary color theme
+            const fxClass = effects[0]; 
+            
+            celestialHTML = `
+                <div class="celestial-wrapper ${fxClass}">
+                    <div class="celestial-glow"></div>
+                    <div class="c-ring ring-inner"></div>
+                    <div class="c-ring ring-outer"></div>
+                    <div class="c-orbit-track">
+                        <div class="c-square"></div>
+                    </div>
+                    <div class="c-orbit-track" style="animation-delay: -2.5s;">
+                        <div class="c-square"></div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Render Standard Orb
         if (isResearchPreview) {
-            return `<div class="research-sphere" style="color:${orb.color};"></div>`;
+            // In preview mode, we show the FX + the sphere
+            return `<div style="position:relative;">
+                        ${celestialHTML}
+                        <div class="research-sphere" style="color:${orb.color};"></div>
+                    </div>`;
         }
 
         let stage = getStageClass(count);
         return `<div class="visual-container">
-                    <div class="orb-visual ${stage}" style="background:currentColor; color:${orb.color};"></div>
+                    ${celestialHTML}
+                    <div class="orb-visual ${stage}" style="background:currentColor; color:${orb.color}; position:relative; z-index:2;"></div>
                 </div>`;
     };
 
@@ -799,9 +900,9 @@
                 // Calculate income for visual
                 let mult = 1;
                 if(userData?.prestigeUpgrades) {
-                     PRESTIGE_UPGRADES.orbs.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
-                     PRESTIGE_UPGRADES.artifacts.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
-                     PRESTIGE_UPGRADES.global.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
+                      PRESTIGE_UPGRADES.orbs.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
+                      PRESTIGE_UPGRADES.artifacts.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
+                      PRESTIGE_UPGRADES.global.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
                 }
                 const finalInc = Math.floor(orb.income * mult);
 
