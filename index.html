@@ -235,7 +235,7 @@
             align-items: center; 
             margin-bottom: 25px; 
             border: 2px solid; 
-            border-color: currentColor; /* Matches Orb Color */
+            border-color: currentColor; /* Matches Orb Color */ 
             position: relative; 
             overflow: hidden; 
             box-shadow: inset 0 0 60px rgba(0,0,0,0.8);
@@ -888,7 +888,8 @@
         // Requirement: Lock tabs until Void Eye (orb5) is owned
         const hasVoidEye = (userData.orbs && userData.orbs['orb5'] > 0);
         document.getElementById('tRes').innerText = hasVoidEye ? "RESEARCH" : "🔒 RESEARCH";
-        document.getElementById('tCol').innerText = hasVoidEye ? "COLLECTION" : "🔒 COLLECTION";
+        // MODIFICATION HERE: Collection is always unlocked visually
+        document.getElementById('tCol').innerText = "COLLECTION"; 
         document.getElementById('tMkt').innerText = hasVoidEye ? "MARKET" : "🔒 MARKET";
     };
 
@@ -1307,7 +1308,8 @@
 
     window.showTab = (tabId) => {
         // --- LOCK LOGIC: REQUIRE VOID EYE (orb5) ---
-        const restrictedTabs = ['research', 'collection', 'marketplace'];
+        // MODIFICATION HERE: Removed 'collection' from restrictedTabs
+        const restrictedTabs = ['research', 'marketplace']; 
         if (restrictedTabs.includes(tabId)) {
             // Check if user owns orb5 (Void Eye)
             if (!userData.orbs || !userData.orbs['orb5'] || userData.orbs['orb5'] <= 0) {
