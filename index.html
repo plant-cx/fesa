@@ -46,14 +46,16 @@
         @keyframes orbPulseDiamond { 50% { transform: rotate(45deg) scale(1.1); } }
         @keyframes slowRotateGlow { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* --- CELESTIAL VISUAL FX ENGINE (NEW) --- */
+        /* --- CELESTIAL VISUAL FX ENGINE (UPDATED) --- */
         .celestial-wrapper {
             position: absolute;
             top: 50%; left: 50%;
             width: 100%; height: 100%;
             transform: translate(-50%, -50%);
             pointer-events: none;
-            z-index: 1; /* Behind the orb mostly */
+            z-index: 1;
+            perspective: 600px;
+            transform-style: preserve-3d;
         }
 
         /* The Colored Light/Glow */
@@ -67,38 +69,83 @@
             animation: pulseGlow 3s infinite alternate;
         }
 
-        /* Gyroscope Rings */
-        .c-ring {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            border: 2px solid transparent;
-            border-top: 2px solid currentColor;
-            border-bottom: 2px solid currentColor;
-            border-radius: 50%;
-            box-shadow: 0 0 10px currentColor;
-            animation: cSpin 6s linear infinite;
-        }
-
-        .c-ring.ring-inner { width: 110%; height: 110%; margin: -5%; animation-duration: 4s; opacity: 0.8; }
-        .c-ring.ring-outer { width: 150%; height: 150%; margin: -25%; animation-duration: 10s; opacity: 0.5; border-left: 1px dotted currentColor; }
-
-        /* Orbiting Squares */
-        .c-orbit-track {
+        /* Unified Orbit System: Locks path and particle together */
+        .c-system {
             position: absolute; top: 50%; left: 50%;
-            width: 160%; height: 160%;
-            transform: translate(-50%, -50%);
-            animation: cOrbit 5s linear infinite;
+            transform-style: preserve-3d;
+            border-radius: 50%;
         }
-        
-        .c-square {
+
+        /* The Visual Line (Ring) */
+        .c-path {
+            position: absolute; top: 0; left: 0; 
+            width: 100%; height: 100%;
+            border: 1px solid currentColor;
+            border-radius: 50%;
+            box-shadow: 0 0 5px currentColor;
+            opacity: 0.5;
+            box-sizing: border-box;
+        }
+
+        /* The Rotator (Invisible container that spins the ball) */
+        .c-runner {
+            position: absolute; top: 0; left: 0; 
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            /* Animation speed set per system below */
+        }
+
+        /* The Particle (Ball) */
+        .c-ball {
             position: absolute;
-            width: 8px; height: 8px;
+            top: -3px; left: 50%; /* Top center of the ring */
+            width: 6px; height: 6px;
             background: currentColor;
-            box-shadow: 0 0 10px currentColor;
-            top: 0; left: 50%;
-            transform: translate(-50%, -50%) rotate(45deg);
+            border-radius: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 8px currentColor, 0 0 15px currentColor;
         }
-        
+
+        /* --- ORBIT CONFIGURATIONS --- */
+        /* System 1: Tilted X, rotates slowly on Z axis */
+        .sys-1 { 
+            width: 130%; height: 130%; 
+            animation: gyroSpin1 10s linear infinite;
+        }
+        .sys-1 .c-runner { animation: ballRun 3s linear infinite; }
+
+        /* System 2: Tilted Y, rotates slowly on Z axis (reverse) */
+        .sys-2 { 
+            width: 170%; height: 170%; 
+            animation: gyroSpin2 14s linear infinite;
+        }
+        .sys-2 .c-runner { animation: ballRun 5s linear infinite reverse; }
+
+        /* System 3: Complex Tilt */
+        .sys-3 { 
+            width: 220%; height: 220%; 
+            animation: gyroSpin3 20s linear infinite;
+        }
+        .sys-3 .c-runner { animation: ballRun 7s linear infinite; }
+
+        /* Animations */
+        @keyframes gyroSpin1 { 
+            0% { transform: translate(-50%, -50%) rotateX(70deg) rotateZ(0deg); } 
+            100% { transform: translate(-50%, -50%) rotateX(70deg) rotateZ(360deg); } 
+        }
+        @keyframes gyroSpin2 { 
+            0% { transform: translate(-50%, -50%) rotateY(60deg) rotateZ(0deg); } 
+            100% { transform: translate(-50%, -50%) rotateY(60deg) rotateZ(-360deg); } 
+        }
+        @keyframes gyroSpin3 { 
+            0% { transform: translate(-50%, -50%) rotateX(45deg) rotateY(45deg) rotateZ(0deg); } 
+            100% { transform: translate(-50%, -50%) rotateX(45deg) rotateY(45deg) rotateZ(360deg); } 
+        }
+        @keyframes ballRun { 
+            0% { transform: rotate(0deg); } 
+            100% { transform: rotate(360deg); } 
+        }
+
         /* Specific Colors based on Research Type */
         .fx-core { color: #3b82f6; }    /* Blue */
         .fx-magic { color: #a855f7; }   /* Purple */
@@ -107,8 +154,6 @@
         .fx-strength { color: #f97316; } /* Orange */
 
         @keyframes pulseGlow { 0% { opacity: 0.2; transform: translate(-50%, -50%) scale(0.9); } 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1.1); } }
-        @keyframes cSpin { 0% { transform: rotateX(60deg) rotateZ(0deg); } 100% { transform: rotateX(60deg) rotateZ(360deg); } }
-        @keyframes cOrbit { 0% { transform: translate(-50%, -50%) rotate(0deg); } 100% { transform: translate(-50%, -50%) rotate(360deg); } }
 
         /* --- ORB LAYOUT STYLES --- */
         .orb-item .orb-lvl-badge { 
@@ -531,7 +576,7 @@
         }
     });
 
-    // --- CELESTIAL VISUAL FX GENERATOR ---
+    // --- CELESTIAL VISUAL FX GENERATOR (UPDATED LOGIC) ---
     const generateOrbHTML = (orb, count, isResearchPreview = false) => {
         const r = userData.research?.[orb.id] || {};
         let celestialHTML = '';
@@ -550,17 +595,34 @@
             // We use the first maxed stat to determine the primary color theme
             const fxClass = effects[0]; 
             
+            // Note: We now use "c-system" which contains the "c-path" (line) and "c-runner" (ball rotator)
+            // inside the SAME 3D transformation context. This locks them together.
             celestialHTML = `
                 <div class="celestial-wrapper ${fxClass}">
                     <div class="celestial-glow"></div>
-                    <div class="c-ring ring-inner"></div>
-                    <div class="c-ring ring-outer"></div>
-                    <div class="c-orbit-track">
-                        <div class="c-square"></div>
+                    
+                    <div class="c-system sys-1">
+                        <div class="c-path"></div>
+                        <div class="c-runner">
+                            <div class="c-ball"></div>
+                        </div>
                     </div>
-                    <div class="c-orbit-track" style="animation-delay: -2.5s;">
-                        <div class="c-square"></div>
-                    </div>
+
+                    ${effects.length >= 2 || isResearchPreview ? `
+                    <div class="c-system sys-2">
+                        <div class="c-path"></div>
+                        <div class="c-runner">
+                            <div class="c-ball"></div>
+                        </div>
+                    </div>` : ''}
+
+                    ${effects.length >= 3 || isResearchPreview ? `
+                    <div class="c-system sys-3">
+                        <div class="c-path"></div>
+                        <div class="c-runner">
+                            <div class="c-ball"></div>
+                        </div>
+                    </div>` : ''}
                 </div>
             `;
         }
