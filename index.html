@@ -353,13 +353,8 @@
 <div id="notifBanner" class="notif-banner"><div style="width:12px;height:12px;background:#10b981;border-radius:50%"></div><span id="notifText">@user sent mail!</span></div>
 
 <div id="lootPopup" class="loot-popup-overlay hidden">
-    <div class="loot-popup-card">
-        <h2 style="color:#facc15; margin-bottom:20px;">CHEST OPENED!</h2>
-        <div id="lootRevealVisual" style="margin-bottom: 20px;"></div>
-        <h3 id="lootRevealName" style="font-size:24px; margin-bottom:10px;">Unknown Orb</h3>
-        <p id="lootRevealStats" style="color:#94a3b8; font-size:16px; margin-bottom:25px;">Stats...</p>
-        <button onclick="document.getElementById('lootPopup').classList.add('hidden')">COLLECT</button>
-    </div>
+    <div class="loot-popup-card" id="lootCardContent">
+        </div>
 </div>
 
 <div class="container">
@@ -636,6 +631,14 @@
     const getRandomColor = () => { const l = '0123456789ABCDEF'; let c = '#'; for (let i = 0; i < 6; i++) { c += l[Math.floor(Math.random() * 16)]; } return c; };
     const getRandomName = () => `${NAME_PREFIXES[Math.floor(Math.random() * NAME_PREFIXES.length)]} ${NAME_SUFFIXES[Math.floor(Math.random() * NAME_SUFFIXES.length)]}`;
 
+    // --- Helper for Notifications ---
+    window.showNotification = (msg) => {
+        const b = document.getElementById('notifBanner');
+        document.getElementById('notifText').innerText = msg;
+        b.classList.add('active');
+        setTimeout(() => b.classList.remove('active'), 3000);
+    };
+
     onAuthStateChanged(auth, u => {
         if(u) {
             myUid = u.uid;
@@ -664,9 +667,9 @@
 
         const effects = [];
         if ((r['core'] || 0) >= 5) effects.push('fx-core');        
-        if ((r['magic'] || 0) >= 5) effects.push('fx-magic');      
-        if ((r['power'] || 0) >= 5) effects.push('fx-power');      
-        if ((r['wisdom'] || 0) >= 5) effects.push('fx-wisdom');    
+        if ((r['magic'] || 0) >= 5) effects.push('fx-magic');       
+        if ((r['power'] || 0) >= 5) effects.push('fx-power');       
+        if ((r['wisdom'] || 0) >= 5) effects.push('fx-wisdom');     
         if ((r['strength'] || 0) >= 5) effects.push('fx-strength');
 
         if (effects.length > 0) {
@@ -880,6 +883,13 @@
         if (userData.balance >= 1000000000) potentialPoints = Math.floor(units + Math.pow(units, 1.2)); // Slower curve
         document.getElementById('pendingPrestigePoints').innerText = potentialPoints.toLocaleString();
         document.getElementById('doPrestigeBtn').style.opacity = userData.balance < 1000000000 ? "0.5" : "1";
+
+        // --- LOCK TABS VISUALS ---
+        // Requirement: Lock tabs until Void Eye (orb5) is owned
+        const hasVoidEye = (userData.orbs && userData.orbs['orb5'] > 0);
+        document.getElementById('tRes').innerText = hasVoidEye ? "RESEARCH" : "🔒 RESEARCH";
+        document.getElementById('tCol').innerText = hasVoidEye ? "COLLECTION" : "🔒 COLLECTION";
+        document.getElementById('tMkt').innerText = hasVoidEye ? "MARKET" : "🔒 MARKET";
     };
 
     const getPower = (lvl) => {
@@ -994,11 +1004,21 @@
         const newOrb = { id: 'u_' + Date.now() + '_' + Math.floor(Math.random()*1000), name: getRandomName(), color: getRandomColor(), income: Math.floor(Math.random() * (maxCash - minCash + 1)) + minCash, time: Math.floor(Math.random() * (maxTime - minTime + 1)) + minTime, tier: tier, acquiredAt: Date.now() };
 
         const popup = document.getElementById('lootPopup');
-        document.getElementById('lootRevealName').innerText = newOrb.name;
-        document.getElementById('lootRevealName').style.color = newOrb.color;
-        document.getElementById('lootRevealStats').innerText = `Tier: ${tier.toUpperCase()} | $${newOrb.income.toLocaleString()}/every ${(newOrb.time/1000).toFixed(1)}s`;
-        const visual = document.getElementById('lootRevealVisual');
-        visual.innerHTML = `<div class="orb-visual stage-3" style="width:100px; height:100px; background:${newOrb.color}; box-shadow:0 0 30px ${newOrb.color};"></div>`;
+        const content = document.getElementById('lootCardContent');
+        
+        // --- MODIFIED POPUP STRUCTURE: NAME TOP, VISUAL MIDDLE, STATS BOTTOM ---
+        content.innerHTML = `
+            <h2 style="color:#facc15; margin-bottom:15px;">CHEST OPENED!</h2>
+            <h3 style="font-size:28px; margin-bottom:10px; color:${newOrb.color}">${newOrb.name}</h3>
+            <div style="margin: 20px auto; transform: scale(1.5); width:100px; height:100px; display:flex; justify-content:center; align-items:center;">
+                <div class="orb-visual stage-3" style="width:50px; height:50px; background:${newOrb.color}; box-shadow:0 0 30px ${newOrb.color};"></div>
+            </div>
+            <p style="color:#94a3b8; font-size:16px; margin-bottom:25px;">
+                Tier: ${tier.toUpperCase()}<br>
+                <span style="color:#10b981; font-weight:800;">+$${newOrb.income.toLocaleString()}</span> / ${(newOrb.time/1000).toFixed(1)}s
+            </p>
+            <button onclick="document.getElementById('lootPopup').classList.add('hidden')">COLLECT</button>
+        `;
         popup.classList.remove('hidden');
 
         userData.balance -= cost;
@@ -1030,11 +1050,21 @@
         };
 
         const popup = document.getElementById('lootPopup');
-        document.getElementById('lootRevealName').innerText = newOrb.name;
-        document.getElementById('lootRevealName').style.color = newOrb.color;
-        document.getElementById('lootRevealStats').innerText = `Tier: DAILY SUPPLY | $${newOrb.income.toLocaleString()}/every ${(newOrb.time/1000).toFixed(1)}s`;
-        const visual = document.getElementById('lootRevealVisual');
-        visual.innerHTML = `<div class="orb-visual stage-3" style="width:100px; height:100px; background:${newOrb.color}; box-shadow:0 0 30px ${newOrb.color};"></div>`;
+        const content = document.getElementById('lootCardContent');
+
+        // --- MODIFIED POPUP STRUCTURE FOR DAILY ---
+        content.innerHTML = `
+            <h2 style="color:#facc15; margin-bottom:15px;">CHEST OPENED!</h2>
+            <h3 style="font-size:28px; margin-bottom:10px; color:${newOrb.color}">${newOrb.name}</h3>
+            <div style="margin: 20px auto; transform: scale(1.5); width:100px; height:100px; display:flex; justify-content:center; align-items:center;">
+                <div class="orb-visual stage-3" style="width:50px; height:50px; background:${newOrb.color}; box-shadow:0 0 30px ${newOrb.color};"></div>
+            </div>
+            <p style="color:#94a3b8; font-size:16px; margin-bottom:25px;">
+                Tier: DAILY SUPPLY<br>
+                <span style="color:#10b981; font-weight:800;">+$${newOrb.income.toLocaleString()}</span> / ${(newOrb.time/1000).toFixed(1)}s
+            </p>
+            <button onclick="document.getElementById('lootPopup').classList.add('hidden')">COLLECT</button>
+        `;
         popup.classList.remove('hidden');
 
         // Note: Free, so no balance check
@@ -1276,6 +1306,16 @@
     }, 5000);
 
     window.showTab = (tabId) => {
+        // --- LOCK LOGIC: REQUIRE VOID EYE (orb5) ---
+        const restrictedTabs = ['research', 'collection', 'marketplace'];
+        if (restrictedTabs.includes(tabId)) {
+            // Check if user owns orb5 (Void Eye)
+            if (!userData.orbs || !userData.orbs['orb5'] || userData.orbs['orb5'] <= 0) {
+                window.showNotification("🔒 Unlock 'Void Eye' first to access!");
+                return; // Stop function here
+            }
+        }
+
         document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         document.getElementById(tabId + 'View').classList.remove('hidden');
