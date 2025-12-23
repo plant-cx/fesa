@@ -60,6 +60,32 @@
             border-radius: 50%;
         }
         
+        /* --- UNIQUE CHEST ORB STYLES (Rounded Square & Flow) --- */
+        .unique-loot-visual {
+            width: 60px; height: 60px;
+            border-radius: 16px; /* Rounded Square */
+            position: relative;
+            background-color: currentColor; /* Base color */
+            overflow: hidden;
+            box-shadow: 0 0 15px currentColor;
+        }
+
+        /* The Shimmering Flow Effect */
+        .unique-loot-visual::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 200%; height: 200%;
+            /* Gradient: Transparent -> Whiteish tint -> Transparent */
+            background: linear-gradient(135deg, transparent 20%, rgba(255,255,255,0.4) 50%, transparent 80%);
+            animation: shimmerFlow 3s infinite linear;
+        }
+
+        @keyframes shimmerFlow {
+            0% { transform: translate(-50%, -50%); }
+            100% { transform: translate(0%, 0%); }
+        }
+
         /* --- FIXED ORBIT ENGINE --- */
         .atom-cloud {
             position: absolute;
@@ -355,6 +381,14 @@
         .evo-arrow { font-size:30px; color:#6366f1; }
         .tut-btn { background:#10b981; border-bottom:4px solid #047857; color:white; font-weight:900; padding:12px 30px; border-radius:8px; cursor:pointer; font-size:16px; }
         .tut-btn:hover { transform:translateY(2px); border-bottom-width:2px; }
+
+        /* Custom Tutorial Visuals */
+        .tut-center-orb { width:30px; height:30px; background:#6366f1; border-radius:50%; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); box-shadow:0 0 10px #6366f1; z-index: 5; }
+        .tut-orbit { position: absolute; top: 50%; left: 50%; width: 50px; height: 50px; border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; }
+        .tut-electron { position: absolute; width: 4px; height: 4px; background: white; border-radius: 50%; box-shadow: 0 0 5px white; top: 0; left: 50%; transform: translate(-50%, -50%); }
+        .tut-gold-ring { position: absolute; top:50%; left:50%; width:60px; height:60px; border:2px solid #facc15; border-radius:50%; margin:-30px 0 0 -30px; opacity:0.6; }
+        
+        @keyframes tutSpin { 0% { transform: translate(-50%, -50%) rotate(0deg); } 100% { transform: translate(-50%, -50%) rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -432,30 +466,33 @@
                 <div class="tutorial-flow">
                     <div class="evo-step">
                         <div class="evo-orb-box">
-                            <div style="width:30px; height:30px; background:#6366f1; border-radius:50%; box-shadow:0 0 10px #6366f1;"></div>
+                            <div class="tut-center-orb"></div>
                         </div>
                         <div style="font-size:12px; color:#94a3b8;">BASIC</div>
                     </div>
                     <div class="evo-arrow">➜</div>
                     <div class="evo-step">
                         <div class="evo-orb-box">
-                             <div class="atom-ring-wrapper" style="width:50px; height:50px; transform: rotateX(70deg); border-color:#818cf8;"><div class="atom-spinner"><div class="atom-electron" style="width:4px; height:4px; top:0;"></div></div></div>
-                             <div style="width:30px; height:30px; background:#6366f1; border-radius:50%; z-index:2;"></div>
+                             <div class="tut-center-orb"></div>
+                             <div class="tut-orbit" style="animation: tutSpin 2s linear infinite;"><div class="tut-electron"></div></div>
+                             <div class="tut-orbit" style="width:40px; height:40px; animation: tutSpin 3s linear infinite reverse; transform:translate(-50%, -50%) rotate(90deg);"><div class="tut-electron"></div></div>
                         </div>
                         <div style="font-size:12px; color:#94a3b8;">RESEARCHED</div>
                     </div>
                     <div class="evo-arrow">➜</div>
                     <div class="evo-step">
                         <div class="evo-orb-box">
-                            <div class="celestial-glow" style="background:radial-gradient(circle, #a855f7 0%, transparent 70%); opacity:1;"></div>
-                            <div class="c-system sys-1" style="width:100%; height:100%; border-color:#a855f7;"></div>
-                            <div style="width:30px; height:30px; background:#a855f7; border-radius:50%; z-index:2; box-shadow:0 0 20px #a855f7;"></div>
+                            <div class="tut-center-orb" style="box-shadow:0 0 20px gold;"></div>
+                            <div class="tut-orbit" style="animation: tutSpin 2s linear infinite;"><div class="tut-electron"></div></div>
+                            <div class="tut-orbit" style="width:40px; height:40px; animation: tutSpin 3s linear infinite reverse; transform:translate(-50%, -50%) rotate(90deg);"><div class="tut-electron"></div></div>
+                            <div class="tut-gold-ring" style="animation: tutSpin 6s linear infinite;"></div>
+                            <div class="tut-gold-ring" style="width:50px; height:50px; margin:-25px 0 0 -25px; border-color:white; animation: tutSpin 8s linear infinite reverse;"></div>
                         </div>
                         <div style="font-size:12px; color:#facc15; font-weight:bold;">ASCENDED</div>
                     </div>
                 </div>
                 <p style="color:#cbd5e1; max-width:400px; text-align:center; margin-bottom:30px; font-size:14px;">Unlock the hidden potential of your Orbs to multiply their power and visual effects.</p>
-                <button class="tut-btn" onclick="document.getElementById('researchTutorial').classList.add('hidden')">UNDERSTOOD</button>
+                <button class="tut-btn" onclick="closeResearchTutorial()">UNDERSTOOD</button>
             </div>
 
             <h3 style="color:#6366f1; margin-bottom: 20px;">🧪 ORB RESEARCH LAB</h3>
@@ -488,7 +525,7 @@
         <div id="collectionView" class="tab-view hidden">
             <div class="card" style="padding: 15px; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; background: #0f172a;">
                 <span style="font-weight: 800; color: #94a3b8; font-size: 14px;">SORT COLLECTION:</span>
-                <select id="collectionSortOrder" onchange="renderCollection()" style="margin-bottom: 0; padding: 8px; font-size: 14px; width: auto; background:#1e293b; border-color:#6366f1;">
+                <select id="collectionSortOrder" onchange="forceRenderCollection()" style="margin-bottom: 0; padding: 8px; font-size: 14px; width: auto; background:#1e293b; border-color:#6366f1;">
                     <option value="income">Highest Production ($$$)</option>
                     <option value="quantity">Largest Quantity (x99)</option>
                 </select>
@@ -607,8 +644,7 @@
     let selectedResearchOrb = null;
     
     // Track previous state to prevent flickering
-    let lastOrbStateStr = "";
-    let researchIntroShown = false;
+    let lastCollectionHash = "";
 
     /* --- HARDCORE BALANCE UPDATE --- 
        Logic: Slower starts, massive gaps between tiers, more rewarding scaling.
@@ -683,6 +719,11 @@
         setTimeout(() => b.classList.remove('active'), 3000);
     };
 
+    window.closeResearchTutorial = () => {
+        document.getElementById('researchTutorial').classList.add('hidden');
+        localStorage.setItem('mailcash_tut_seen_v2', 'true');
+    };
+
     onAuthStateChanged(auth, u => {
         if(u) {
             myUid = u.uid;
@@ -693,18 +734,18 @@
                     
                     updateUI(); // Always update balance/text
                     renderDailyChest(); 
-                    
+                    renderOrbs('orbGrid', ORB_DATA); // Render earn grid (less intensive)
+
                     // -- FIX FOR COLLECTION FLICKER --
-                    // Only re-render grids if the ORB counts/structure actually changed.
-                    // stringify is a cheap way to compare state for this purpose.
-                    const currentOrbStateStr = JSON.stringify(userData.orbs) + JSON.stringify(userData.uniqueOrbs);
+                    // We only re-render the collection grid if the actual content (Inventory) changes
+                    // Not when balance changes.
+                    const currentCollectionHash = JSON.stringify(userData.orbs) + JSON.stringify(userData.uniqueOrbs);
                     
-                    if (currentOrbStateStr !== lastOrbStateStr) {
-                        renderOrbs('orbGrid', ORB_DATA);
+                    if (currentCollectionHash !== lastCollectionHash) {
                         renderCollection();
                         renderUniqueLoot(); 
                         renderResearch(); // In case levels changed
-                        lastOrbStateStr = currentOrbStateStr;
+                        lastCollectionHash = currentCollectionHash;
                     }
                     
                     loadInbox();
@@ -1029,8 +1070,7 @@
             
             updateUI();
             
-            // Manually trigger render here so it feels instant, 
-            // even though snapshot will also trigger later
+            // Manually trigger render here so it feels instant
             renderOrbs('orbGrid', ORB_DATA); 
 
             const update = { balance: increment(-cost) }; update[`orbs.${id}`] = increment(1);
@@ -1069,7 +1109,7 @@
             <h2 style="color:#facc15; margin-bottom:15px;">CHEST OPENED!</h2>
             <h3 style="font-size:28px; margin-bottom:10px; color:${newOrb.color}">${newOrb.name}</h3>
             <div style="margin: 20px auto; transform: scale(1.5); width:100px; height:100px; display:flex; justify-content:center; align-items:center;">
-                <div class="orb-visual stage-3" style="width:50px; height:50px; background:${newOrb.color}; box-shadow:0 0 30px ${newOrb.color};"></div>
+                <div class="unique-loot-visual" style="color:${newOrb.color};"></div>
             </div>
             <p style="color:#94a3b8; font-size:16px; margin-bottom:25px;">
                 Tier: ${tier.toUpperCase()}<br>
@@ -1115,7 +1155,7 @@
             <h2 style="color:#facc15; margin-bottom:15px;">CHEST OPENED!</h2>
             <h3 style="font-size:28px; margin-bottom:10px; color:${newOrb.color}">${newOrb.name}</h3>
             <div style="margin: 20px auto; transform: scale(1.5); width:100px; height:100px; display:flex; justify-content:center; align-items:center;">
-                <div class="orb-visual stage-3" style="width:50px; height:50px; background:${newOrb.color}; box-shadow:0 0 30px ${newOrb.color};"></div>
+                <div class="unique-loot-visual" style="color:${newOrb.color};"></div>
             </div>
             <p style="color:#94a3b8; font-size:16px; margin-bottom:25px;">
                 Tier: DAILY SUPPLY<br>
@@ -1197,13 +1237,27 @@
                     }
                     const finalInc = Math.floor(orb.income * mult);
                     const div = document.createElement('div'); div.className = `orb-item unique-loot-card tier-${tier}`;
-                    div.innerHTML = `<div class="visual-container"><div class="orb-visual stage-3" style="background:${orb.color}; box-shadow:0 0 20px ${orb.color};"></div></div><b style="font-size:16px;">${orb.name}</b><div style="color:#10b981; font-weight:800; font-size:14px; margin-top:5px;">+$${finalInc.toLocaleString()}</div><div style="font-size:12px; color:#94a3b8;">Every ${(orb.time/1000).toFixed(1)}s</div><div class="progress-bg" style="margin-top:10px;"><div class="progress-fill" id="unique-bar-${orb.id}"></div></div>`;
+                    
+                    div.innerHTML = `
+                        <div class="visual-container">
+                            <div class="unique-loot-visual" style="color:${orb.color};"></div>
+                        </div>
+                        <b style="font-size:16px;">${orb.name}</b>
+                        <div style="color:#10b981; font-weight:800; font-size:14px; margin-top:5px;">+$${finalInc.toLocaleString()}</div>
+                        <div style="font-size:12px; color:#94a3b8;">Every ${(orb.time/1000).toFixed(1)}s</div>
+                        <div class="progress-bg" style="margin-top:10px;"><div class="progress-fill" id="unique-bar-${orb.id}"></div></div>
+                    `;
                     grid.appendChild(div);
                 });
                 container.appendChild(grid);
             }
         });
     }
+
+    // New helper to force reload when changing sort order manually
+    window.forceRenderCollection = () => {
+        renderCollection();
+    };
 
     window.renderCollection = () => {
         if (!userData) return;
@@ -1248,7 +1302,9 @@
 
                 div.innerHTML = `
                     <div class="orb-lvl-badge" style="background:#a855f7; border-color:#d8b4fe;">UNIQUE</div>
-                    <div class="visual-container"><div class="orb-visual stage-3" style="background:${orb.color}; box-shadow:0 0 20px ${orb.color};"></div></div>
+                    <div class="visual-container">
+                        <div class="unique-loot-visual" style="color:${orb.color};"></div>
+                    </div>
                     <b>${orb.name}</b>
                     <p style="font-size:12px; color:#94a3b8;">${orb.tier.toUpperCase()}</p>
                     <div style="color:#10b981; font-weight:800; font-size:14px;">+$${finalInc.toLocaleString()}</div>
@@ -1375,9 +1431,12 @@
         }
         
         // --- SHOW INTRO IF RESEARCH TAB IS CLICKED FOR FIRST TIME ---
-        if (tabId === 'research' && !researchIntroShown) {
-            document.getElementById('researchTutorial').classList.remove('hidden');
-            researchIntroShown = true;
+        if (tabId === 'research') {
+             // Check LocalStorage to ensure this only happens ONCE ever
+             const seen = localStorage.getItem('mailcash_tut_seen_v2');
+             if (!seen) {
+                 document.getElementById('researchTutorial').classList.remove('hidden');
+             }
         }
 
         document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
