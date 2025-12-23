@@ -12,8 +12,9 @@
         .hidden { display: none !important; }
         input, textarea, select { width: 100%; padding: 16px; background: #0f172a; border: 1px solid #475569; border-radius: 12px; color: white; margin-bottom: 15px; outline: none; font-size: 18px; font-weight: 500; }
         
+        /* Updated Button Styles */
         button { width: 100%; padding: 16px; background: #6366f1; color: white; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; transition: 0.2s; font-size: 18px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .buy-btn { padding: 10px 16px; font-size: 16px; }
+        .buy-btn { padding: 10px 16px; font-size: 16px; } /* Smaller Buy Button */
         
         button:disabled { background: #334155; color: #64748b; cursor: not-allowed; }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; position: relative; gap: 10px; flex-wrap: wrap; }
@@ -24,16 +25,6 @@
 
         .pfp-circle { width: 55px; height: 55px; border-radius: 50%; border: 3px solid #6366f1; background: #334155; cursor: pointer; }
         #settingsMenu { position: absolute; right: 0; top: 75px; width: 300px; z-index: 1000; box-shadow: 0 15px 40px rgba(0,0,0,0.6); border: 2px solid #475569; }
-        
-        /* Updated Toggle Switch in Settings */
-        .toggle-container { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; font-size: 14px; font-weight: 700; color: #94a3b8; }
-        .toggle-switch { position: relative; display: inline-block; width: 50px; height: 26px; }
-        .toggle-switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #334155; transition: .4s; border-radius: 34px; }
-        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: #6366f1; }
-        input:checked + .slider:before { transform: translateX(24px); }
-
         .tabs { display: flex; gap: 8px; margin-bottom: 25px; background: #0f172a; padding: 8px; border-radius: 16px; overflow-x: auto; border: 1px solid #334155; }
         .tab { flex: 1; text-align: center; padding: 14px; cursor: pointer; border-radius: 12px; color: #94a3b8; font-weight: 800; font-size: 14px; white-space: nowrap; }
         .tab.active { background: #334155; color: white; border: 1px solid #475569; }
@@ -43,7 +34,7 @@
         
         /* --- VISUAL ENGINE & EFFECTS --- */
         .visual-container { position: relative; width: 80px; height: 80px; margin: 20px auto 10px; display: flex; justify-content: center; align-items: center; }
-        .orb-visual { width: 60px; height: 60px; transition: all 0.5s ease; position: relative; z-index: 5; background: currentColor; box-shadow: 0 0 20px currentColor; }
+        .orb-visual { width: 60px; height: 60px; transition: all 0.5s ease; position: relative; z-index: 2; background: currentColor; box-shadow: 0 0 20px currentColor; }
         
         .stage-1 { border-radius: 50%; }
         .stage-2 { border-radius: 35%; }
@@ -57,13 +48,23 @@
 
         /* --- ORB LAYOUT STYLES --- */
         .orb-item .orb-lvl-badge { 
-            position: absolute; top: 10px; right: 10px; 
-            background: #334155; color: #94a3b8; padding: 4px 8px; border-radius: 6px; 
-            font-size: 12px; font-weight: 800; border: 1px solid #475569; z-index: 5; 
+            position: absolute; 
+            top: 10px; 
+            right: 10px; 
+            background: #334155; 
+            color: #94a3b8; 
+            padding: 4px 8px; 
+            border-radius: 6px; 
+            font-size: 12px; 
+            font-weight: 800; 
+            border: 1px solid #475569; 
+            z-index: 5; 
         }
 
+        /* Updated Sell Button */
         .sell-btn-corner {
-            position: absolute; top: 10px; left: 10px; 
+            position: absolute; 
+            top: 10px; left: 10px; 
             width: auto; height: 28px; padding: 0 8px;
             background: #ef4444; color: white; 
             border-radius: 6px; font-weight: 900; 
@@ -80,71 +81,102 @@
             display: inline-block; margin: 5px auto; border: 1px solid #334155;
         }
 
-        /* --- RESEARCH EFFECTS --- */
-        .spec-magic .orb-visual { box-shadow: 0 0 50px rgba(220, 20, 60, 0.8), inset 0 0 20px #000; background: radial-gradient(circle, #000, #7f1d1d); }
-        .magic-star { position: absolute; width: 120%; height: 120%; background: rgba(220, 20, 60, 0.5); clip-path: polygon(50% 100%, 81% 0%, 2% 62%, 98% 62%, 19% 0%); animation: rotateStar 10s linear infinite; z-index: 1; }
-        .magic-mist { position: absolute; width: 140%; height: 140%; background: radial-gradient(circle, rgba(100,0,0,0.4), transparent 70%); animation: pulseMist 3s infinite; z-index: 0; }
-        .magic-particle { position: absolute; width: 4px; height: 4px; background: #ef4444; border-radius: 50%; animation: particleRiseRed 2s infinite; opacity: 0; }
+        /* --- RESEARCH ANIMATIONS --- */
+        .preview-box { 
+            background: radial-gradient(circle at center, #1e293b 0%, #020617 100%);
+            border-radius: 12px; 
+            height: 300px; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            margin-bottom: 25px; 
+            border: 2px solid; 
+            border-color: currentColor; /* Matches Orb Color */
+            position: relative; 
+            overflow: hidden; 
+            box-shadow: inset 0 0 60px rgba(0,0,0,0.8);
+            perspective: 800px;
+            color: #6366f1; /* Default, gets overridden inline */
+        }
 
-        .spec-core .orb-visual { box-shadow: 0 0 60px rgba(255,255,255,0.9); background: #fff; }
-        .core-halo { position: absolute; width: 140%; height: 140%; border: 4px solid rgba(255,255,255,0.6); border-radius: 50%; animation: pulseHalo 4s infinite; z-index: 1; box-shadow: 0 0 20px white; }
-
-        .spec-power .orb-visual { animation: shakePower 0.2s infinite; border: 2px solid #fff; }
-        .power-bolt { position: absolute; width: 60px; height: 100%; background: linear-gradient(transparent, #a855f7, transparent); clip-path: polygon(40% 0, 60% 0, 40% 100%, 20% 100%); animation: flashBolt 0.5s infinite alternate; z-index: 0; transform: rotate(45deg); }
-
-        .strength-rock { position: absolute; width: 12px; height: 12px; background: #7c2d12; border-radius: 4px; animation: orbitRock 3s linear infinite; }
-
-        @keyframes rotateStar { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        @keyframes pulseMist { 0%,100% { opacity: 0.3; transform: scale(1); } 50% { opacity: 0.8; transform: scale(1.1); } }
-        @keyframes particleRiseRed { 0% { transform: translateY(20px); opacity: 0; } 50% { opacity: 1; } 100% { transform: translateY(-30px); opacity: 0; } }
-        @keyframes pulseHalo { 0% { transform: scale(0.9); opacity: 0.5; } 50% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(0.9); opacity: 0.5; } }
-        @keyframes shakePower { 0% { transform: translate(1px, 1px); } 100% { transform: translate(-1px, -1px); } }
-        @keyframes flashBolt { 0% { opacity: 0; } 100% { opacity: 1; } }
-        @keyframes orbitRock { from { transform: rotate(0deg) translateX(40px) rotate(0deg); } to { transform: rotate(360deg) translateX(40px) rotate(-360deg); } }
-
-        /* --- RESEARCH PANEL STYLES --- */
-        .preview-box { background: radial-gradient(circle at center, #1e293b 0%, #020617 100%); border-radius: 12px; height: 300px; display: flex; flex-direction: column; justify-content: center; align-items: center; margin-bottom: 25px; border: 2px solid; border-color: currentColor; position: relative; overflow: hidden; box-shadow: inset 0 0 60px rgba(0,0,0,0.8); perspective: 800px; color: #6366f1; }
-
-        .holo-floor { position: absolute; bottom: -50%; left: -50%; width: 200%; height: 100%; background: linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 40px 40px; transform: rotateX(70deg); animation: floorMove 10s linear infinite; opacity: 0.2; z-index: 0; }
+        /* 3D Floor Grid */
+        .holo-floor {
+            position: absolute;
+            bottom: -50%;
+            left: -50%;
+            width: 200%;
+            height: 100%;
+            background: 
+                linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+            transform: rotateX(70deg);
+            animation: floorMove 10s linear infinite;
+            opacity: 0.2;
+            z-index: 0;
+        }
         @keyframes floorMove { from { transform: rotateX(70deg) translateY(0); } to { transform: rotateX(70deg) translateY(40px); } }
 
-        .research-sphere { width: 100px; height: 100px; border-radius: 50%; position: relative; z-index: 10; background: currentColor; box-shadow: inset -15px -15px 30px rgba(0,0,0,0.6), inset 10px 10px 30px rgba(255,255,255,0.4), 0 0 50px currentColor; animation: sphereFloat 4s ease-in-out infinite; }
-        @keyframes sphereFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+        /* The Research Orb (Strict Sphere) */
+        .research-sphere {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            position: relative;
+            z-index: 10;
+            background: currentColor;
+            box-shadow: 
+                inset -15px -15px 30px rgba(0,0,0,0.6), 
+                inset 10px 10px 30px rgba(255,255,255,0.4),
+                0 0 50px currentColor; /* Outer glow */
+            animation: sphereFloat 4s ease-in-out infinite;
+        }
 
-        .gyro-ring { position: absolute; top: 50%; left: 50%; border: 2px solid rgba(255,255,255,0.05); border-top: 2px solid currentColor; border-bottom: 2px solid currentColor; border-radius: 50%; box-shadow: 0 0 10px currentColor; pointer-events: none; z-index: 5; opacity: 0.8; }
+        @keyframes sphereFloat { 
+            0%, 100% { transform: translateY(0); } 
+            50% { transform: translateY(-20px); } 
+        }
+
+        /* 3D Gyroscope Rings - Now using currentColor for dynamic coloring */
+        .gyro-ring {
+            position: absolute;
+            top: 50%; left: 50%;
+            border: 2px solid rgba(255,255,255,0.05);
+            border-top: 2px solid currentColor;
+            border-bottom: 2px solid currentColor;
+            border-radius: 50%;
+            box-shadow: 0 0 10px currentColor;
+            pointer-events: none;
+            z-index: 5;
+            opacity: 0.8;
+        }
+
         .ring-1 { width: 180px; height: 180px; margin: -90px; animation: spin1 4s linear infinite; }
         .ring-2 { width: 140px; height: 140px; margin: -70px; animation: spin2 5s linear infinite; }
         .ring-3 { width: 220px; height: 220px; margin: -110px; border-color: rgba(255,255,255,0.02); border-left: 2px solid currentColor; border-right: 2px solid currentColor; animation: spin3 8s linear infinite; }
+
         @keyframes spin1 { 0% { transform: rotateX(60deg) rotateZ(0deg); } 100% { transform: rotateX(60deg) rotateZ(360deg); } }
         @keyframes spin2 { 0% { transform: rotateY(60deg) rotateZ(0deg); } 100% { transform: rotateY(60deg) rotateZ(-360deg); } }
         @keyframes spin3 { 0% { transform: rotateX(80deg) rotateY(20deg) rotateZ(0deg); } 100% { transform: rotateX(80deg) rotateY(20deg) rotateZ(360deg); } }
 
-        .research-overlay-text { position: absolute; bottom: 10px; color: currentColor; font-size: 10px; letter-spacing: 2px; font-weight: 900; text-shadow: 0 0 10px currentColor; z-index: 20; }
+        .research-overlay-text {
+            position: absolute; bottom: 10px;
+            color: currentColor;
+            font-size: 10px; letter-spacing: 2px; font-weight: 900;
+            text-shadow: 0 0 10px currentColor; z-index: 20;
+        }
         
         .section-header { width:100%; text-align:center; margin: 40px 0 20px; padding-top:20px; border-top: 1px solid #334155; color:#cbd5e1; font-weight:800; font-size: 14px; letter-spacing: 1px; }
-        .sell-research-btn { background: #991b1b; color: #fecaca; padding: 6px 10px; font-size: 10px; border-radius: 6px; font-weight: 800; margin-right: 8px; width: auto; display: inline-block; }
-        .sell-research-btn:hover { background: #dc2626; }
 
-        /* --- FLOATING MAIL BUTTON (FAB) --- */
-        .mail-fab-container { position: fixed; bottom: 30px; right: 30px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; align-items: flex-end; }
-        .mail-fab-main { width: 60px; height: 60px; background: #6366f1; color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 24px; box-shadow: 0 10px 25px rgba(99, 102, 241, 0.5); cursor: pointer; transition: 0.3s; border: 2px solid #818cf8; }
-        .mail-fab-main:hover { transform: scale(1.1); }
-        
-        .mail-fab-sub { width: 50px; height: 50px; background: #1e293b; color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); cursor: pointer; transition: 0.3s; opacity: 0; transform: translateY(20px); pointer-events: none; border: 1px solid #475569; position: absolute; bottom: 70px; right: 5px; }
-        
-        .mail-fab-container:hover .mail-fab-sub { opacity: 1; transform: translateY(0); pointer-events: auto; }
-        .mail-fab-container:hover .mail-fab-sub:nth-child(1) { bottom: 130px; transition-delay: 0.05s; } /* Inbox */
-        .mail-fab-container:hover .mail-fab-sub:nth-child(2) { bottom: 70px; transition-delay: 0s; } /* Send */
-
-        .mail-tooltip { position: absolute; right: 60px; background: #0f172a; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: bold; opacity: 0; transition: 0.2s; white-space: nowrap; border: 1px solid #334155; }
-        .mail-fab-sub:hover .mail-tooltip { opacity: 1; }
-        
         /* --- UI & LAYOUT --- */
         .blur-lock { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(10px); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10; border-radius: 16px; }
         .progress-bg { width: 100%; height: 6px; background: #1e293b; border-radius: 10px; margin-top: 12px; overflow: hidden; }
         .progress-fill { height: 100%; background: #6366f1; width: 0%; transition: width 0.1s linear; }
+        
         .search-bar { padding: 10px 15px; font-size: 14px; width: 200px; margin: 0; height: 45px; }
 
+        /* Research Specifics */
         .research-layout { display: grid; grid-template-columns: 300px 1fr; gap: 20px; align-items: start; }
         .research-list { max-height: 500px; overflow-y: auto; background: #0f172a; border-radius: 12px; padding: 10px; border: 1px solid #334155; }
         .research-item { padding: 12px; margin-bottom: 8px; background: #1e293b; border-radius: 8px; cursor: pointer; border: 1px solid transparent; transition: 0.2s; display: flex; justify-content: space-between; align-items: center; }
@@ -176,18 +208,6 @@
 <body>
 
 <div id="notifBanner" class="notif-banner"><div style="width:12px;height:12px;background:#10b981;border-radius:50%"></div><span id="notifText">@user sent mail!</span></div>
-
-<div id="mailFabContainer" class="mail-fab-container hidden">
-    <div class="mail-fab-sub" onclick="showTab('inbox')">
-        📥 <span class="mail-tooltip">Inbox</span>
-    </div>
-    <div class="mail-fab-sub" onclick="showTab('message')">
-        ✍️ <span class="mail-tooltip">Compose</span>
-    </div>
-    <div class="mail-fab-main">
-        ✉️
-    </div>
-</div>
 
 <div id="lootPopup" class="loot-popup-overlay hidden">
     <div class="loot-popup-card">
@@ -225,15 +245,6 @@
             </div>
             <div id="settingsMenu" class="card hidden">
                 <h3 style="margin-bottom:20px;">Settings</h3>
-                
-                <div class="toggle-container">
-                    <span>Use Floating Mail Button</span>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="toggleMailBtn" onchange="toggleMailFab()">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                
                 <input type="text" id="setNewUser" placeholder="New Username">
                 <button onclick="updateProfile()" style="background:#10b981; margin-bottom:15px;">Update Profile</button>
                 <button onclick="logout()" style="background:#ef4444;">Logout</button>
@@ -279,7 +290,9 @@
                         <div class="gyro-ring ring-1"></div>
                         <div class="gyro-ring ring-2"></div>
                         <div class="gyro-ring ring-3"></div>
+                        
                         <div id="researchPreview"></div>
+
                         <div class="research-overlay-text">ANALYSIS IN PROGRESS</div>
                     </div>
 
@@ -402,24 +415,22 @@
     const uniqueOrbProgress = {};
     let searchFilter = "";
     let selectedResearchOrb = null;
-    let useMailFab = false;
 
-    // RENAMED ORBS TO BE GODLY & NATURAL
     const ORB_DATA = [
-        { id: 'orb1', name: 'Tidal Essence', baseCost: 350, baseInc: 15, time: 5000, color: '#3b82f6' },
-        { id: 'orb2', name: 'Magma Heart', baseCost: 3000, baseInc: 200, time: 7000, color: '#ef4444' },
-        { id: 'orb3', name: 'Gaia\'s Root', baseCost: 15000, baseInc: 850, time: 6000, color: '#10b981' },
-        { id: 'orb4', name: 'Solar Flare', baseCost: 50000, baseInc: 3500, time: 4000, color: '#f59e0b' },
-        { id: 'orb5', name: 'Void Essence', baseCost: 150000, baseInc: 12000, time: 5000, color: '#8b5cf6' },
-        { id: 'orb6', name: 'Glacial Shard', baseCost: 400000, baseInc: 40000, time: 5000, color: '#06b6d4' },
-        { id: 'orb7', name: 'Nebula Tear', baseCost: 1000000, baseInc: 120000, time: 8000, color: '#ec4899' },
-        { id: 'orb8', name: 'Divine Light', baseCost: 4000000, baseInc: 500000, time: 10000, color: '#f8fafc' },
-        { id: 'orb9', name: 'Abyssal Core', baseCost: 20000000, baseInc: 3000000, time: 12000, color: '#475569' },
-        { id: 'orb10', name: 'Stellar Nucleus', baseCost: 80000000, baseInc: 15000000, time: 15000, color: '#fbbf24' }
+        { id: 'orb1', name: 'Blue Orb', baseCost: 350, baseInc: 15, time: 5000, color: '#3b82f6' },
+        { id: 'orb2', name: 'Red Orb', baseCost: 3000, baseInc: 200, time: 7000, color: '#ef4444' },
+        { id: 'orb3', name: 'Green Orb', baseCost: 15000, baseInc: 850, time: 6000, color: '#10b981' },
+        { id: 'orb4', name: 'Gold Orb', baseCost: 50000, baseInc: 3500, time: 4000, color: '#f59e0b' },
+        { id: 'orb5', name: 'Purple Orb', baseCost: 150000, baseInc: 12000, time: 5000, color: '#8b5cf6' },
+        { id: 'orb6', name: 'Cyan Orb', baseCost: 400000, baseInc: 40000, time: 5000, color: '#06b6d4' },
+        { id: 'orb7', name: 'Pink Orb', baseCost: 1000000, baseInc: 120000, time: 8000, color: '#ec4899' },
+        { id: 'orb8', name: 'White Orb', baseCost: 4000000, baseInc: 500000, time: 10000, color: '#f8fafc' },
+        { id: 'orb9', name: 'Void Orb', baseCost: 20000000, baseInc: 3000000, time: 12000, color: '#475569' },
+        { id: 'orb10', name: 'Solar Orb', baseCost: 80000000, baseInc: 15000000, time: 15000, color: '#fbbf24' }
     ];
 
     const RESEARCH_TYPES = ['core', 'magic', 'power', 'wisdom', 'strength'];
-    const RESEARCH_COST = 50000;
+    const RESEARCH_COST = 50000; // Cost per level
 
     const PRESTIGE_UPGRADES = {
         clicks: [{ id: 'p_click_1', name: 'Iron Clicks', mult: 1.1, cost: 1 }, { id: 'p_click_2', name: 'Golden Finger', mult: 1.25, cost: 3 }, { id: 'p_click_3', name: 'Titan Tap', mult: 1.5, cost: 10 }, { id: 'p_click_4', name: 'Godly Touch', mult: 2.0, cost: 25 }, { id: 'p_click_5', name: 'Cosmic Click', mult: 5.0, cost: 100 }],
@@ -442,14 +453,6 @@
                 if(d.exists()) {
                     userData = d.data();
                     if(!userData.research) userData.research = {};
-                    
-                    // Load Toggle Setting
-                    if(userData.settings && userData.settings.useMailFab) {
-                        useMailFab = true;
-                        document.getElementById('toggleMailBtn').checked = true;
-                    }
-                    toggleMailFab(false); // Apply visual state
-
                     updateUI();
                     renderOrbs('orbGrid', ORB_DATA);
                     renderCollection();
@@ -464,117 +467,41 @@
         }
     });
 
-    // --- TOGGLE MAIL BUTTON LOGIC ---
-    window.toggleMailFab = async (save = true) => {
-        const toggle = document.getElementById('toggleMailBtn');
-        const fab = document.getElementById('mailFabContainer');
-        const tIn = document.getElementById('tIn');
-        const tMsg = document.getElementById('tMsg');
-
-        if(toggle.checked) {
-            // FAB Mode
-            fab.classList.remove('hidden');
-            if(tIn) tIn.classList.add('hidden');
-            if(tMsg) tMsg.classList.add('hidden');
-            useMailFab = true;
-        } else {
-            // Classic Tab Mode
-            fab.classList.add('hidden');
-            if(tIn) tIn.classList.remove('hidden');
-            if(tMsg) tMsg.classList.remove('hidden');
-            useMailFab = false;
-        }
-
-        if(save && myUid) {
-            await updateDoc(doc(db, "users", myUid), { "settings.useMailFab": toggle.checked });
-        }
-    };
-
     const generateOrbHTML = (orb, count, isResearchPreview = false) => {
         const r = userData.research?.[orb.id] || {};
         
         if (isResearchPreview) {
-            let innerHtml = `<div class="research-sphere" style="color:${orb.color};"></div>`;
-            if((r.magic || 0) >= 3) {
-                innerHtml = `
-                    <div class="research-sphere spec-magic" style="color:${orb.color};">
-                        <div class="magic-star"></div>
-                        <div class="magic-mist"></div>
-                        <div class="magic-particle" style="left:20%; animation-delay:0s;"></div>
-                        <div class="magic-particle" style="left:50%; animation-delay:1s;"></div>
-                        <div class="magic-particle" style="left:80%; animation-delay:0.5s;"></div>
-                    </div>`;
-            } else if ((r.core || 0) >= 3) {
-                innerHtml = `<div class="research-sphere spec-core" style="color:${orb.color};"><div class="core-halo"></div></div>`;
-            } else if ((r.power || 0) >= 3) {
-                innerHtml = `<div class="research-sphere spec-power" style="color:${orb.color};"><div class="power-bolt"></div><div class="power-bolt" style="transform:rotate(-45deg)"></div></div>`;
-            } else if ((r.strength || 0) >= 3) {
-                 innerHtml = `<div class="research-sphere spec-strength" style="color:${orb.color};"><div class="strength-rock"></div><div class="strength-rock" style="animation-delay:1.5s;"></div></div>`;
-            } else if ((r.wisdom || 0) >= 3) {
-                 innerHtml = `<div class="research-sphere spec-wisdom" style="color:${orb.color}; border:2px dashed #34d399;"></div>`;
-            }
-            return innerHtml;
+            return `<div class="research-sphere" style="color:${orb.color};"></div>`;
         }
 
         let stage = getStageClass(count);
-        let specClass = "";
-        let extraElements = "";
-        
-        if((r.magic || 0) >= 3) { specClass = "spec-magic"; extraElements = `<div class="magic-star"></div><div class="magic-mist"></div><div class="magic-particle" style="left:50%"></div>`; } 
-        else if ((r.core || 0) >= 3) { specClass = "spec-core"; extraElements = `<div class="core-halo"></div>`; } 
-        else if ((r.power || 0) >= 3) { specClass = "spec-power"; extraElements = `<div class="power-bolt"></div>`; } 
-        else if ((r.strength || 0) >= 3) { specClass = "spec-strength"; extraElements = `<div class="strength-rock"></div>`; } 
-        else if ((r.wisdom || 0) >= 3) { specClass = "spec-wisdom"; }
-
-        return `<div class="visual-container ${specClass}">
+        return `<div class="visual-container">
                     <div class="orb-visual ${stage}" style="background:currentColor; color:${orb.color};"></div>
-                    ${extraElements}
                 </div>`;
     };
 
-    // --- RESEARCH LOGIC (INCLUDES CHEST ORBS) ---
+    // --- RESEARCH LOGIC ---
     function renderResearch() {
         const list = document.getElementById('researchOrbList');
         const currentId = selectedResearchOrb;
         list.innerHTML = '';
         
-        // 1. Standard Orbs
+        // Populate list
         ORB_DATA.forEach(orb => {
             if(userData.orbs?.[orb.id] > 0) {
-                createResearchItem(orb, list, currentId);
+                const item = document.createElement('div');
+                item.className = `research-item ${currentId === orb.id ? 'active' : ''}`;
+                item.innerHTML = `<b>${orb.name}</b>`;
+                item.onclick = () => selectResearchOrb(orb);
+                list.appendChild(item);
             }
         });
 
-        // 2. Chest Orbs (New)
-        if(userData.uniqueOrbs && userData.uniqueOrbs.length > 0) {
-            const chestHeader = document.createElement('div');
-            chestHeader.style.padding = '10px';
-            chestHeader.style.color = '#f59e0b';
-            chestHeader.style.fontWeight = 'bold';
-            chestHeader.style.fontSize = '12px';
-            chestHeader.innerText = "CHEST ARTIFACTS";
-            list.appendChild(chestHeader);
-            
-            userData.uniqueOrbs.forEach(orb => {
-                createResearchItem(orb, list, currentId);
-            });
-        }
-
+        // Update Panel if open
         if(currentId) {
-            // Find in standard OR unique
-            let orb = ORB_DATA.find(o => o.id === currentId);
-            if(!orb && userData.uniqueOrbs) orb = userData.uniqueOrbs.find(o => o.id === currentId);
-            
+            const orb = ORB_DATA.find(o => o.id === currentId);
             if(orb) updateResearchPanel(orb);
         }
-    }
-
-    function createResearchItem(orb, list, currentId) {
-        const item = document.createElement('div');
-        item.className = `research-item ${currentId === orb.id ? 'active' : ''}`;
-        item.innerHTML = `<b>${orb.name}</b>`;
-        item.onclick = () => selectResearchOrb(orb);
-        list.appendChild(item);
     }
 
     function selectResearchOrb(orb) {
@@ -586,7 +513,12 @@
 
     function updateResearchPanel(orb) {
         document.getElementById('researchOrbName').innerText = orb.name;
-        document.getElementById('researchVisualBox').style.color = orb.color; 
+        
+        // --- COLORED ANIMATION UPDATE ---
+        // We set the color of the container, which the rings inherit via currentColor
+        const visBox = document.getElementById('researchVisualBox');
+        visBox.style.color = orb.color; 
+        
         document.getElementById('researchPreview').innerHTML = generateOrbHTML(orb, 1, true);
         
         const container = document.getElementById('statContainer');
@@ -614,10 +546,7 @@
                     <div class="stat-name">${type} (Lvl ${level})</div>
                     <div class="progress-bg" style="width:150px"><div class="progress-fill" style="width:${(level/5)*100}%"></div></div>
                 </div>
-                <div>
-                    ${level > 0 ? `<button class="sell-research-btn" onclick="sellResearch('${orb.id}', '${type}')">SELL</button>` : ''}
-                    <button onclick="buyResearch('${orb.id}', '${type}')" ${canUpgrade && canAfford ? '' : 'disabled'} style="font-size:12px; padding:8px;">${btnText}</button>
-                </div>
+                <button onclick="buyResearch('${orb.id}', '${type}')" ${canUpgrade && canAfford ? '' : 'disabled'} style="font-size:12px; padding:8px;">${btnText}</button>
             `;
             container.appendChild(row);
         });
@@ -631,38 +560,14 @@
         if (currentLvl >= 5) return;
         if (currentLvl >= 2 && currentSpec && currentSpec !== type) return;
         
+        // Optimistic update for Research
         userData.balance -= RESEARCH_COST;
         if (!userData.research[orbId]) userData.research[orbId] = {};
         userData.research[orbId][type] = (userData.research[orbId][type] || 0) + 1;
-        
-        // Find orb object to update panel
-        let orb = ORB_DATA.find(o => o.id === orbId);
-        if(!orb && userData.uniqueOrbs) orb = userData.uniqueOrbs.find(o => o.id === orbId);
-        
-        if(orb) updateResearchPanel(orb);
+        updateResearchPanel(ORB_DATA.find(o => o.id === orbId));
         updateUI();
 
         await updateDoc(doc(db, "users", myUid), { balance: increment(-RESEARCH_COST), [`research.${orbId}.${type}`]: increment(1) });
-    };
-
-    window.sellResearch = async (orbId, type) => {
-        const currentLvl = (userData.research?.[orbId]?.[type] || 0);
-        if(currentLvl > 0) {
-            const refund = 25000;
-            userData.balance += refund;
-            userData.research[orbId][type]--;
-            
-            let orb = ORB_DATA.find(o => o.id === orbId);
-            if(!orb && userData.uniqueOrbs) orb = userData.uniqueOrbs.find(o => o.id === orbId);
-
-            if(orb) updateResearchPanel(orb);
-            updateUI();
-            
-            await updateDoc(doc(db, "users", myUid), { 
-                balance: increment(refund), 
-                [`research.${orbId}.${type}`]: increment(-1) 
-            });
-        }
     };
 
     window.handleSearch = () => {
@@ -671,7 +576,10 @@
         renderCollection();
     };
 
-    const calculateOrbLevel = (orb, owned) => { return owned > 0 ? owned : 1; };
+    // --- LEVEL LOGIC UPDATE: GOES UP INDIVIDUALLY (Level = Count) ---
+    const calculateOrbLevel = (orb, owned) => {
+        return owned > 0 ? owned : 1;
+    };
 
     const updateUI = () => {
         if (!userData) return;
@@ -770,13 +678,18 @@
         });
     }
 
+    // --- OPTIMIZED BUYING (No Latency) ---
     window.buyOrb = async (id, cost, currentOwned) => {
         if (userData.balance >= cost && currentOwned < 50) {
+            // 1. Optimistic UI Update
             userData.balance -= cost;
             if(!userData.orbs[id]) userData.orbs[id] = 0;
             userData.orbs[id]++;
+            
             updateUI();
-            renderOrbs('orbGrid', ORB_DATA);
+            renderOrbs('orbGrid', ORB_DATA); // Re-render immediately
+
+            // 2. Background DB Update
             const update = { balance: increment(-cost) }; update[`orbs.${id}`] = increment(1);
             await updateDoc(doc(db, "users", myUid), update);
         }
@@ -784,10 +697,12 @@
 
     window.sellOrb = async (id, refund) => { 
         if(userData?.orbs?.[id] > 0) {
+            // Optimistic Sell
             userData.balance += refund;
             userData.orbs[id]--;
             updateUI();
             renderOrbs('orbGrid', ORB_DATA);
+
             await updateDoc(doc(db, "users", myUid), { balance: increment(refund), [`orbs.${id}`]: increment(-1) });
         }
     };
@@ -810,6 +725,7 @@
         visual.innerHTML = `<div class="orb-visual stage-3" style="width:100px; height:100px; background:${newOrb.color}; box-shadow:0 0 30px ${newOrb.color};"></div>`;
         popup.classList.remove('hidden');
 
+        // Optimistic Loot
         userData.balance -= cost;
         if(!userData.uniqueOrbs) userData.uniqueOrbs = [];
         userData.uniqueOrbs.push(newOrb);
@@ -818,6 +734,35 @@
         await updateDoc(doc(db, "users", myUid), { balance: increment(-cost), uniqueOrbs: arrayUnion(newOrb) });
     };
 
+    function renderUniqueLoot() {
+        const container = document.getElementById('lootMarketplaceContainer');
+        if (!container || !userData.uniqueOrbs) return;
+        container.innerHTML = '';
+        const tiers = ['bronze', 'silver', 'gold', 'champion'];
+        tiers.forEach(tier => {
+            const orbsInTier = userData.uniqueOrbs.filter(o => o.tier === tier);
+            if (orbsInTier.length > 0) {
+                const header = document.createElement('div'); header.className = 'loot-category-header'; header.innerText = `${tier.toUpperCase()} ARTIFACTS`; header.style.color = tier === 'bronze' ? '#d97706' : tier === 'silver' ? '#cbd5e1' : tier === 'gold' ? '#facc15' : '#a855f7';
+                container.appendChild(header);
+                const grid = document.createElement('div'); grid.className = 'orb-grid';
+                orbsInTier.forEach(orb => {
+                    let mult = 1;
+                    if(userData?.prestigeUpgrades) {
+                        PRESTIGE_UPGRADES.orbs.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
+                        PRESTIGE_UPGRADES.artifacts.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
+                        PRESTIGE_UPGRADES.global.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
+                    }
+                    const finalInc = Math.floor(orb.income * mult);
+                    const div = document.createElement('div'); div.className = `orb-item unique-loot-card tier-${tier}`;
+                    div.innerHTML = `<div class="visual-container"><div class="orb-visual stage-3" style="background:${orb.color}; box-shadow:0 0 20px ${orb.color};"></div></div><b style="font-size:16px;">${orb.name}</b><div style="color:#10b981; font-weight:800; font-size:14px; margin-top:5px;">+$${finalInc.toLocaleString()}</div><div style="font-size:12px; color:#94a3b8;">Every ${(orb.time/1000).toFixed(1)}s</div><div class="progress-bg" style="margin-top:10px;"><div class="progress-fill" id="unique-bar-${orb.id}"></div></div>`;
+                    grid.appendChild(div);
+                });
+                container.appendChild(grid);
+            }
+        });
+    }
+
+    // --- UPDATED COLLECTION RENDER (INCLUDES CHEST ORBS) ---
     window.renderCollection = () => {
         if (!userData) return;
         const collectionGrid = document.getElementById('collectionGrid');
@@ -826,6 +771,7 @@
         
         const sortMode = document.getElementById('collectionSortOrder').value;
         
+        // 1. Standard Orbs
         collectionGrid.innerHTML = '';
         const ownedList = ORB_DATA.filter(orb => (userData.orbs?.[orb.id] || 0) > 0 && (!searchFilter || orb.name.toLowerCase().includes(searchFilter)));
         if (sortMode === 'income') ownedList.sort((a, b) => calcIncome(b, userData.orbs[b.id]) - calcIncome(a, userData.orbs[a.id]));
@@ -842,12 +788,15 @@
             setTimeout(() => { div.style.opacity = '1'; div.style.transform = 'translateY(0)'; }, index * 40);
         });
 
+        // 2. Chest Orbs (Unique)
         if(chestGrid) {
             chestGrid.innerHTML = '';
             const chestOrbs = (userData.uniqueOrbs || []).filter(o => !searchFilter || o.name.toLowerCase().includes(searchFilter));
             chestOrbs.forEach((orb, index) => {
                 const div = document.createElement('div');
                 div.className = 'orb-item'; div.style.minHeight = '220px';
+                
+                // Calculate income for visual
                 let mult = 1;
                 if(userData?.prestigeUpgrades) {
                      PRESTIGE_UPGRADES.orbs.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
@@ -855,12 +804,10 @@
                      PRESTIGE_UPGRADES.global.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
                 }
                 const finalInc = Math.floor(orb.income * mult);
-                // Also update Chest Orbs with Visuals if researched
-                const visualHTML = generateOrbHTML(orb, 1); 
 
                 div.innerHTML = `
                     <div class="orb-lvl-badge" style="background:#a855f7; border-color:#d8b4fe;">UNIQUE</div>
-                    ${visualHTML}
+                    <div class="visual-container"><div class="orb-visual stage-3" style="background:${orb.color}; box-shadow:0 0 20px ${orb.color};"></div></div>
                     <b>${orb.name}</b>
                     <p style="font-size:12px; color:#94a3b8;">${orb.tier.toUpperCase()}</p>
                     <div style="color:#10b981; font-weight:800; font-size:14px;">+$${finalInc.toLocaleString()}</div>
@@ -988,60 +935,22 @@
         document.body.appendChild(pop); setTimeout(() => pop.remove(), 400);
     };
 
-    // --- REPLACEMENT AUTH LOGIC ---
     const handleAuth = async () => {
-        // FIX: Removed .toLowerCase() so it searches for exactly what you type (Case Sensitive)
-        const u = document.getElementById('loginUser').value.trim(); 
+        const u = document.getElementById('loginUser').value.trim().toLowerCase();
         const p = document.getElementById('authPass').value;
         const e = document.getElementById('regEmail').value;
-        const btn = document.getElementById('authBtn');
-
         if (!u || !p || (isReg && !e)) return alert("Please fill all fields");
-        
-        btn.disabled = true;
-        btn.innerText = "Checking...";
-
         try {
             if(isReg) {
-                // Register Logic
-                const q = query(collection(db, "users"), where("username", "==", u));
-                const s = await getDocs(q);
-                if(!s.empty) throw new Error("Username taken!");
-
                 const res = await createUserWithEmailAndPassword(auth, e, p);
-                
-                // Create the user document
-                await setDoc(doc(db, "users", res.user.uid), { 
-                    username: u, 
-                    email: e, 
-                    balance: 1000, 
-                    orbs: {}, 
-                    uniqueOrbs: [], 
-                    research: {}, 
-                    clickLevel: 1, 
-                    prestigePoints: 0, 
-                    prestigeUpgrades: [],
-                    settings: { useMailFab: false }
-                });
-
-                location.reload(); // Refresh to load the app
+                await setDoc(doc(db, "users", res.user.uid), { username: u, email: e, balance: 1000, orbs: {}, uniqueOrbs: [], research: {}, clickLevel: 1, prestigePoints: 0, prestigeUpgrades: [] });
             } else {
-                // Login Logic
                 const q = query(collection(db, "users"), where("username", "==", u));
                 const s = await getDocs(q);
-                
-                if(s.empty) {
-                    throw new Error("Username not found! (Check capitalization)");
-                }
-                
-                const userEmail = s.docs[0].data().email;
-                await signInWithEmailAndPassword(auth, userEmail, p);
+                if(s.empty) return alert("User not found");
+                await signInWithEmailAndPassword(auth, s.docs[0].data().email, p);
             }
-        } catch(err) { 
-            alert(err.message); 
-            btn.disabled = false;
-            btn.innerText = "Enter Game";
-        }
+        } catch(err) { alert(err.message); }
     };
 
     document.getElementById('authBtn').onclick = handleAuth;
