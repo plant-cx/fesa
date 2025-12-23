@@ -11,7 +11,11 @@
         .card { background: #1e293b; border-radius: 16px; padding: 30px; border: 1px solid #334155; margin-bottom: 25px; }
         .hidden { display: none !important; }
         input, textarea, select { width: 100%; padding: 16px; background: #0f172a; border: 1px solid #475569; border-radius: 12px; color: white; margin-bottom: 15px; outline: none; font-size: 18px; font-weight: 500; }
+        
+        /* Updated Button Styles */
         button { width: 100%; padding: 16px; background: #6366f1; color: white; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; transition: 0.2s; font-size: 18px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .buy-btn { padding: 10px 16px; font-size: 16px; } /* Smaller Buy Button */
+        
         button:disabled { background: #334155; color: #64748b; cursor: not-allowed; }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; position: relative; gap: 10px; flex-wrap: wrap; }
         .balance-pill { background: #064e3b; color: #34d399; padding: 12px 24px; border-radius: 50px; font-weight: 900; border: 2px solid #059669; font-size: 22px; }
@@ -32,7 +36,6 @@
         .visual-container { position: relative; width: 80px; height: 80px; margin: 20px auto 10px; display: flex; justify-content: center; align-items: center; }
         .orb-visual { width: 60px; height: 60px; transition: all 0.5s ease; position: relative; z-index: 2; background: currentColor; box-shadow: 0 0 20px currentColor; }
         
-        /* Earn Page Stages (Shapes) */
         .stage-1 { border-radius: 50%; }
         .stage-2 { border-radius: 35%; }
         .stage-3 { border-radius: 20%; animation: orbPulse 3s infinite; }
@@ -58,15 +61,17 @@
             z-index: 5; 
         }
 
+        /* Updated Sell Button */
         .sell-btn-corner {
             position: absolute; 
             top: 10px; left: 10px; 
-            width: 32px; height: 32px; 
+            width: auto; height: 28px; padding: 0 8px;
             background: #ef4444; color: white; 
-            border-radius: 8px; font-weight: bold; 
+            border-radius: 6px; font-weight: 900; 
             display: flex; align-items: center; justify-content: center; 
-            cursor: pointer; font-size: 16px; 
-            border: 2px solid #b91c1c; z-index: 5; padding: 0;
+            cursor: pointer; font-size: 11px; 
+            border: 2px solid #b91c1c; z-index: 5; 
+            letter-spacing: 0.5px;
         }
         .sell-btn-corner:hover { background: #dc2626; }
 
@@ -76,21 +81,23 @@
             display: inline-block; margin: 5px auto; border: 1px solid #334155;
         }
 
-        /* --- NEW AMAZING RESEARCH ANIMATIONS --- */
+        /* --- RESEARCH ANIMATIONS --- */
         .preview-box { 
             background: radial-gradient(circle at center, #1e293b 0%, #020617 100%);
             border-radius: 12px; 
-            height: 300px; /* Taller for the 3D effect */
+            height: 300px; 
             display: flex; 
             flex-direction: column; 
             justify-content: center; 
             align-items: center; 
             margin-bottom: 25px; 
-            border: 2px solid #4338ca; 
+            border: 2px solid; 
+            border-color: currentColor; /* Matches Orb Color */
             position: relative; 
             overflow: hidden; 
             box-shadow: inset 0 0 60px rgba(0,0,0,0.8);
-            perspective: 800px; /* Crucial for 3D */
+            perspective: 800px;
+            color: #6366f1; /* Default, gets overridden inline */
         }
 
         /* 3D Floor Grid */
@@ -101,12 +108,12 @@
             width: 200%;
             height: 100%;
             background: 
-                linear-gradient(rgba(99, 102, 241, 0.2) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(99, 102, 241, 0.2) 1px, transparent 1px);
+                linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px);
             background-size: 40px 40px;
             transform: rotateX(70deg);
             animation: floorMove 10s linear infinite;
-            opacity: 0.3;
+            opacity: 0.2;
             z-index: 0;
         }
         @keyframes floorMove { from { transform: rotateX(70deg) translateY(0); } to { transform: rotateX(70deg) translateY(40px); } }
@@ -122,7 +129,7 @@
             box-shadow: 
                 inset -15px -15px 30px rgba(0,0,0,0.6), 
                 inset 10px 10px 30px rgba(255,255,255,0.4),
-                0 0 30px currentColor;
+                0 0 50px currentColor; /* Outer glow */
             animation: sphereFloat 4s ease-in-out infinite;
         }
 
@@ -131,38 +138,36 @@
             50% { transform: translateY(-20px); } 
         }
 
-        /* 3D Gyroscope Rings */
+        /* 3D Gyroscope Rings - Now using currentColor for dynamic coloring */
         .gyro-ring {
             position: absolute;
             top: 50%; left: 50%;
-            border: 2px solid rgba(255,255,255,0.1);
-            border-top: 2px solid #6366f1;
-            border-bottom: 2px solid #6366f1;
+            border: 2px solid rgba(255,255,255,0.05);
+            border-top: 2px solid currentColor;
+            border-bottom: 2px solid currentColor;
             border-radius: 50%;
-            box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+            box-shadow: 0 0 10px currentColor;
             pointer-events: none;
             z-index: 5;
+            opacity: 0.8;
         }
 
         .ring-1 { width: 180px; height: 180px; margin: -90px; animation: spin1 4s linear infinite; }
         .ring-2 { width: 140px; height: 140px; margin: -70px; animation: spin2 5s linear infinite; }
-        .ring-3 { width: 220px; height: 220px; margin: -110px; border-color: rgba(255,255,255,0.05); border-left: 2px solid #a855f7; border-right: 2px solid #a855f7; animation: spin3 8s linear infinite; }
+        .ring-3 { width: 220px; height: 220px; margin: -110px; border-color: rgba(255,255,255,0.02); border-left: 2px solid currentColor; border-right: 2px solid currentColor; animation: spin3 8s linear infinite; }
 
         @keyframes spin1 { 0% { transform: rotateX(60deg) rotateZ(0deg); } 100% { transform: rotateX(60deg) rotateZ(360deg); } }
         @keyframes spin2 { 0% { transform: rotateY(60deg) rotateZ(0deg); } 100% { transform: rotateY(60deg) rotateZ(-360deg); } }
         @keyframes spin3 { 0% { transform: rotateX(80deg) rotateY(20deg) rotateZ(0deg); } 100% { transform: rotateX(80deg) rotateY(20deg) rotateZ(360deg); } }
 
-        /* UI Text in Research */
         .research-overlay-text {
-            position: absolute;
-            bottom: 10px;
-            color: #6366f1;
-            font-size: 10px;
-            letter-spacing: 2px;
-            font-weight: 900;
-            text-shadow: 0 0 10px #6366f1;
-            z-index: 20;
+            position: absolute; bottom: 10px;
+            color: currentColor;
+            font-size: 10px; letter-spacing: 2px; font-weight: 900;
+            text-shadow: 0 0 10px currentColor; z-index: 20;
         }
+        
+        .section-header { width:100%; text-align:center; margin: 40px 0 20px; padding-top:20px; border-top: 1px solid #334155; color:#cbd5e1; font-weight:800; font-size: 14px; letter-spacing: 1px; }
 
         /* --- UI & LAYOUT --- */
         .blur-lock { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(10px); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10; border-radius: 16px; }
@@ -280,7 +285,7 @@
                     </div>
                 <div id="researchPanel" class="research-panel hidden">
                     
-                    <div class="preview-box">
+                    <div class="preview-box" id="researchVisualBox">
                         <div class="holo-floor"></div>
                         <div class="gyro-ring ring-1"></div>
                         <div class="gyro-ring ring-2"></div>
@@ -311,8 +316,12 @@
             </div>
             <h3 style="text-align:center; color:#6366f1; margin-bottom:25px; font-size:28px;">YOUR COLLECTION</h3>
             <div id="standardOrbsSection">
-                <div class="loot-section-title">OWNED STANDARD ORBS</div>
+                <div class="section-header" style="border:none; margin-top:0;">OWNED STANDARD ORBS</div>
                 <div class="orb-grid" id="collectionGrid"></div>
+            </div>
+            <div id="chestOrbsSection">
+                <div class="section-header">CHEST FINDS (ARTIFACTS)</div>
+                <div class="orb-grid" id="collectionChestGrid"></div>
             </div>
         </div>
 
@@ -458,17 +467,14 @@
         }
     });
 
-    // Modified to support the new Strict Research Sphere
     const generateOrbHTML = (orb, count, isResearchPreview = false) => {
         const r = userData.research?.[orb.id] || {};
         
-        // If research preview, force a ball shape, else use stage logic
         if (isResearchPreview) {
             return `<div class="research-sphere" style="color:${orb.color};"></div>`;
         }
 
         let stage = getStageClass(count);
-        
         return `<div class="visual-container">
                     <div class="orb-visual ${stage}" style="background:currentColor; color:${orb.color};"></div>
                 </div>`;
@@ -502,11 +508,17 @@
         selectedResearchOrb = orb.id;
         document.getElementById('researchPlaceholder').classList.add('hidden');
         document.getElementById('researchPanel').classList.remove('hidden');
-        renderResearch(); // highlight active
+        renderResearch(); 
     }
 
     function updateResearchPanel(orb) {
         document.getElementById('researchOrbName').innerText = orb.name;
+        
+        // --- COLORED ANIMATION UPDATE ---
+        // We set the color of the container, which the rings inherit via currentColor
+        const visBox = document.getElementById('researchVisualBox');
+        visBox.style.color = orb.color; 
+        
         document.getElementById('researchPreview').innerHTML = generateOrbHTML(orb, 1, true);
         
         const container = document.getElementById('statContainer');
@@ -547,6 +559,14 @@
         const currentSpec = RESEARCH_TYPES.find(t => (r[t] || 0) > 2);
         if (currentLvl >= 5) return;
         if (currentLvl >= 2 && currentSpec && currentSpec !== type) return;
+        
+        // Optimistic update for Research
+        userData.balance -= RESEARCH_COST;
+        if (!userData.research[orbId]) userData.research[orbId] = {};
+        userData.research[orbId][type] = (userData.research[orbId][type] || 0) + 1;
+        updateResearchPanel(ORB_DATA.find(o => o.id === orbId));
+        updateUI();
+
         await updateDoc(doc(db, "users", myUid), { balance: increment(-RESEARCH_COST), [`research.${orbId}.${type}`]: increment(1) });
     };
 
@@ -556,14 +576,9 @@
         renderCollection();
     };
 
+    // --- LEVEL LOGIC UPDATE: GOES UP INDIVIDUALLY (Level = Count) ---
     const calculateOrbLevel = (orb, owned) => {
-        if (!owned || owned <= 0) return 1;
-        const incomePerSec = (orb.baseInc * (Math.pow(2.0, Math.min(owned, 50)) - 1)) / (orb.time / 1000);
-        if (incomePerSec <= 10) return 1;
-        if (incomePerSec <= 100) return 5;
-        if (incomePerSec <= 1500) return 10;
-        if (incomePerSec <= 100000) return 15;
-        return 20;
+        return owned > 0 ? owned : 1;
     };
 
     const updateUI = () => {
@@ -646,7 +661,7 @@
 
             div.innerHTML = `
                 ${isUnlocked ? `
-                    <button class="sell-btn-corner" onclick="sellOrb('${orb.id}', ${Math.floor(cost * 0.7)})" title="Sell Orb">X</button>
+                    <button class="sell-btn-corner" onclick="sellOrb('${orb.id}', ${Math.floor(cost * 0.7)})" title="Sell Orb">SELL</button>
                     <div class="orb-lvl-badge">LVL ${calculateOrbLevel(orb, owned)}</div>
                 ` : ''}
                 ${visualHTML}
@@ -662,6 +677,35 @@
             grid.appendChild(div);
         });
     }
+
+    // --- OPTIMIZED BUYING (No Latency) ---
+    window.buyOrb = async (id, cost, currentOwned) => {
+        if (userData.balance >= cost && currentOwned < 50) {
+            // 1. Optimistic UI Update
+            userData.balance -= cost;
+            if(!userData.orbs[id]) userData.orbs[id] = 0;
+            userData.orbs[id]++;
+            
+            updateUI();
+            renderOrbs('orbGrid', ORB_DATA); // Re-render immediately
+
+            // 2. Background DB Update
+            const update = { balance: increment(-cost) }; update[`orbs.${id}`] = increment(1);
+            await updateDoc(doc(db, "users", myUid), update);
+        }
+    };
+
+    window.sellOrb = async (id, refund) => { 
+        if(userData?.orbs?.[id] > 0) {
+            // Optimistic Sell
+            userData.balance += refund;
+            userData.orbs[id]--;
+            updateUI();
+            renderOrbs('orbGrid', ORB_DATA);
+
+            await updateDoc(doc(db, "users", myUid), { balance: increment(refund), [`orbs.${id}`]: increment(-1) });
+        }
+    };
 
     window.buyChest = async (tier, cost) => {
         if (userData.balance < cost) return alert("Insufficient Funds!");
@@ -680,6 +724,12 @@
         const visual = document.getElementById('lootRevealVisual');
         visual.innerHTML = `<div class="orb-visual stage-3" style="width:100px; height:100px; background:${newOrb.color}; box-shadow:0 0 30px ${newOrb.color};"></div>`;
         popup.classList.remove('hidden');
+
+        // Optimistic Loot
+        userData.balance -= cost;
+        if(!userData.uniqueOrbs) userData.uniqueOrbs = [];
+        userData.uniqueOrbs.push(newOrb);
+        updateUI();
 
         await updateDoc(doc(db, "users", myUid), { balance: increment(-cost), uniqueOrbs: arrayUnion(newOrb) });
     };
@@ -712,33 +762,60 @@
         });
     }
 
+    // --- UPDATED COLLECTION RENDER (INCLUDES CHEST ORBS) ---
     window.renderCollection = () => {
         if (!userData) return;
         const collectionGrid = document.getElementById('collectionGrid');
+        const chestGrid = document.getElementById('collectionChestGrid');
         if (!collectionGrid) return;
         
         const sortMode = document.getElementById('collectionSortOrder').value;
+        
+        // 1. Standard Orbs
         collectionGrid.innerHTML = '';
         const ownedList = ORB_DATA.filter(orb => (userData.orbs?.[orb.id] || 0) > 0 && (!searchFilter || orb.name.toLowerCase().includes(searchFilter)));
-
         if (sortMode === 'income') ownedList.sort((a, b) => calcIncome(b, userData.orbs[b.id]) - calcIncome(a, userData.orbs[a.id]));
         else if (sortMode === 'quantity') ownedList.sort((a, b) => userData.orbs[b.id] - userData.orbs[a.id]);
 
         ownedList.forEach((orb, index) => {
             const count = userData.orbs[orb.id];
             const div = document.createElement('div');
-            div.className = 'orb-item';
-            div.style.minHeight = '220px';
-            div.style.opacity = '0';
-            div.style.transform = 'translateY(20px)';
-            
+            div.className = 'orb-item'; div.style.minHeight = '220px'; div.style.opacity = '0'; div.style.transform = 'translateY(20px)';
             const income = calcIncome(orb, count);
             const visualHTML = generateOrbHTML(orb, count);
-
             div.innerHTML = `<div class="orb-lvl-badge">LVL ${calculateOrbLevel(orb, count)}</div>${visualHTML}<b>${orb.name}</b><p style="font-size:12px;">Owned: ${count}</p><div style="color:#10b981; font-weight:800; font-size:14px;">Total: +$${income.toLocaleString()}</div><div class="progress-bg" style="margin-top:10px;"><div class="progress-fill" id="col-bar-${orb.id}"></div></div>`;
             collectionGrid.appendChild(div);
             setTimeout(() => { div.style.opacity = '1'; div.style.transform = 'translateY(0)'; }, index * 40);
         });
+
+        // 2. Chest Orbs (Unique)
+        if(chestGrid) {
+            chestGrid.innerHTML = '';
+            const chestOrbs = (userData.uniqueOrbs || []).filter(o => !searchFilter || o.name.toLowerCase().includes(searchFilter));
+            chestOrbs.forEach((orb, index) => {
+                const div = document.createElement('div');
+                div.className = 'orb-item'; div.style.minHeight = '220px';
+                
+                // Calculate income for visual
+                let mult = 1;
+                if(userData?.prestigeUpgrades) {
+                     PRESTIGE_UPGRADES.orbs.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
+                     PRESTIGE_UPGRADES.artifacts.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
+                     PRESTIGE_UPGRADES.global.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
+                }
+                const finalInc = Math.floor(orb.income * mult);
+
+                div.innerHTML = `
+                    <div class="orb-lvl-badge" style="background:#a855f7; border-color:#d8b4fe;">UNIQUE</div>
+                    <div class="visual-container"><div class="orb-visual stage-3" style="background:${orb.color}; box-shadow:0 0 20px ${orb.color};"></div></div>
+                    <b>${orb.name}</b>
+                    <p style="font-size:12px; color:#94a3b8;">${orb.tier.toUpperCase()}</p>
+                    <div style="color:#10b981; font-weight:800; font-size:14px;">+$${finalInc.toLocaleString()}</div>
+                    <div style="font-size:12px; color:#94a3b8;">Rate: ${(orb.time/1000).toFixed(1)}s</div>
+                `;
+                chestGrid.appendChild(div);
+            });
+        }
     }
 
     function renderPrestige() {
@@ -766,18 +843,23 @@
     window.upgradeClicker = async () => {
         const currentLevel = userData.clickLevel || 1;
         const cost = Math.floor(25 + (currentLevel - 1) * 50.5);
-        if (userData.balance >= cost && currentLevel < 50) await updateDoc(doc(db, "users", myUid), { balance: increment(-cost), clickLevel: increment(1) });
-    };
-
-    window.buyOrb = async (id, cost, currentOwned) => {
-        if (userData.balance >= cost && currentOwned < 50) {
-            const update = { balance: increment(-cost) }; update[`orbs.${id}`] = increment(1);
-            await updateDoc(doc(db, "users", myUid), update);
+        if (userData.balance >= cost && currentLevel < 50) {
+            userData.balance -= cost;
+            userData.clickLevel = (userData.clickLevel || 1) + 1;
+            updateUI();
+            await updateDoc(doc(db, "users", myUid), { balance: increment(-cost), clickLevel: increment(1) });
         }
     };
 
-    window.sellOrb = async (id, refund) => { if(userData?.orbs?.[id] > 0) await updateDoc(doc(db, "users", myUid), { balance: increment(refund), [`orbs.${id}`]: increment(-1) }); };
-    window.buyPrestigeUpgrade = async (id, cost) => { if(userData.prestigePoints < cost || userData.prestigeUpgrades?.includes(id)) return; await updateDoc(doc(db, "users", myUid), { prestigePoints: increment(-cost), prestigeUpgrades: arrayUnion(id) }); };
+    window.buyPrestigeUpgrade = async (id, cost) => { 
+        if(userData.prestigePoints < cost || userData.prestigeUpgrades?.includes(id)) return; 
+        userData.prestigePoints -= cost;
+        if(!userData.prestigeUpgrades) userData.prestigeUpgrades = [];
+        userData.prestigeUpgrades.push(id);
+        renderPrestige();
+        updateUI();
+        await updateDoc(doc(db, "users", myUid), { prestigePoints: increment(-cost), prestigeUpgrades: arrayUnion(id) }); 
+    };
 
     window.doPrestige = async () => {
         const units = (userData.balance || 0) / 50000000;
