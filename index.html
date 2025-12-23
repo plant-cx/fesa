@@ -44,63 +44,66 @@
             display: flex; 
             justify-content: center; 
             align-items: center; 
-            perspective: 600px; /* Essential for 3D */
+            perspective: 800px; 
             transform-style: preserve-3d;
         }
         
         .orb-visual { 
-            width: 60px; height: 60px; 
+            width: 50px; height: 50px; 
             transition: all 0.5s ease; 
             position: absolute; 
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            z-index: 2; 
+            z-index: 10; 
             background: currentColor; 
-            box-shadow: 0 0 20px currentColor; 
+            box-shadow: 0 0 30px currentColor; 
+            border-radius: 50%;
         }
         
-        .stage-1 { border-radius: 50%; }
-        .stage-2 { border-radius: 35%; }
-        .stage-3 { border-radius: 20%; animation: orbPulse 3s infinite; }
-        .stage-4 { border-radius: 4px; transform: translate(-50%, -50%) rotate(45deg) scale(0.9); animation: orbPulseDiamond 2s infinite; }
-        .stage-5 { border-radius: 8px; animation: slowRotateGlow 8s linear infinite; }
+        /* --- FIXED ORBIT ENGINE --- */
+        .atom-cloud {
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 100%; height: 100%;
+            transform: translate(-50%, -50%);
+            transform-style: preserve-3d;
+            pointer-events: none;
+            z-index: 15; /* Above the orb */
+        }
 
-        @keyframes orbPulse { 50% { transform: translate(-50%, -50%) scale(1.1); } }
-        @keyframes orbPulseDiamond { 50% { transform: translate(-50%, -50%) rotate(45deg) scale(1.1); } }
-        @keyframes slowRotateGlow { 0% { transform: translate(-50%, -50%) rotate(0deg); } 100% { transform: translate(-50%, -50%) rotate(360deg); } }
+        /* The Ring Wrapper: Rotated to a specific angle to create the path */
+        .atom-ring-wrapper {
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 160%; height: 160%; /* Orbits are larger than the nucleus */
+            border-radius: 50%;
+            transform-style: preserve-3d;
+            border: 1px solid rgba(255,255,255,0.08); /* Faint guide line */
+        }
 
-        /* --- QUANTITY ATOM ENGINE (PREMIUM) --- */
-        .atom-shell {
+        /* The Spinner: Rotates 360deg endlessly inside the wrapper */
+        .atom-spinner {
             position: absolute;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            transform-style: preserve-3d;
-            pointer-events: none;
-        }
-
-        .atom-orbit {
-            position: absolute;
-            top: 50%; left: 50%;
-            width: 140%; height: 140%; /* Orbit is wider than orb */
             border-radius: 50%;
-            border: 1px solid rgba(255,255,255,0.05); /* Very faint ring guide */
             transform-style: preserve-3d;
-            /* Animation set via inline style for uniqueness */
         }
 
+        /* The Electron: Placed at the edge of the spinner */
         .atom-electron {
             position: absolute;
-            top: -3px; left: 50%;
-            width: 5px; height: 5px;
-            background: white;
+            top: 0; left: 50%;
+            width: 6px; height: 6px;
+            background: #ffffff;
             border-radius: 50%;
-            box-shadow: 0 0 6px #fff, 0 0 10px #fff;
-            transform: translateX(-50%);
+            box-shadow: 0 0 8px #ffffff, 0 0 15px currentColor;
+            transform: translate(-50%, -50%);
         }
 
-        @keyframes electronSpin {
-            0% { transform: translate(-50%, -50%) rotateZ(0deg); }
-            100% { transform: translate(-50%, -50%) rotateZ(360deg); }
+        @keyframes atomSpin {
+            0% { transform: rotateZ(0deg); }
+            100% { transform: rotateZ(360deg); }
         }
 
         /* --- CELESTIAL VISUAL FX ENGINE (RESEARCH) --- */
@@ -695,27 +698,32 @@
             `;
         }
 
-        // --- PREMIUM QUANTITY ATOM ENGINE (REPLACED) ---
+        // --- FIXED PREMIUM ORBIT ENGINE ---
         let atomHTML = '';
         if (count >= 20 && !isResearchPreview) {
-            const numOrbiters = Math.floor(count / 20);
+            const numOrbiters = Math.floor(count / 20); // 20 owned = 1 ball, 40 owned = 2 balls, etc.
             let orbits = '';
             
             for(let i=0; i<numOrbiters; i++) {
-                // Calculate pseudo-random angles based on index to create a distributed atomic sphere
-                const rotateX = 40 + (i * 35); 
-                const rotateY = 20 + (i * 45);
-                const duration = 2 + (i % 3); // Varying speeds
+                // We create a container ring (wrapper) that is tilted.
+                // Inside that wrapper, we spin a container (spinner) 0-360deg.
+                // The electron sits at the edge of the spinner.
                 
+                const tiltX = (i * 45) % 180;
+                const tiltY = (i * 30) % 180;
+                const speed = 2 + (i % 3); // 2s, 3s, 4s speeds
+
                 orbits += `
-                    <div class="atom-orbit" style="transform: translate(-50%, -50%) rotateX(${rotateX}deg) rotateY(${rotateY}deg);">
-                        <div class="atom-electron" style="animation: electronSpin ${duration}s linear infinite;"></div>
+                    <div class="atom-ring-wrapper" style="transform: translate(-50%, -50%) rotateX(${tiltX}deg) rotateY(${tiltY}deg);">
+                        <div class="atom-spinner" style="animation: atomSpin ${speed}s linear infinite;">
+                            <div class="atom-electron"></div>
+                        </div>
                     </div>
                 `;
             }
             
             atomHTML = `
-                <div class="atom-shell">
+                <div class="atom-cloud">
                     ${orbits}
                 </div>
             `;
@@ -728,11 +736,10 @@
                     </div>`;
         }
 
-        let stage = getStageClass(count);
         return `<div class="visual-container">
                     ${celestialHTML}
                     ${atomHTML}
-                    <div class="orb-visual ${stage}" style="background:currentColor; color:${orb.color}; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); z-index:2;"></div>
+                    <div class="orb-visual" style="background:currentColor; color:${orb.color};"></div>
                 </div>`;
     };
 
