@@ -46,7 +46,7 @@
         @keyframes orbPulseDiamond { 50% { transform: rotate(45deg) scale(1.1); } }
         @keyframes slowRotateGlow { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* --- CELESTIAL VISUAL FX ENGINE (UPDATED) --- */
+        /* --- CELESTIAL VISUAL FX ENGINE (4-RING UPDATE) --- */
         .celestial-wrapper {
             position: absolute;
             top: 50%; left: 50%;
@@ -54,11 +54,10 @@
             transform: translate(-50%, -50%);
             pointer-events: none;
             z-index: 1;
-            perspective: 600px;
+            perspective: 800px; /* Enhanced depth */
             transform-style: preserve-3d;
         }
 
-        /* The Colored Light/Glow */
         .celestial-glow {
             position: absolute; top: 50%; left: 50%;
             width: 140%; height: 140%;
@@ -82,8 +81,8 @@
             width: 100%; height: 100%;
             border: 1px solid currentColor;
             border-radius: 50%;
-            box-shadow: 0 0 5px currentColor;
-            opacity: 0.5;
+            box-shadow: 0 0 4px currentColor;
+            opacity: 0.6;
             box-sizing: border-box;
         }
 
@@ -92,7 +91,7 @@
             position: absolute; top: 0; left: 0; 
             width: 100%; height: 100%;
             border-radius: 50%;
-            /* Animation speed set per system below */
+            /* Animation set per system */
         }
 
         /* The Particle (Ball) */
@@ -106,41 +105,55 @@
             box-shadow: 0 0 8px currentColor, 0 0 15px currentColor;
         }
 
-        /* --- ORBIT CONFIGURATIONS --- */
-        /* System 1: Tilted X, rotates slowly on Z axis */
+        /* --- 4 ORBIT CONFIGURATIONS --- */
+        
+        /* System 1: Vertical Tilt, Slow */
         .sys-1 { 
-            width: 130%; height: 130%; 
-            animation: gyroSpin1 10s linear infinite;
+            width: 120%; height: 120%; 
+            animation: gyroSpin1 12s linear infinite;
         }
-        .sys-1 .c-runner { animation: ballRun 3s linear infinite; }
+        .sys-1 .c-runner { animation: ballRun 4s linear infinite; }
 
-        /* System 2: Tilted Y, rotates slowly on Z axis (reverse) */
+        /* System 2: Horizontal Tilt, Medium Speed */
         .sys-2 { 
-            width: 170%; height: 170%; 
-            animation: gyroSpin2 14s linear infinite;
+            width: 140%; height: 140%; 
+            animation: gyroSpin2 9s linear infinite;
         }
-        .sys-2 .c-runner { animation: ballRun 5s linear infinite reverse; }
+        .sys-2 .c-runner { animation: ballRun 6s linear infinite reverse; }
 
-        /* System 3: Complex Tilt */
+        /* System 3: Diagonal Axis 1, Fast */
         .sys-3 { 
-            width: 220%; height: 220%; 
-            animation: gyroSpin3 20s linear infinite;
+            width: 160%; height: 160%; 
+            animation: gyroSpin3 15s linear infinite;
         }
-        .sys-3 .c-runner { animation: ballRun 7s linear infinite; }
+        .sys-3 .c-runner { animation: ballRun 5s linear infinite; }
 
-        /* Animations */
+        /* System 4: Diagonal Axis 2 (Opposite), Slowest outer ring */
+        .sys-4 { 
+            width: 180%; height: 180%; 
+            animation: gyroSpin4 20s linear infinite;
+        }
+        .sys-4 .c-runner { animation: ballRun 8s linear infinite reverse; }
+
+        /* 3D Rotations for the Rings */
         @keyframes gyroSpin1 { 
-            0% { transform: translate(-50%, -50%) rotateX(70deg) rotateZ(0deg); } 
-            100% { transform: translate(-50%, -50%) rotateX(70deg) rotateZ(360deg); } 
+            0% { transform: translate(-50%, -50%) rotateX(75deg) rotateY(10deg) rotateZ(0deg); } 
+            100% { transform: translate(-50%, -50%) rotateX(75deg) rotateY(10deg) rotateZ(360deg); } 
         }
         @keyframes gyroSpin2 { 
-            0% { transform: translate(-50%, -50%) rotateY(60deg) rotateZ(0deg); } 
-            100% { transform: translate(-50%, -50%) rotateY(60deg) rotateZ(-360deg); } 
+            0% { transform: translate(-50%, -50%) rotateX(15deg) rotateY(70deg) rotateZ(0deg); } 
+            100% { transform: translate(-50%, -50%) rotateX(15deg) rotateY(70deg) rotateZ(-360deg); } 
         }
         @keyframes gyroSpin3 { 
             0% { transform: translate(-50%, -50%) rotateX(45deg) rotateY(45deg) rotateZ(0deg); } 
             100% { transform: translate(-50%, -50%) rotateX(45deg) rotateY(45deg) rotateZ(360deg); } 
         }
+        @keyframes gyroSpin4 { 
+            0% { transform: translate(-50%, -50%) rotateX(-45deg) rotateY(30deg) rotateZ(0deg); } 
+            100% { transform: translate(-50%, -50%) rotateX(-45deg) rotateY(30deg) rotateZ(-360deg); } 
+        }
+        
+        /* Ball movement along the ring (local Z rotation) */
         @keyframes ballRun { 
             0% { transform: rotate(0deg); } 
             100% { transform: rotate(360deg); } 
@@ -576,7 +589,7 @@
         }
     });
 
-    // --- CELESTIAL VISUAL FX GENERATOR (UPDATED LOGIC) ---
+    // --- CELESTIAL VISUAL FX GENERATOR (UPDATED 4-LINE LOGIC) ---
     const generateOrbHTML = (orb, count, isResearchPreview = false) => {
         const r = userData.research?.[orb.id] || {};
         let celestialHTML = '';
@@ -590,46 +603,41 @@
         if ((r['wisdom'] || 0) >= 5) effects.push('fx-wisdom');   // Green
         if ((r['strength'] || 0) >= 5) effects.push('fx-strength'); // Orange
 
-        // If any maxed stats exist, generate the animations
+        // If any maxed stats exist (or if strictly 4 lines requested as per update)
         if (effects.length > 0) {
-            // We use the first maxed stat to determine the primary color theme
             const fxClass = effects[0]; 
             
-            // Note: We now use "c-system" which contains the "c-path" (line) and "c-runner" (ball rotator)
-            // inside the SAME 3D transformation context. This locks them together.
-            celestialHTML = `
-                <div class="celestial-wrapper ${fxClass}">
-                    <div class="celestial-glow"></div>
-                    
-                    <div class="c-system sys-1">
+            // Loop 4 times to create 4 systems
+            let systemsHTML = '';
+            // Define 4 systems with increasing stagger delays for visual variety
+            const systemConfigs = [
+                { cls: 'sys-1', delay: '0s' },
+                { cls: 'sys-2', delay: '-2s' },
+                { cls: 'sys-3', delay: '-5s' },
+                { cls: 'sys-4', delay: '-8s' }
+            ];
+
+            systemConfigs.forEach(sys => {
+                systemsHTML += `
+                    <div class="c-system ${sys.cls}">
                         <div class="c-path"></div>
-                        <div class="c-runner">
+                        <div class="c-runner" style="animation-delay:${sys.delay}">
                             <div class="c-ball"></div>
                         </div>
                     </div>
+                `;
+            });
 
-                    ${effects.length >= 2 || isResearchPreview ? `
-                    <div class="c-system sys-2">
-                        <div class="c-path"></div>
-                        <div class="c-runner">
-                            <div class="c-ball"></div>
-                        </div>
-                    </div>` : ''}
-
-                    ${effects.length >= 3 || isResearchPreview ? `
-                    <div class="c-system sys-3">
-                        <div class="c-path"></div>
-                        <div class="c-runner">
-                            <div class="c-ball"></div>
-                        </div>
-                    </div>` : ''}
+            celestialHTML = `
+                <div class="celestial-wrapper ${fxClass}">
+                    <div class="celestial-glow"></div>
+                    ${systemsHTML}
                 </div>
             `;
         }
         
         // Render Standard Orb
         if (isResearchPreview) {
-            // In preview mode, we show the FX + the sphere
             return `<div style="position:relative;">
                         ${celestialHTML}
                         <div class="research-sphere" style="color:${orb.color};"></div>
