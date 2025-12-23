@@ -698,20 +698,25 @@
             `;
         }
 
-        // --- FIXED PREMIUM ORBIT ENGINE ---
+        // --- FIXED PREMIUM ORBIT ENGINE (Exact 20/40/60/80 Logic) ---
         let atomHTML = '';
         if (count >= 20 && !isResearchPreview) {
-            const numOrbiters = Math.floor(count / 20); // 20 owned = 1 ball, 40 owned = 2 balls, etc.
+            let numOrbiters = Math.floor(count / 20); 
+            // Cap at 4 visually (reached at level 80) so it stays clean
+            if (numOrbiters > 4) numOrbiters = 4;
+
             let orbits = '';
             
             for(let i=0; i<numOrbiters; i++) {
-                // We create a container ring (wrapper) that is tilted.
-                // Inside that wrapper, we spin a container (spinner) 0-360deg.
-                // The electron sits at the edge of the spinner.
+                // Fixed angles for distinct visibility at 1, 2, 3, 4 stages
+                let tiltX = 0, tiltY = 0;
                 
-                const tiltX = (i * 45) % 180;
-                const tiltY = (i * 30) % 180;
-                const speed = 2 + (i % 3); // 2s, 3s, 4s speeds
+                if (i === 0) { tiltX = 70; tiltY = 0; }        // 1st Ball (Lvl 20): Flat-ish ring
+                else if (i === 1) { tiltX = 0; tiltY = 80; }   // 2nd Ball (Lvl 40): Vertical ring
+                else if (i === 2) { tiltX = 45; tiltY = 45; }  // 3rd Ball (Lvl 60): Diagonal Left
+                else if (i === 3) { tiltX = -45; tiltY = 45; } // 4th Ball (Lvl 80): Diagonal Right
+
+                const speed = 3 + (i % 2); // Varying speeds slightly
 
                 orbits += `
                     <div class="atom-ring-wrapper" style="transform: translate(-50%, -50%) rotateX(${tiltX}deg) rotateY(${tiltY}deg);">
