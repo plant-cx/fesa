@@ -987,10 +987,10 @@
         const pop = document.createElement('div'); pop.className = 'popup-anim'; pop.innerText = `+$${power}`; pop.style.left = e.pageX + "px"; pop.style.top = e.pageY + "px";
         document.body.appendChild(pop); setTimeout(() => pop.remove(), 400);
     };
-
-    // --- FIXED AUTH LOGIC ---
+// --- REPLACEMENT AUTH LOGIC ---
     const handleAuth = async () => {
-        const u = document.getElementById('loginUser').value.trim().toLowerCase();
+        // FIX: Removed .toLowerCase() so it searches for exactly what you type (Case Sensitive)
+        const u = document.getElementById('loginUser').value.trim(); 
         const p = document.getElementById('authPass').value;
         const e = document.getElementById('regEmail').value;
         const btn = document.getElementById('authBtn');
@@ -1002,18 +1002,35 @@
 
         try {
             if(isReg) {
-                // Register
+                // Register Logic
                 const q = query(collection(db, "users"), where("username", "==", u));
                 const s = await getDocs(q);
                 if(!s.empty) throw new Error("Username taken!");
 
                 const res = await createUserWithEmailAndPassword(auth, e, p);
-                await setDoc(doc(db, "users", res.user.uid), { username: u, email: e, balance: 1000, orbs: {}, uniqueOrbs: [], research: {}, clickLevel: 1, prestigePoints: 0, prestigeUpgrades: [] });
+                
+                // Create the user document
+                await setDoc(doc(db, "users", res.user.uid), { 
+                    username: u, 
+                    email: e, 
+                    balance: 1000, 
+                    orbs: {}, 
+                    uniqueOrbs: [], 
+                    research: {}, 
+                    clickLevel: 1, 
+                    prestigePoints: 0, 
+                    prestigeUpgrades: [] 
+                });
+
+                location.reload(); // Refresh to load the app
             } else {
-                // Login
+                // Login Logic
                 const q = query(collection(db, "users"), where("username", "==", u));
                 const s = await getDocs(q);
-                if(s.empty) throw new Error("Username not found!");
+                
+                if(s.empty) {
+                    throw new Error("Username not found! (Check capitalization)");
+                }
                 
                 const userEmail = s.docs[0].data().email;
                 await signInWithEmailAndPassword(auth, userEmail, p);
