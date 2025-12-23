@@ -987,7 +987,8 @@
         const pop = document.createElement('div'); pop.className = 'popup-anim'; pop.innerText = `+$${power}`; pop.style.left = e.pageX + "px"; pop.style.top = e.pageY + "px";
         document.body.appendChild(pop); setTimeout(() => pop.remove(), 400);
     };
-// --- REPLACEMENT AUTH LOGIC ---
+
+    // --- REPLACEMENT AUTH LOGIC ---
     const handleAuth = async () => {
         // FIX: Removed .toLowerCase() so it searches for exactly what you type (Case Sensitive)
         const u = document.getElementById('loginUser').value.trim(); 
@@ -1019,7 +1020,8 @@
                     research: {}, 
                     clickLevel: 1, 
                     prestigePoints: 0, 
-                    prestigeUpgrades: [] 
+                    prestigeUpgrades: [],
+                    settings: { useMailFab: false }
                 });
 
                 location.reload(); // Refresh to load the app
