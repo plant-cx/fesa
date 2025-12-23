@@ -49,7 +49,24 @@
         @keyframes orbPulseDiamond { 50% { transform: rotate(45deg) scale(1.1); } }
         @keyframes slowRotateGlow { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* --- CELESTIAL VISUAL FX ENGINE (4-RING UPDATE) --- */
+        /* --- QUANTITY ORBITER ENGINE (NEW) --- */
+        .q-orbit-layer {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 3;
+        }
+        .q-satellite {
+            position: absolute; top: 0; left: 50%;
+            width: 6px; height: 6px;
+            background: #fff;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 5px #fff;
+        }
+
+        /* --- CELESTIAL VISUAL FX ENGINE (RESEARCH) --- */
         .celestial-wrapper {
             position: absolute;
             top: 50%; left: 50%;
@@ -94,7 +111,6 @@
             position: absolute; top: 0; left: 0; 
             width: 100%; height: 100%;
             border-radius: 50%;
-            /* Animation set per system */
         }
 
         /* The Particle (Ball) */
@@ -109,58 +125,20 @@
         }
 
         /* --- 4 ORBIT CONFIGURATIONS --- */
-        
-        /* System 1: Vertical Tilt, Slow */
-        .sys-1 { 
-            width: 120%; height: 120%; 
-            animation: gyroSpin1 12s linear infinite;
-        }
+        .sys-1 { width: 120%; height: 120%; animation: gyroSpin1 12s linear infinite; }
         .sys-1 .c-runner { animation: ballRun 4s linear infinite; }
-
-        /* System 2: Horizontal Tilt, Medium Speed */
-        .sys-2 { 
-            width: 140%; height: 140%; 
-            animation: gyroSpin2 9s linear infinite;
-        }
+        .sys-2 { width: 140%; height: 140%; animation: gyroSpin2 9s linear infinite; }
         .sys-2 .c-runner { animation: ballRun 6s linear infinite reverse; }
-
-        /* System 3: Diagonal Axis 1, Fast */
-        .sys-3 { 
-            width: 160%; height: 160%; 
-            animation: gyroSpin3 15s linear infinite;
-        }
+        .sys-3 { width: 160%; height: 160%; animation: gyroSpin3 15s linear infinite; }
         .sys-3 .c-runner { animation: ballRun 5s linear infinite; }
-
-        /* System 4: Diagonal Axis 2 (Opposite), Slowest outer ring */
-        .sys-4 { 
-            width: 180%; height: 180%; 
-            animation: gyroSpin4 20s linear infinite;
-        }
+        .sys-4 { width: 180%; height: 180%; animation: gyroSpin4 20s linear infinite; }
         .sys-4 .c-runner { animation: ballRun 8s linear infinite reverse; }
 
-        /* 3D Rotations for the Rings */
-        @keyframes gyroSpin1 { 
-            0% { transform: translate(-50%, -50%) rotateX(75deg) rotateY(10deg) rotateZ(0deg); } 
-            100% { transform: translate(-50%, -50%) rotateX(75deg) rotateY(10deg) rotateZ(360deg); } 
-        }
-        @keyframes gyroSpin2 { 
-            0% { transform: translate(-50%, -50%) rotateX(15deg) rotateY(70deg) rotateZ(0deg); } 
-            100% { transform: translate(-50%, -50%) rotateX(15deg) rotateY(70deg) rotateZ(-360deg); } 
-        }
-        @keyframes gyroSpin3 { 
-            0% { transform: translate(-50%, -50%) rotateX(45deg) rotateY(45deg) rotateZ(0deg); } 
-            100% { transform: translate(-50%, -50%) rotateX(45deg) rotateY(45deg) rotateZ(360deg); } 
-        }
-        @keyframes gyroSpin4 { 
-            0% { transform: translate(-50%, -50%) rotateX(-45deg) rotateY(30deg) rotateZ(0deg); } 
-            100% { transform: translate(-50%, -50%) rotateX(-45deg) rotateY(30deg) rotateZ(-360deg); } 
-        }
-        
-        /* Ball movement along the ring (local Z rotation) */
-        @keyframes ballRun { 
-            0% { transform: rotate(0deg); } 
-            100% { transform: rotate(360deg); } 
-        }
+        @keyframes gyroSpin1 { 0% { transform: translate(-50%, -50%) rotateX(75deg) rotateY(10deg) rotateZ(0deg); } 100% { transform: translate(-50%, -50%) rotateX(75deg) rotateY(10deg) rotateZ(360deg); } }
+        @keyframes gyroSpin2 { 0% { transform: translate(-50%, -50%) rotateX(15deg) rotateY(70deg) rotateZ(0deg); } 100% { transform: translate(-50%, -50%) rotateX(15deg) rotateY(70deg) rotateZ(-360deg); } }
+        @keyframes gyroSpin3 { 0% { transform: translate(-50%, -50%) rotateX(45deg) rotateY(45deg) rotateZ(0deg); } 100% { transform: translate(-50%, -50%) rotateX(45deg) rotateY(45deg) rotateZ(360deg); } }
+        @keyframes gyroSpin4 { 0% { transform: translate(-50%, -50%) rotateX(-45deg) rotateY(30deg) rotateZ(0deg); } 100% { transform: translate(-50%, -50%) rotateX(-45deg) rotateY(30deg) rotateZ(-360deg); } }
+        @keyframes ballRun { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         /* Specific Colors based on Research Type */
         .fx-core { color: #3b82f6; }    /* Blue */
@@ -455,6 +433,15 @@
             <h3 style="text-align:center; color:#6366f1; margin-bottom:15px;">🎁 MYSTERY CHESTS</h3>
             <p style="text-align:center; color:#94a3b8; margin-bottom:25px; font-size:14px;">High Risk, High Reward.</p>
             <div class="chest-grid">
+                <div class="chest-card" id="dailyChestCard">
+                    <div class="chest-icon">📦</div>
+                    <div class="chest-title">DAILY SUPPLY</div>
+                    <div class="chest-cost" style="color:#34d399; font-weight:bold;">FREE</div>
+                    <div style="font-size:12px; color:#94a3b8; margin: 5px 0 10px;">Contains $1-$250 Orb</div>
+                    <button id="dailyClaimBtn" class="buy-btn" onclick="claimDailyChest()">CLAIM</button>
+                    <div id="dailyTimer" style="font-size:12px; color:#94a3b8; margin-top:5px; display:none;">Wait: <span id="dailyTimeLeft">00:00:00</span></div>
+                </div>
+
                 <div class="chest-card">
                     <div class="chest-icon">🥉</div>
                     <div class="chest-title">BRONZE CHEST</div>
@@ -622,6 +609,7 @@
                     renderPrestige();
                     renderUniqueLoot(); 
                     renderResearch();
+                    renderDailyChest(); // Update Daily Chest UI
                     loadInbox();
                     document.getElementById('authScreen').classList.add('hidden');
                     document.getElementById('appScreen').classList.remove('hidden');
@@ -635,10 +623,10 @@
         let celestialHTML = '';
 
         const effects = [];
-        if ((r['core'] || 0) >= 5) effects.push('fx-core');       
-        if ((r['magic'] || 0) >= 5) effects.push('fx-magic');     
-        if ((r['power'] || 0) >= 5) effects.push('fx-power');     
-        if ((r['wisdom'] || 0) >= 5) effects.push('fx-wisdom');   
+        if ((r['core'] || 0) >= 5) effects.push('fx-core');        
+        if ((r['magic'] || 0) >= 5) effects.push('fx-magic');      
+        if ((r['power'] || 0) >= 5) effects.push('fx-power');      
+        if ((r['wisdom'] || 0) >= 5) effects.push('fx-wisdom');    
         if ((r['strength'] || 0) >= 5) effects.push('fx-strength');
 
         if (effects.length > 0) {
@@ -669,6 +657,25 @@
                 </div>
             `;
         }
+
+        // --- NEW: Quantity Orbiter Logic ---
+        let orbitersHTML = '';
+        if (count >= 20 && !isResearchPreview) {
+            const numOrbiters = Math.floor(count / 20);
+            for(let i=0; i<numOrbiters; i++) {
+                // Different speeds/rotations per ball based on index
+                const rotDuration = 3 + (i % 5); 
+                const startRot = i * (360 / numOrbiters);
+                const layerSize = 100 + (i * 20); // Each new ball is on a slightly wider/different layer context if desired, or simpler:
+                
+                // We rotate the container
+                orbitersHTML += `
+                    <div class="q-orbit-layer" style="width:130%; height:130%; animation: spin1 ${rotDuration}s linear infinite reverse;">
+                        <div class="q-satellite" style="transform: rotate(${startRot}deg) translate(0, -50px);"></div>
+                    </div>
+                `;
+            }
+        }
         
         if (isResearchPreview) {
             return `<div style="position:relative;">
@@ -680,6 +687,7 @@
         let stage = getStageClass(count);
         return `<div class="visual-container">
                     ${celestialHTML}
+                    ${orbitersHTML}
                     <div class="orb-visual ${stage}" style="background:currentColor; color:${orb.color}; position:relative; z-index:2;"></div>
                 </div>`;
     };
@@ -945,15 +953,95 @@
         await updateDoc(doc(db, "users", myUid), { balance: increment(-cost), uniqueOrbs: arrayUnion(newOrb) });
     };
 
+    // --- NEW DAILY CHEST LOGIC ---
+    window.claimDailyChest = async () => {
+        const now = Date.now();
+        const last = userData.lastDailyClaim || 0;
+        if (now - last < 86400000) return alert("Come back later!");
+
+        const tier = 'daily';
+        const minCash = 1; const maxCash = 250;
+        const minTime = 2000; const maxTime = 10000;
+
+        const newOrb = { 
+            id: 'u_' + Date.now() + '_' + Math.floor(Math.random()*1000), 
+            name: getRandomName(), 
+            color: getRandomColor(), 
+            income: Math.floor(Math.random() * (maxCash - minCash + 1)) + minCash, 
+            time: Math.floor(Math.random() * (maxTime - minTime + 1)) + minTime, 
+            tier: tier, 
+            acquiredAt: Date.now() 
+        };
+
+        const popup = document.getElementById('lootPopup');
+        document.getElementById('lootRevealName').innerText = newOrb.name;
+        document.getElementById('lootRevealName').style.color = newOrb.color;
+        document.getElementById('lootRevealStats').innerText = `Tier: DAILY SUPPLY | $${newOrb.income.toLocaleString()}/every ${(newOrb.time/1000).toFixed(1)}s`;
+        const visual = document.getElementById('lootRevealVisual');
+        visual.innerHTML = `<div class="orb-visual stage-3" style="width:100px; height:100px; background:${newOrb.color}; box-shadow:0 0 30px ${newOrb.color};"></div>`;
+        popup.classList.remove('hidden');
+
+        // Note: Free, so no balance check
+        if(!userData.uniqueOrbs) userData.uniqueOrbs = [];
+        userData.uniqueOrbs.push(newOrb);
+        userData.lastDailyClaim = now;
+        
+        renderDailyChest();
+        updateUI();
+
+        await updateDoc(doc(db, "users", myUid), { 
+            uniqueOrbs: arrayUnion(newOrb),
+            lastDailyClaim: now
+        });
+    }
+
+    function renderDailyChest() {
+        const btn = document.getElementById('dailyClaimBtn');
+        const timer = document.getElementById('dailyTimer');
+        const timeText = document.getElementById('dailyTimeLeft');
+        const card = document.getElementById('dailyChestCard');
+
+        if (!userData || !btn) return;
+
+        const now = Date.now();
+        const last = userData.lastDailyClaim || 0;
+        const diff = now - last;
+        const oneDay = 86400000;
+
+        if (diff >= oneDay) {
+            btn.disabled = false;
+            btn.classList.add('btn-available');
+            btn.classList.remove('btn-locked');
+            btn.innerText = "CLAIM NOW";
+            timer.style.display = 'none';
+            card.style.borderColor = '#34d399';
+        } else {
+            btn.disabled = true;
+            btn.classList.remove('btn-available');
+            btn.classList.add('btn-locked');
+            btn.innerText = "COOLDOWN";
+            timer.style.display = 'block';
+            card.style.borderColor = '#334155';
+
+            const remaining = oneDay - diff;
+            const h = Math.floor(remaining / (1000 * 60 * 60));
+            const m = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+            timeText.innerText = `${h}h ${m}m`;
+        }
+    }
+
     function renderUniqueLoot() {
         const container = document.getElementById('lootMarketplaceContainer');
         if (!container || !userData.uniqueOrbs) return;
         container.innerHTML = '';
-        const tiers = ['bronze', 'silver', 'gold', 'champion'];
+        const tiers = ['daily', 'bronze', 'silver', 'gold', 'champion']; // Added Daily
         tiers.forEach(tier => {
             const orbsInTier = userData.uniqueOrbs.filter(o => o.tier === tier);
             if (orbsInTier.length > 0) {
-                const header = document.createElement('div'); header.className = 'loot-category-header'; header.innerText = `${tier.toUpperCase()} ARTIFACTS`; header.style.color = tier === 'bronze' ? '#d97706' : tier === 'silver' ? '#cbd5e1' : tier === 'gold' ? '#facc15' : '#a855f7';
+                const header = document.createElement('div'); header.className = 'loot-category-header'; 
+                header.innerText = `${tier.toUpperCase()} ARTIFACTS`; 
+                header.style.color = tier === 'daily' ? '#34d399' : tier === 'bronze' ? '#d97706' : tier === 'silver' ? '#cbd5e1' : tier === 'gold' ? '#facc15' : '#a855f7';
+                
                 container.appendChild(header);
                 const grid = document.createElement('div'); grid.className = 'orb-grid';
                 orbsInTier.forEach(orb => {
@@ -1084,6 +1172,9 @@
         const now = Date.now();
         const deltaTime = now - lastTime;
         lastTime = now;
+        
+        // Update Daily Chest Timer Visually
+        renderDailyChest();
 
         ORB_DATA.forEach(orb => {
             const owned = userData.orbs?.[orb.id] || 0;
@@ -1133,7 +1224,7 @@
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         document.getElementById(tabId + 'View').classList.remove('hidden');
         const tabBtn = document.getElementById('t' + tabId.charAt(0).toUpperCase() + tabId.slice(1, 3)); if(tabBtn) tabBtn.classList.add('active');
-        if (tabId === 'marketplace') renderUniqueLoot();
+        if (tabId === 'marketplace') { renderUniqueLoot(); renderDailyChest(); }
         if (tabId === 'collection') renderCollection();
         if (tabId === 'research') renderResearch();
     };
