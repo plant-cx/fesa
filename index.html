@@ -32,6 +32,7 @@
         .visual-container { position: relative; width: 80px; height: 80px; margin: 20px auto 10px; display: flex; justify-content: center; align-items: center; }
         .orb-visual { width: 60px; height: 60px; transition: all 0.5s ease; position: relative; z-index: 2; background: currentColor; box-shadow: 0 0 20px currentColor; }
         
+        /* Earn Page Stages (Shapes) */
         .stage-1 { border-radius: 50%; }
         .stage-2 { border-radius: 35%; }
         .stage-3 { border-radius: 20%; animation: orbPulse 3s infinite; }
@@ -42,7 +43,7 @@
         @keyframes orbPulseDiamond { 50% { transform: rotate(45deg) scale(1.1); } }
         @keyframes slowRotateGlow { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* --- UPDATED ORB LAYOUT STYLES --- */
+        /* --- ORB LAYOUT STYLES --- */
         .orb-item .orb-lvl-badge { 
             position: absolute; 
             top: 10px; 
@@ -58,150 +59,110 @@
         }
 
         .sell-btn-corner {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            width: 32px;
-            height: 32px;
-            background: #ef4444;
-            color: white;
-            border-radius: 8px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 16px;
-            border: 2px solid #b91c1c;
-            z-index: 5;
-            padding: 0;
+            position: absolute; 
+            top: 10px; left: 10px; 
+            width: 32px; height: 32px; 
+            background: #ef4444; color: white; 
+            border-radius: 8px; font-weight: bold; 
+            display: flex; align-items: center; justify-content: center; 
+            cursor: pointer; font-size: 16px; 
+            border: 2px solid #b91c1c; z-index: 5; padding: 0;
         }
         .sell-btn-corner:hover { background: #dc2626; }
 
         .owned-counter {
-            font-size: 14px;
-            color: #94a3b8;
-            font-weight: 700;
-            background: #1e293b;
-            padding: 4px 12px;
-            border-radius: 20px;
-            display: inline-block;
-            margin: 5px auto;
-            border: 1px solid #334155;
+            font-size: 14px; color: #94a3b8; font-weight: 700;
+            background: #1e293b; padding: 4px 12px; border-radius: 20px;
+            display: inline-block; margin: 5px auto; border: 1px solid #334155;
         }
 
-        /* --- RESEARCH CINEMATIC EFFECTS --- */
+        /* --- NEW AMAZING RESEARCH ANIMATIONS --- */
         .preview-box { 
-            background: #020617; 
+            background: radial-gradient(circle at center, #1e293b 0%, #020617 100%);
             border-radius: 12px; 
-            height: 250px; /* Taller for cinematic feel */
+            height: 300px; /* Taller for the 3D effect */
             display: flex; 
             flex-direction: column; 
             justify-content: center; 
             align-items: center; 
             margin-bottom: 25px; 
-            border: 2px solid #6366f1; 
+            border: 2px solid #4338ca; 
             position: relative; 
             overflow: hidden; 
-            box-shadow: inset 0 0 50px rgba(0,0,0,0.9);
+            box-shadow: inset 0 0 60px rgba(0,0,0,0.8);
+            perspective: 800px; /* Crucial for 3D */
         }
 
-        /* The Lab Floor Grid */
-        .preview-box::before {
-            content: '';
+        /* 3D Floor Grid */
+        .holo-floor {
             position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 40%;
-            background: linear-gradient(transparent, rgba(99, 102, 241, 0.1) 20%, rgba(99, 102, 241, 0.2));
-            transform: perspective(300px) rotateX(40deg);
+            bottom: -50%;
+            left: -50%;
+            width: 200%;
+            height: 100%;
+            background: 
+                linear-gradient(rgba(99, 102, 241, 0.2) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(99, 102, 241, 0.2) 1px, transparent 1px);
+            background-size: 40px 40px;
+            transform: rotateX(70deg);
+            animation: floorMove 10s linear infinite;
+            opacity: 0.3;
             z-index: 0;
         }
+        @keyframes floorMove { from { transform: rotateX(70deg) translateY(0); } to { transform: rotateX(70deg) translateY(40px); } }
 
-        /* Rotating Tech Ring */
-        .tech-ring {
-            position: absolute;
-            width: 160px;
-            height: 160px;
-            border: 1px dashed rgba(255,255,255,0.3);
+        /* The Research Orb (Strict Sphere) */
+        .research-sphere {
+            width: 100px;
+            height: 100px;
             border-radius: 50%;
-            animation: spinRing 10s linear infinite;
-            z-index: 1;
-        }
-        .tech-ring::after {
-            content: '';
-            position: absolute;
-            top: -2px; left: 50%;
-            width: 6px; height: 6px;
-            background: #6366f1;
-            box-shadow: 0 0 10px #6366f1;
-            border-radius: 50%;
-        }
-
-        @keyframes spinRing { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-        /* The Orb in Research Mode */
-        .research-mode-visual {
-            transform: scale(1.5);
-            animation: floatOrb 3s ease-in-out infinite;
+            position: relative;
             z-index: 10;
+            background: currentColor;
+            box-shadow: 
+                inset -15px -15px 30px rgba(0,0,0,0.6), 
+                inset 10px 10px 30px rgba(255,255,255,0.4),
+                0 0 30px currentColor;
+            animation: sphereFloat 4s ease-in-out infinite;
         }
 
-        /* Scanning Laser */
-        .scanner-beam {
+        @keyframes sphereFloat { 
+            0%, 100% { transform: translateY(0); } 
+            50% { transform: translateY(-20px); } 
+        }
+
+        /* 3D Gyroscope Rings */
+        .gyro-ring {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: #34d399;
-            box-shadow: 0 0 15px #34d399;
-            opacity: 0.5;
-            animation: scanUpDown 3s ease-in-out infinite;
+            top: 50%; left: 50%;
+            border: 2px solid rgba(255,255,255,0.1);
+            border-top: 2px solid #6366f1;
+            border-bottom: 2px solid #6366f1;
+            border-radius: 50%;
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .ring-1 { width: 180px; height: 180px; margin: -90px; animation: spin1 4s linear infinite; }
+        .ring-2 { width: 140px; height: 140px; margin: -70px; animation: spin2 5s linear infinite; }
+        .ring-3 { width: 220px; height: 220px; margin: -110px; border-color: rgba(255,255,255,0.05); border-left: 2px solid #a855f7; border-right: 2px solid #a855f7; animation: spin3 8s linear infinite; }
+
+        @keyframes spin1 { 0% { transform: rotateX(60deg) rotateZ(0deg); } 100% { transform: rotateX(60deg) rotateZ(360deg); } }
+        @keyframes spin2 { 0% { transform: rotateY(60deg) rotateZ(0deg); } 100% { transform: rotateY(60deg) rotateZ(-360deg); } }
+        @keyframes spin3 { 0% { transform: rotateX(80deg) rotateY(20deg) rotateZ(0deg); } 100% { transform: rotateX(80deg) rotateY(20deg) rotateZ(360deg); } }
+
+        /* UI Text in Research */
+        .research-overlay-text {
+            position: absolute;
+            bottom: 10px;
+            color: #6366f1;
+            font-size: 10px;
+            letter-spacing: 2px;
+            font-weight: 900;
+            text-shadow: 0 0 10px #6366f1;
             z-index: 20;
         }
-
-        @keyframes floatOrb { 0%, 100% { transform: scale(1.5) translateY(0); } 50% { transform: scale(1.5) translateY(-10px); } }
-        @keyframes scanUpDown { 0% { top: 10%; opacity: 0; } 20% { opacity: 0.8; } 80% { opacity: 0.8; } 100% { top: 90%; opacity: 0; } }
-
-        /* Particles */
-        .energy-particle {
-            position: absolute;
-            background: white;
-            border-radius: 50%;
-            opacity: 0;
-            animation: particleRise 2s infinite;
-        }
-
-        @keyframes particleRise {
-            0% { transform: translateY(0) scale(1); opacity: 0; }
-            50% { opacity: 1; }
-            100% { transform: translateY(-50px) scale(0); opacity: 0; }
-        }
-
-
-        /* Research Specializations */
-        /* Core: White/Blue, Holy Mist */
-        .spec-core .orb-visual { background: radial-gradient(circle, #fff, #3b82f6); color: #3b82f6; box-shadow: 0 0 30px #fff; }
-        .spec-core::after { content:''; position: absolute; inset: -10px; background: radial-gradient(circle, rgba(255,255,255,0.4), transparent 70%); animation: mistPulse 2s infinite; z-index: 1; filter: blur(5px); }
-        
-        /* Magic: Red/Black, Sinister */
-        .spec-magic .orb-visual { background: radial-gradient(circle, #000, #7f1d1d); color: #ef4444; border: 2px solid #ef4444; box-shadow: 0 0 25px #ef4444; animation: sinisterPulse 1s infinite alternate; }
-        .spec-magic::before { content:''; position: absolute; inset: -15px; background: radial-gradient(circle, rgba(239,68,68,0.2), transparent 60%); z-index: 1; }
-        
-        /* Strength: Orange, Bubbles */
-        .spec-strength .orb-visual { background: #ea580c; color: #fb923c; box-shadow: 0 0 25px #f97316; }
-        .strength-bubble { position: absolute; width: 6px; height: 6px; background: #f97316; border-radius: 50%; bottom: 0; animation: bubbleRise 2s infinite linear; opacity: 0; }
-        
-        /* Wisdom: Green, Lasers */
-        .spec-wisdom .orb-visual { background: #052e16; color: #22c55e; border: 1px solid #22c55e; box-shadow: 0 0 20px #22c55e; }
-        .wisdom-laser { position: absolute; width: 2px; height: 100%; background: #22c55e; top: -10px; height: calc(100% + 20px); opacity: 0.6; box-shadow: 0 0 8px #22c55e; animation: scanLaser 3s infinite ease-in-out; }
-        
-        @keyframes mistPulse { 0%,100%{opacity:0.3; transform:scale(1);} 50%{opacity:0.8; transform:scale(1.1);} }
-        @keyframes sinisterPulse { from{transform:scale(1);} to{transform:scale(1.05);} }
-        @keyframes bubbleRise { 0%{transform:translateY(10px); opacity:0;} 20%{opacity:1;} 100%{transform:translateY(-50px); opacity:0;} }
-        @keyframes scanLaser { 0%{left: -10px; opacity:0;} 10%{opacity:1;} 90%{opacity:1;} 100%{left: 100%; opacity:0;} }
 
         /* --- UI & LAYOUT --- */
         .blur-lock { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(10px); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10; border-radius: 16px; }
@@ -269,7 +230,7 @@
                 <img id="userPfp" class="pfp-circle" src="" onclick="toggleSettings()">
                 <b id="userDisplay" style="font-size:20px;">@user</b>
                 <button class="header-prestige-btn" onclick="showTab('prestige')">
-                    Prestige ✨ <span id="headerPoints" style="color:#facc15">(0)</span>
+                    ✨ <span id="headerPoints" style="color:#facc15">(0)</span>
                 </button>
             </div>
             <div style="display:flex; align-items:center; gap:12px;">
@@ -318,14 +279,18 @@
                 <div class="research-list" id="researchOrbList">
                     </div>
                 <div id="researchPanel" class="research-panel hidden">
+                    
                     <div class="preview-box">
-                        <div class="scanner-beam"></div>
-                        <div class="tech-ring"></div>
-                        <div class="energy-particle" style="left:20%; bottom:10px; animation-delay:0.2s"></div>
-                        <div class="energy-particle" style="left:80%; bottom:10px; animation-delay:1.2s"></div>
-                        <div id="researchPreview" class="visual-container research-mode-visual"></div>
-                        <div style="color: #6366f1; font-size: 12px; margin-top: 10px; z-index:10; font-weight:bold; letter-spacing:1px; text-shadow:0 0 10px #6366f1;">ACTIVE CONTAINMENT FIELD</div>
+                        <div class="holo-floor"></div>
+                        <div class="gyro-ring ring-1"></div>
+                        <div class="gyro-ring ring-2"></div>
+                        <div class="gyro-ring ring-3"></div>
+                        
+                        <div id="researchPreview"></div>
+
+                        <div class="research-overlay-text">ANALYSIS IN PROGRESS</div>
                     </div>
+
                     <h2 id="researchOrbName" style="margin-bottom: 20px;">Orb Name</h2>
                     
                     <div id="statContainer"></div>
@@ -493,21 +458,19 @@
         }
     });
 
+    // Modified to support the new Strict Research Sphere
     const generateOrbHTML = (orb, count, isResearchPreview = false) => {
         const r = userData.research?.[orb.id] || {};
-        let stage = isResearchPreview ? 'stage-3' : getStageClass(count);
-        let specClass = "";
-        let extraElements = "";
+        
+        // If research preview, force a ball shape, else use stage logic
+        if (isResearchPreview) {
+            return `<div class="research-sphere" style="color:${orb.color};"></div>`;
+        }
 
-        // Check for specialization (Level > 2)
-        if(r.core > 2) specClass = "spec-core";
-        else if(r.magic > 2) specClass = "spec-magic";
-        else if(r.strength > 2) { specClass = "spec-strength"; extraElements += `<div class="strength-bubble" style="left:20%"></div><div class="strength-bubble" style="left:50%; animation-delay:0.5s"></div><div class="strength-bubble" style="left:80%; animation-delay:1s"></div>`; }
-        else if(r.wisdom > 2) { specClass = "spec-wisdom"; extraElements += `<div class="wisdom-laser"></div><div class="wisdom-laser" style="animation-delay:1.5s; left:50%"></div>`; }
-
-        return `<div class="visual-container ${specClass} ${isResearchPreview ? 'research-mode-visual' : ''}">
+        let stage = getStageClass(count);
+        
+        return `<div class="visual-container">
                     <div class="orb-visual ${stage}" style="background:currentColor; color:${orb.color};"></div>
-                    ${extraElements}
                 </div>`;
     };
 
@@ -544,35 +507,23 @@
 
     function updateResearchPanel(orb) {
         document.getElementById('researchOrbName').innerText = orb.name;
-        // The cinematic classes are now handled in the HTML structure of the preview box
         document.getElementById('researchPreview').innerHTML = generateOrbHTML(orb, 1, true);
         
         const container = document.getElementById('statContainer');
         container.innerHTML = '';
         const r = userData.research?.[orb.id] || {};
-        
-        // Check if any specialization exists (any level > 2)
         const currentSpec = RESEARCH_TYPES.find(t => (r[t] || 0) > 2);
 
         RESEARCH_TYPES.forEach(type => {
             const level = r[type] || 0;
             const row = document.createElement('div');
             row.className = 'stat-row';
-            
-            // Logic: Can upgrade if level < 2 OR (level >= 2 AND this is the specialized stat)
-            // AND max level is 5
             let canUpgrade = false;
             let btnText = "MAXED";
             
             if (level < 5) {
-                if (level < 2) {
-                    canUpgrade = true;
-                } else {
-                    // Level is 2 or more. Can only upgrade if no spec exists OR this is the spec
-                    if (!currentSpec || currentSpec === type) {
-                        canUpgrade = true;
-                    }
-                }
+                if (level < 2) canUpgrade = true;
+                else if (!currentSpec || currentSpec === type) canUpgrade = true;
                 btnText = `UPGRADE ($${RESEARCH_COST.toLocaleString()})`;
             }
 
@@ -583,12 +534,7 @@
                     <div class="stat-name">${type} (Lvl ${level})</div>
                     <div class="progress-bg" style="width:150px"><div class="progress-fill" style="width:${(level/5)*100}%"></div></div>
                 </div>
-                <button 
-                    onclick="buyResearch('${orb.id}', '${type}')" 
-                    ${canUpgrade && canAfford ? '' : 'disabled'}
-                    style="font-size:12px; padding:8px;">
-                    ${btnText}
-                </button>
+                <button onclick="buyResearch('${orb.id}', '${type}')" ${canUpgrade && canAfford ? '' : 'disabled'} style="font-size:12px; padding:8px;">${btnText}</button>
             `;
             container.appendChild(row);
         });
@@ -597,20 +543,11 @@
     window.buyResearch = async (orbId, type) => {
         if(userData.balance < RESEARCH_COST) return;
         const currentLvl = (userData.research?.[orbId]?.[type] || 0);
-        
-        // Double check logic server side simulation
         const r = userData.research?.[orbId] || {};
         const currentSpec = RESEARCH_TYPES.find(t => (r[t] || 0) > 2);
-        
         if (currentLvl >= 5) return;
         if (currentLvl >= 2 && currentSpec && currentSpec !== type) return;
-
-        // Apply
-        const updateKey = `research.${orbId}.${type}`;
-        await updateDoc(doc(db, "users", myUid), {
-            balance: increment(-RESEARCH_COST),
-            [updateKey]: increment(1)
-        });
+        await updateDoc(doc(db, "users", myUid), { balance: increment(-RESEARCH_COST), [`research.${orbId}.${type}`]: increment(1) });
     };
 
     window.handleSearch = () => {
@@ -635,10 +572,8 @@
         const currentBasePower = currentLevel <= 1 ? 1 : Math.min(1 + ((currentLevel - 1) * 10), 500);
         const cost = Math.floor(25 + (currentLevel - 1) * 50.5);
         const isMaxed = currentBasePower >= 500;
-
         const totalVisualBal = Math.floor((userData.balance || 0) + localBalanceAccumulator);
         document.getElementById('userBal').innerText = totalVisualBal.toLocaleString();
-        
         document.getElementById('userDisplay').innerText = "@" + userData.username;
         document.getElementById('userPfp').src = `https://api.dicebear.com/7.x/identicon/svg?seed=${userData.username}`;
         document.getElementById('clickPowerVal').innerText = getPower(userData.clickLevel || 1).toLocaleString();
@@ -679,7 +614,6 @@
     const calcIncome = (orb, owned) => {
         let totalIncome = 0;
         if (owned > 0) totalIncome += Math.floor(orb.baseInc * (Math.pow(2.0, owned) - 1));
-        
         let mult = 1;
         if(userData?.prestigeUpgrades) {
             PRESTIGE_UPGRADES.orbs.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
@@ -705,29 +639,23 @@
             const isMaxed = owned >= 50;
             const div = document.createElement('div'); div.className = 'orb-item';
             
-            // Updated Button Label: removed "UPG"
             let btnLabel = isMaxed ? "MAXED" : (isUnlocked ? `$${cost.toLocaleString()}` : "LOCKED");
             let btnClass = (userData.balance >= cost && isUnlocked && !isMaxed) ? 'btn-available' : 'btn-locked';
 
             const visualHTML = generateOrbHTML(orb, owned);
 
-            // UPDATED LAYOUT STRUCTURE
             div.innerHTML = `
                 ${isUnlocked ? `
                     <button class="sell-btn-corner" onclick="sellOrb('${orb.id}', ${Math.floor(cost * 0.7)})" title="Sell Orb">X</button>
                     <div class="orb-lvl-badge">LVL ${calculateOrbLevel(orb, owned)}</div>
                 ` : ''}
-                
                 ${visualHTML}
-                
                 <b>${orb.name}</b>
-                
                 ${isUnlocked ? `
                     <div style="color:#10b981; font-weight:800;">+$${income.toLocaleString()}</div>
                     <div class="owned-counter">Count: ${owned}</div>
                     <div class="progress-bg"><div class="progress-fill" id="bar-${orb.id}"></div></div>
                 ` : ''}
-                
                 <button onclick="buyOrb('${orb.id}', ${cost}, ${owned})" class="buy-btn ${btnClass}">${btnLabel}</button>
             `;
             if (!isUnlocked) div.innerHTML += `<div class="blur-lock"><div class="lock-q">?</div></div>`;
@@ -790,17 +718,11 @@
         if (!collectionGrid) return;
         
         const sortMode = document.getElementById('collectionSortOrder').value;
-
-        // Clear content but maintain height to avoid layout flickering
         collectionGrid.innerHTML = '';
-
         const ownedList = ORB_DATA.filter(orb => (userData.orbs?.[orb.id] || 0) > 0 && (!searchFilter || orb.name.toLowerCase().includes(searchFilter)));
 
-        if (sortMode === 'income') {
-            ownedList.sort((a, b) => calcIncome(b, userData.orbs[b.id]) - calcIncome(a, userData.orbs[a.id]));
-        } else if (sortMode === 'quantity') {
-            ownedList.sort((a, b) => userData.orbs[b.id] - userData.orbs[a.id]);
-        }
+        if (sortMode === 'income') ownedList.sort((a, b) => calcIncome(b, userData.orbs[b.id]) - calcIncome(a, userData.orbs[a.id]));
+        else if (sortMode === 'quantity') ownedList.sort((a, b) => userData.orbs[b.id] - userData.orbs[a.id]);
 
         ownedList.forEach((orb, index) => {
             const count = userData.orbs[orb.id];
@@ -814,14 +736,8 @@
             const visualHTML = generateOrbHTML(orb, count);
 
             div.innerHTML = `<div class="orb-lvl-badge">LVL ${calculateOrbLevel(orb, count)}</div>${visualHTML}<b>${orb.name}</b><p style="font-size:12px;">Owned: ${count}</p><div style="color:#10b981; font-weight:800; font-size:14px;">Total: +$${income.toLocaleString()}</div><div class="progress-bg" style="margin-top:10px;"><div class="progress-fill" id="col-bar-${orb.id}"></div></div>`;
-            
             collectionGrid.appendChild(div);
-
-            // Staggered flying animation
-            setTimeout(() => {
-                div.style.opacity = '1';
-                div.style.transform = 'translateY(0)';
-            }, index * 40);
+            setTimeout(() => { div.style.opacity = '1'; div.style.transform = 'translateY(0)'; }, index * 40);
         });
     }
 
@@ -831,9 +747,7 @@
         const rowArtifacts = document.getElementById('pRowArtifacts');
         const rowGlobal = document.getElementById('pRowGlobal');
         const rowFrenzy = document.getElementById('pRowFrenzy');
-        
         [rowClick, rowOrb, rowArtifacts, rowGlobal, rowFrenzy].forEach(r => { if(r) r.innerHTML = ''; });
-
         const renderUpgrade = (u, container) => {
             const owned = userData.prestigeUpgrades?.includes(u.id);
             const canAfford = (userData.prestigePoints || 0) >= u.cost;
@@ -842,7 +756,6 @@
             div.innerHTML = `<div style="font-size:18px; margin-bottom:5px;">${u.name}</div><div style="color:#facc15; font-weight:900;">${u.mult}x Boost</div><div style="margin:10px 0; font-size:12px; color:#94a3b8;">Cost: ${u.cost} Pts</div><button onclick="buyPrestigeUpgrade('${u.id}', ${u.cost})" class="buy-btn ${owned ? 'hidden' : (canAfford ? 'btn-available' : 'btn-locked')}" style="padding:8px; font-size:12px;">${owned ? 'OWNED' : 'BUY'}</button>`;
             container.appendChild(div);
         };
-
         PRESTIGE_UPGRADES.clicks.forEach(u => renderUpgrade(u, rowClick));
         PRESTIGE_UPGRADES.orbs.forEach(u => renderUpgrade(u, rowOrb));
         PRESTIGE_UPGRADES.artifacts.forEach(u => renderUpgrade(u, rowArtifacts));
