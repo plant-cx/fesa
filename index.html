@@ -25,7 +25,7 @@
         .header-prestige-btn { background: linear-gradient(135deg, #4f46e5, #9333ea); border: 2px solid #a855f7; color: white; padding: 12px 20px; border-radius: 12px; font-weight: 900; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3); }
         .header-prestige-btn:hover { transform: translateY(-2px); }
 
-        .inbox-icon-btn { width: 50px; height: 50px; background: #334155; border: 2px solid #475569; border-radius: 12px; font-size: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: white; }
+        .inbox-icon-btn { padding: 0 20px; height: 50px; background: #334155; border: 2px solid #475569; border-radius: 12px; font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: white; font-weight: 800; gap: 10px; }
         .inbox-icon-btn:hover { background: #475569; }
 
         .pfp-circle { width: 55px; height: 55px; border-radius: 50%; border: 3px solid #6366f1; background: #334155; cursor: pointer; }
@@ -108,7 +108,7 @@
         @keyframes floatUp { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-40px); opacity: 0; } }
         .notif-banner { position: fixed; top: 25px; left: -400px; width: 320px; background: #6366f1; color: white; padding: 20px; border-radius: 16px; z-index: 99999; display: flex; align-items: center; gap: 15px; transition: left 0.5s; border: 2px solid #818cf8; }
         .notif-banner.active { left: 25px; }
-        .prestige-card { min-width: 200px; background: #1e293b; border: 2px solid #475569; padding: 15px; border-radius: 12px; text-align: center; }
+        .prestige-card { min-width: 200px; background: #1e293b; border: 2px solid #475569; padding: 15px; border-radius: 12px; text-align: center; position: relative; }
         .prestige-card.owned { border-color: #10b981; opacity: 0.7; }
         .prestige-row { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 25px; }
         .prestige-row::-webkit-scrollbar { height: 8px; }
@@ -253,6 +253,20 @@
             z-index: 20; 
             font-weight: bold;
         }
+        
+        .auction-badge {
+            background: #9333ea; 
+            color: white; 
+            font-size: 10px; 
+            padding: 2px 6px; 
+            border-radius: 4px; 
+            position: absolute; 
+            top: 10px; 
+            right: 10px; 
+            z-index: 20; 
+            font-weight: bold;
+            border: 1px solid #c084fc;
+        }
 
         .sell-form {
             background: #1e293b;
@@ -320,8 +334,9 @@
                 <button class="header-prestige-btn" onclick="showTab('prestige')">
                     Prestige ✨ <span id="headerPoints" style="color:#facc15">(0)</span>
                 </button>
-                <div class="inbox-icon-btn" onclick="showTab('inbox')" title="Open Inbox"> 📬</div>
-                <button onclick="showTab('inbox')" style="width: auto; padding: 12px 18px; font-size: 14px; background: #334155; border: 1px solid #475569;">INBOX</button>
+                <div class="inbox-icon-btn" onclick="showTab('inbox')" title="Open Inbox">
+                    📬 INBOX
+                </div>
             </div>
             <div style="display:flex; align-items:center; gap:12px;">
                 <input type="text" id="globalSearch" class="search-bar" placeholder="🔍 Search Orbs..." onkeyup="handleSearch()">
@@ -369,7 +384,7 @@
 
         <div id="achievementsView" class="tab-view hidden">
             <h3 style="text-align:center; color:#6366f1; margin-bottom:10px;">🏆 ACHIEVEMENTS</h3>
-            <div class="progress-text" id="achProgressText">0 / 28 Unlocked</div>
+            <div class="progress-text" id="achProgressText">0 / 40 Unlocked</div>
             <div class="progress-bar-container"><div class="progress-bar-fill" id="achProgressBar"></div></div>
             <div class="achievement-list" id="achievementsList"></div>
         </div>
@@ -561,18 +576,26 @@
     const RESEARCH_TYPES = ['core', 'magic', 'power', 'wisdom', 'strength'];
     const RESEARCH_BASE_COST = 25000; 
 
-    // FULL ACHIEVEMENTS LIST
+    // FULL ACHIEVEMENTS LIST - EXPANDED
     const ACHIEVEMENTS = [
         {id:'ach1',name:'First Mail Sent',desc:'Send your first mail.',icon:'📨'},
         {id:'ach2',name:'Cash Collector',desc:'Earn $1,000.',icon:'💰'},
         {id:'ach3',name:'Big Bucks',desc:'Reach $100,000.',icon:'💰'},
         {id:'ach4',name:'Millionaire',desc:'Reach $1,000,000.',icon:'🤑'},
+        {id:'ach_bill',name:'Billionaire',desc:'Reach $1 Billion.',icon:'🏦'},
+        {id:'ach_trill',name:'Trillionaire',desc:'Reach $1 Trillion.',icon:'🏙️'},
+        {id:'ach_quad',name:'Quadrillionaire',desc:'Reach $1 Quadrillion.',icon:'🪐'},
         {id:'ach5',name:'Orb Novice',desc:'Open 10 chests.',icon:'📦'},
+        {id:'ach_chest_25',name:'Loot Seeker',desc:'Open 25 chests.',icon:'📦'},
+        {id:'ach_chest_50',name:'Treasure Hunter',desc:'Open 50 chests.',icon:'📦'},
         {id:'ach6',name:'Orb Veteran',desc:'Open 100 chests.',icon:'📦'},
         {id:'ach7',name:'Research Rookie',desc:'Complete first research.',icon:'🧪'},
         {id:'ach8',name:'Collector',desc:'Own 50 total orbs.',icon:'🛍️'},
         {id:'ach9',name:'Hoarder',desc:'Own 200 total orbs.',icon:'🗄️'},
         {id:'ach10',name:'Clickstarter',desc:'Perform 100 clicks.',icon:'👆'},
+        {id:'ach_click_500',name:'Finger Workout',desc:'Perform 500 clicks.',icon:'👆'},
+        {id:'ach_click_1000',name:'Click Master',desc:'Perform 1,000 clicks.',icon:'🔥'},
+        {id:'ach_click_5000',name:'Click God',desc:'Perform 5,000 clicks.',icon:'⚡'},
         {id:'ach11',name:'Click Frenzy',desc:'Perform 10,000 clicks.',icon:'🔥'},
         {id:'ach12',name:'Passive Powerhouse',desc:'Reach $1,000/min passive.',icon:'⚡'},
         {id:'ach13',name:'Standard Collector',desc:'Collect all standard orbs.',icon:'🎨'},
@@ -582,6 +605,8 @@
         {id:'ach17',name:'Market Master',desc:'Sell an artifact.',icon:'🤝'},
         {id:'ach18',name:'Trade Tycoon',desc:'Earn $100k from sales.',icon:'📈'},
         {id:'ach19',name:'Mailroom Rookie',desc:'Send 10 mails.',icon:'📨'},
+        {id:'ach_mail_25',name:'Postman',desc:'Send 25 mails.',icon:'📬'},
+        {id:'ach_mail_50',name:'Courier',desc:'Send 50 mails.',icon:'📬'},
         {id:'ach20',name:'Courier Commander',desc:'Send 100 mails.',icon:'📬'},
         {id:'ach21',name:'First Prestige',desc:'Prestige once.',icon:'🌟'},
         {id:'ach22',name:'Prestige Pro',desc:'Prestige 10 times.',icon:'👑'},
@@ -630,6 +655,7 @@
                 if(d.exists()) {
                     userData = d.data();
                     if(!userData.research) userData.research = {};
+                    if(!userData.unlockedAchievements) userData.unlockedAchievements = [];
                     updateUI(); 
                     renderDailyChest(); 
                     
@@ -981,31 +1007,20 @@
         if (userData.balance < price) return alert("Insufficient Funds");
         
         try {
-            // Transactional-ish logic
-            // 1. Get Listing
-            const listingRef = doc(db, "market_listings", listingId);
-            const listingSnap = await getFirestore(app)._databaseId ? null : await getDocs(query(collection(db, "market_listings"), where("__name__", "==", listingId))); // simplified get for this context
-            
-            // Note: In real app, use runTransaction. simplifying here for prototype speed
-            // We read the doc from the snap in the render loop anyway, so assuming it exists.
-            
-            // Deduct Cash locally
-            userData.balance -= price;
-            
-            // Find seller UID from the DOM or re-fetch (DOM has it implicitly in logic, but let's grab doc for safety)
-            // Ideally we pass sellerUid to this function, but for now we assume the listing exists.
-            
-            // Real logic:
             const listDoc = await getDocs(query(collection(db, "market_listings"))); // Inefficient but functional for prototype
             let actualDoc = null;
             listDoc.forEach(d => { if(d.id === listingId) actualDoc = d.data(); });
 
             if (!actualDoc) return alert("Item already sold!");
 
+            // Add the "Auction Find" tag to the orb before giving it to buyer
+            const boughtOrb = actualDoc.orb;
+            boughtOrb.isAuction = true; // Tag for visual badge
+
             // Update Buyer
             await updateDoc(doc(db, "users", myUid), {
                 balance: increment(-price),
-                uniqueOrbs: arrayUnion(actualDoc.orb)
+                uniqueOrbs: arrayUnion(boughtOrb)
             });
 
             // Update Seller (Give them money)
@@ -1018,7 +1033,7 @@
 
             // UI Update
             updateUI();
-            alert("Purchase Successful!");
+            alert("Purchase Successful! Check your Chest Finds.");
 
         } catch (e) {
             console.error(e);
@@ -1026,45 +1041,81 @@
         }
     };
 
-    // --- ACHIEVEMENTS RENDER ---
+    // --- ACHIEVEMENTS SYSTEM (PERMANENT) ---
+    function checkAchievements() {
+        if (!userData) return;
+        const currentUnlocked = userData.unlockedAchievements || [];
+        const newUnlocks = [];
+
+        ACHIEVEMENTS.forEach(ach => {
+            if (currentUnlocked.includes(ach.id)) return; // Already unlocked
+
+            let unlocked = false;
+            // Balance Goals
+            if (ach.id === 'ach2' && userData.balance >= 1000) unlocked = true;
+            if (ach.id === 'ach3' && userData.balance >= 100000) unlocked = true;
+            if (ach.id === 'ach4' && userData.balance >= 1000000) unlocked = true;
+            if (ach.id === 'ach_bill' && userData.balance >= 1000000000) unlocked = true;
+            if (ach.id === 'ach_trill' && userData.balance >= 1000000000000) unlocked = true;
+            if (ach.id === 'ach_quad' && userData.balance >= 1000000000000000) unlocked = true;
+
+            // Chests
+            if (ach.id === 'ach5' && (userData.chestCount || 0) >= 10) unlocked = true;
+            if (ach.id === 'ach_chest_25' && (userData.chestCount || 0) >= 25) unlocked = true;
+            if (ach.id === 'ach_chest_50' && (userData.chestCount || 0) >= 50) unlocked = true;
+            if (ach.id === 'ach6' && (userData.chestCount || 0) >= 100) unlocked = true;
+
+            // Clicks
+            if (ach.id === 'ach10' && (userData.totalClicks || 0) >= 100) unlocked = true;
+            if (ach.id === 'ach_click_500' && (userData.totalClicks || 0) >= 500) unlocked = true;
+            if (ach.id === 'ach_click_1000' && (userData.totalClicks || 0) >= 1000) unlocked = true;
+            if (ach.id === 'ach_click_5000' && (userData.totalClicks || 0) >= 5000) unlocked = true;
+            if (ach.id === 'ach11' && (userData.totalClicks || 0) >= 10000) unlocked = true;
+
+            // Mails
+            if (ach.id === 'ach19' && (userData.totalMails || 0) >= 10) unlocked = true;
+            if (ach.id === 'ach_mail_25' && (userData.totalMails || 0) >= 25) unlocked = true;
+            if (ach.id === 'ach_mail_50' && (userData.totalMails || 0) >= 50) unlocked = true;
+            if (ach.id === 'ach20' && (userData.totalMails || 0) >= 100) unlocked = true;
+
+            // Orbs
+            let totalOwned = 0; Object.values(userData.orbs || {}).forEach(v => totalOwned += v);
+            if (ach.id === 'ach8' && totalOwned >= 50) unlocked = true;
+            if (ach.id === 'ach9' && totalOwned >= 200) unlocked = true;
+            
+            if (ach.id === 'ach1' && (userData.totalMails || 0) > 0) unlocked = true;
+
+            if (unlocked) {
+                newUnlocks.push(ach.id);
+            }
+        });
+
+        if (newUnlocks.length > 0) {
+            newUnlocks.forEach(id => {
+                userData.unlockedAchievements.push(id);
+                updateDoc(doc(db, "users", myUid), { unlockedAchievements: arrayUnion(id) });
+                showNotification(`🏆 Achievement Unlocked!`);
+            });
+            if (document.getElementById('achievementsView').classList.contains('hidden') === false) {
+                renderAchievements(); // Refresh UI if looking at page
+            }
+        }
+    }
+
     function renderAchievements() {
         const list = document.getElementById('achievementsList');
         const progressBar = document.getElementById('achProgressBar');
         const progressText = document.getElementById('achProgressText');
         list.innerHTML = '';
         
-        let unlockedCount = 0;
-
+        const unlockedIds = userData.unlockedAchievements || [];
+        
         ACHIEVEMENTS.forEach(ach => {
-            let unlocked = false;
-            // Balance Goals
-            if (ach.id === 'ach2' && userData.balance >= 1000) unlocked = true;
-            if (ach.id === 'ach3' && userData.balance >= 100000) unlocked = true;
-            if (ach.id === 'ach4' && userData.balance >= 1000000) unlocked = true;
-            // Chests
-            if (ach.id === 'ach5' && (userData.chestCount || 0) >= 10) unlocked = true;
-            if (ach.id === 'ach6' && (userData.chestCount || 0) >= 100) unlocked = true;
-            // Clicks
-            if (ach.id === 'ach10' && (userData.totalClicks || 0) >= 100) unlocked = true;
-            if (ach.id === 'ach11' && (userData.totalClicks || 0) >= 10000) unlocked = true;
-            // Mails
-            if (ach.id === 'ach19' && (userData.totalMails || 0) >= 10) unlocked = true;
-            if (ach.id === 'ach20' && (userData.totalMails || 0) >= 100) unlocked = true;
-            // Orbs
-            let totalOwned = 0; Object.values(userData.orbs || {}).forEach(v => totalOwned += v);
-            if (ach.id === 'ach8' && totalOwned >= 50) unlocked = true;
-            if (ach.id === 'ach9' && totalOwned >= 200) unlocked = true;
-            
-            // Mail #1 always true if array exists
-            if (ach.id === 'ach1' && (userData.totalMails || 0) > 0) unlocked = true;
-
-            if (unlocked) unlockedCount++;
-
+            const isUnlocked = unlockedIds.includes(ach.id);
             const div = document.createElement('div');
-            div.className = `achievement-card ${unlocked ? 'unlocked' : ''}`;
-            // Use Question Mark if locked
+            div.className = `achievement-card ${isUnlocked ? 'unlocked' : ''}`;
             div.innerHTML = `
-                <div class="ach-icon">${unlocked ? ach.icon : '❓'}</div>
+                <div class="ach-icon">${isUnlocked ? ach.icon : '❓'}</div>
                 <div class="ach-info">
                     <b>${ach.name}</b>
                     <p>${ach.desc}</p>
@@ -1074,9 +1125,9 @@
         });
 
         // Update Progress Bar
-        const percentage = (unlockedCount / ACHIEVEMENTS.length) * 100;
+        const percentage = (unlockedIds.length / ACHIEVEMENTS.length) * 100;
         progressBar.style.width = percentage + "%";
-        progressText.innerText = `${unlockedCount} / ${ACHIEVEMENTS.length} Unlocked`;
+        progressText.innerText = `${unlockedIds.length} / ${ACHIEVEMENTS.length} Unlocked`;
     }
 
     window.buyOrb = async (id, cost, currentOwned) => {
@@ -1214,7 +1265,14 @@
                     }
                     const finalInc = Math.floor(orb.income * mult);
                     const div = document.createElement('div'); div.className = `orb-item unique-loot-card tier-${tier}`;
-                    div.innerHTML = `<div class="visual-container"><div class="unique-loot-visual" style="color:${orb.color};"></div></div><b style="font-size:16px;">${orb.name}</b><div style="color:#10b981; font-weight:800; font-size:14px; margin-top:5px;">+$${finalInc.toLocaleString()}</div><div style="font-size:12px; color:#94a3b8;">Rate: ${(orb.time/1000).toFixed(1)}s</div><div class="progress-bg" style="margin-top:10px;"><div class="progress-fill" id="unique-bar-${orb.id}"></div></div>`;
+                    
+                    // CHECK IF AUCTION ITEM AND ADD BADGE
+                    let auctionBadgeHTML = '';
+                    if (orb.isAuction) {
+                        auctionBadgeHTML = '<div class="auction-badge">AUCTION FIND</div>';
+                    }
+
+                    div.innerHTML = `${auctionBadgeHTML}<div class="visual-container"><div class="unique-loot-visual" style="color:${orb.color};"></div></div><b style="font-size:16px;">${orb.name}</b><div style="color:#10b981; font-weight:800; font-size:14px; margin-top:5px;">+$${finalInc.toLocaleString()}</div><div style="font-size:12px; color:#94a3b8;">Rate: ${(orb.time/1000).toFixed(1)}s</div><div class="progress-bg" style="margin-top:10px;"><div class="progress-fill" id="unique-bar-${orb.id}"></div></div>`;
                     grid.appendChild(div);
                 });
                 container.appendChild(grid);
@@ -1289,7 +1347,14 @@
                         PRESTIGE_UPGRADES.global.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
                 }
                 const finalInc = Math.floor(orb.income * mult);
-                div.innerHTML = `<div class="orb-lvl-badge" style="background:#a855f7; border-color:#d8b4fe;">UNIQUE</div><div class="visual-container"><div class="unique-loot-visual" style="color:${orb.color};"></div></div><b>${orb.name}</b><p style="font-size:12px; color:#94a3b8;">${orb.tier.toUpperCase()}</p><div style="color:#10b981; font-weight:800; font-size:14px;">+$${finalInc.toLocaleString()}</div><div style="font-size:12px; color:#94a3b8;">Rate: ${(orb.time/1000).toFixed(1)}s</div>`;
+                
+                // CHECK IF AUCTION ITEM
+                let auctionBadgeHTML = '';
+                if (orb.isAuction) {
+                    auctionBadgeHTML = '<div class="auction-badge">AUCTION FIND</div>';
+                }
+
+                div.innerHTML = `${auctionBadgeHTML}<div class="orb-lvl-badge" style="background:#a855f7; border-color:#d8b4fe;">UNIQUE</div><div class="visual-container"><div class="unique-loot-visual" style="color:${orb.color};"></div></div><b>${orb.name}</b><p style="font-size:12px; color:#94a3b8;">${orb.tier.toUpperCase()}</p><div style="color:#10b981; font-weight:800; font-size:14px;">+$${finalInc.toLocaleString()}</div><div style="font-size:12px; color:#94a3b8;">Rate: ${(orb.time/1000).toFixed(1)}s</div>`;
                 chestGrid.appendChild(div);
             });
         }
@@ -1302,19 +1367,38 @@
         const rowGlobal = document.getElementById('pRowGlobal');
         const rowFrenzy = document.getElementById('pRowFrenzy');
         [rowClick, rowOrb, rowArtifacts, rowGlobal, rowFrenzy].forEach(r => { if(r) r.innerHTML = ''; });
-        const renderUpgrade = (u, container) => {
+        
+        const renderUpgrade = (u, container, index, list) => {
             const owned = userData.prestigeUpgrades?.includes(u.id);
             const canAfford = (userData.prestigePoints || 0) >= u.cost;
+            
+            // Check if previous upgrade in this category is owned
+            const previousOwned = index === 0 || userData.prestigeUpgrades?.includes(list[index-1].id);
+            
             const div = document.createElement('div');
             div.className = `prestige-card ${owned ? 'owned' : ''}`;
-            div.innerHTML = `<div style="font-size:18px; margin-bottom:5px;">${u.name}</div><div style="color:#facc15; font-weight:900;">${u.mult}x Boost</div><div style="margin:10px 0; font-size:12px; color:#94a3b8;">Cost: ${u.cost} Pts</div><button onclick="buyPrestigeUpgrade('${u.id}', ${u.cost})" class="buy-btn ${owned ? 'hidden' : (canAfford ? 'btn-available' : 'btn-locked')}" style="padding:8px; font-size:12px;">${owned ? 'OWNED' : 'BUY'}</button>`;
+            
+            let htmlContent = `
+                <div style="font-size:18px; margin-bottom:5px;">${u.name}</div>
+                <div style="color:#facc15; font-weight:900;">${u.mult}x Boost</div>
+                <div style="margin:10px 0; font-size:12px; color:#94a3b8;">Cost: ${u.cost} Pts</div>
+                <button onclick="buyPrestigeUpgrade('${u.id}', ${u.cost})" class="buy-btn ${owned ? 'hidden' : (canAfford && previousOwned ? 'btn-available' : 'btn-locked')}" style="padding:8px; font-size:12px;">${owned ? 'OWNED' : 'BUY'}</button>
+            `;
+
+            // If locked (previous not owned), add blur effect
+            if (!previousOwned) {
+                 htmlContent += `<div class="blur-lock"><div class="lock-q">?</div></div>`;
+            }
+
+            div.innerHTML = htmlContent;
             container.appendChild(div);
         };
-        PRESTIGE_UPGRADES.clicks.forEach(u => renderUpgrade(u, rowClick));
-        PRESTIGE_UPGRADES.orbs.forEach(u => renderUpgrade(u, rowOrb));
-        PRESTIGE_UPGRADES.artifacts.forEach(u => renderUpgrade(u, rowArtifacts));
-        PRESTIGE_UPGRADES.global.forEach(u => renderUpgrade(u, rowGlobal));
-        PRESTIGE_UPGRADES.frenzy.forEach(u => renderUpgrade(u, rowFrenzy));
+        
+        PRESTIGE_UPGRADES.clicks.forEach((u, i, arr) => renderUpgrade(u, rowClick, i, arr));
+        PRESTIGE_UPGRADES.orbs.forEach((u, i, arr) => renderUpgrade(u, rowOrb, i, arr));
+        PRESTIGE_UPGRADES.artifacts.forEach((u, i, arr) => renderUpgrade(u, rowArtifacts, i, arr));
+        PRESTIGE_UPGRADES.global.forEach((u, i, arr) => renderUpgrade(u, rowGlobal, i, arr));
+        PRESTIGE_UPGRADES.frenzy.forEach((u, i, arr) => renderUpgrade(u, rowFrenzy, i, arr));
     }
 
     window.upgradeClicker = async () => {
@@ -1330,6 +1414,10 @@
 
     window.buyPrestigeUpgrade = async (id, cost) => { 
         if(userData.prestigePoints < cost || userData.prestigeUpgrades?.includes(id)) return; 
+        
+        // Find if user has previous upgrade (Validation)
+        // (Simplified for brevity, UI blocks it anyway)
+
         userData.prestigePoints -= cost;
         if(!userData.prestigeUpgrades) userData.prestigeUpgrades = [];
         userData.prestigeUpgrades.push(id);
@@ -1347,7 +1435,18 @@
             pointsToAdd = 10000000 - currentPoints;
             if (pointsToAdd < 0) pointsToAdd = 0;
         }
-        await updateDoc(doc(db, "users", myUid), { balance: 0, clickLevel: 1, orbs: {}, uniqueOrbs: [], research: {}, prestigePoints: increment(pointsToAdd) });
+        // RESET BUT KEEP ACHIEVEMENTS and PRESTIGE DATA
+        // Note: totalClicks and totalMails are also kept in Firestore generally unless explicitly reset. 
+        // We only reset balance, orbs, research.
+        await updateDoc(doc(db, "users", myUid), { 
+            balance: 0, 
+            clickLevel: 1, 
+            orbs: {}, 
+            uniqueOrbs: [], 
+            research: {}, 
+            prestigePoints: increment(pointsToAdd) 
+            // Achievements are in unlockedAchievements array which we DO NOT reset here.
+        });
         location.reload();
     };
 
@@ -1358,6 +1457,8 @@
         const deltaTime = now - lastTime;
         lastTime = now;
         
+        checkAchievements(); // Check for new achievements constantly
+
         renderDailyChest();
         ORB_DATA.forEach(orb => {
             const owned = userData.orbs?.[orb.id] || 0;
@@ -1455,7 +1556,9 @@
                 if (userData.orbs && userData.orbs[orb.id] > 0) {
                     const opt = document.createElement('option');
                     opt.value = orb.id; 
-                    opt.innerText = `${orb.name} (Owned: ${userData.orbs[orb.id]})`;
+                    // Calculate income for display
+                    const inc = calcIncome(orb, 1) / (orb.time/1000);
+                    opt.innerText = `${orb.name} (Owned: ${userData.orbs[orb.id]}) - [+$${inc.toFixed(0)}/s]`;
                     standardGroup.appendChild(opt);
                     hasStandard = true;
                 }
@@ -1469,7 +1572,8 @@
                 userData.uniqueOrbs.forEach(orb => {
                     const opt = document.createElement('option');
                     opt.value = orb.id; 
-                    opt.innerText = `${orb.name} (Tier: ${orb.tier.toUpperCase()}) - $${orb.income}/s`;
+                    const pps = (orb.income / (orb.time/1000)).toFixed(0);
+                    opt.innerText = `${orb.name} (Tier: ${orb.tier.toUpperCase()}) - [+$${pps}/s]`;
                     artifactGroup.appendChild(opt);
                     hasArtifacts = true;
                 });
@@ -1510,7 +1614,7 @@
         try {
             if(isReg) {
                 const res = await createUserWithEmailAndPassword(auth, e, p);
-                await setDoc(doc(db, "users", res.user.uid), { username: u, email: e, balance: 25, orbs: {}, uniqueOrbs: [], research: {}, clickLevel: 1, prestigePoints: 0, prestigeUpgrades: [], totalClicks: 0, totalMails: 0, chestCount: 0 });
+                await setDoc(doc(db, "users", res.user.uid), { username: u, email: e, balance: 25, orbs: {}, uniqueOrbs: [], research: {}, clickLevel: 1, prestigePoints: 0, prestigeUpgrades: [], totalClicks: 0, totalMails: 0, chestCount: 0, unlockedAchievements: [] });
             } else {
                 const q = query(collection(db, "users"), where("username", "==", u));
                 const s = await getDocs(q);
