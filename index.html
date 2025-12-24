@@ -15,9 +15,9 @@
         button { width: 100%; padding: 16px; background: #6366f1; color: white; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; transition: 0.2s; font-size: 18px; text-transform: uppercase; letter-spacing: 0.5px; }
         .buy-btn { padding: 10px 16px; font-size: 16px; } 
         
-        button:disabled, .btn-locked { background: #334155 !important; color: #64748b !important; cursor: not-allowed; border: 1px solid #475569; }
-        .btn-available { background: #6366f1; }
-        .btn-available:hover { background: #4f46e5; transform: translateY(-2px); }
+        button:disabled, .btn-locked { background: #334155 !important; color: #64748b !important; cursor: not-allowed; border: 1px solid #475569; opacity: 0.7; }
+        .btn-available { background: #6366f1 !important; color: white !important; cursor: pointer !important; opacity: 1 !important; border-color: #818cf8; }
+        .btn-available:hover { background: #4f46e5 !important; transform: translateY(-2px); }
 
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; position: relative; gap: 10px; flex-wrap: wrap; }
         .balance-pill { background: #064e3b; color: #34d399; padding: 12px 24px; border-radius: 50px; font-weight: 900; border: 2px solid #059669; font-size: 22px; }
@@ -254,6 +254,28 @@
             font-weight: bold;
         }
 
+        .sell-form {
+            background: #1e293b;
+            border: 2px solid #6366f1;
+            padding: 20px;
+            border-radius: 16px;
+            max-width: 400px;
+            margin: 0 auto 30px;
+            text-align: center;
+        }
+
+        .mkt-price-tag {
+            background: #0f172a;
+            color: #34d399;
+            border: 1px solid #059669;
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 14px;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+
     </style>
 </head>
 <body>
@@ -298,7 +320,8 @@
                 <button class="header-prestige-btn" onclick="showTab('prestige')">
                     Prestige ✨ <span id="headerPoints" style="color:#facc15">(0)</span>
                 </button>
-                <div class="inbox-icon-btn" onclick="showTab('inbox')" title="Open Inbox"> <p>Inbox</p> 📬</div>
+                <div class="inbox-icon-btn" onclick="showTab('inbox')" title="Open Inbox"> 📬</div>
+                <button onclick="showTab('inbox')" style="width: auto; padding: 12px 18px; font-size: 14px; background: #334155; border: 1px solid #475569;">INBOX</button>
             </div>
             <div style="display:flex; align-items:center; gap:12px;">
                 <input type="text" id="globalSearch" class="search-bar" placeholder="🔍 Search Orbs..." onkeyup="handleSearch()">
@@ -319,6 +342,7 @@
             <div id="tCol" class="tab" onclick="showTab('collection')">COLLECTION</div>
             <div id="tAch" class="tab" onclick="showTab('achievements')">ACHIEVEMENTS</div>
             <div id="tMkt" class="tab" onclick="showTab('marketplace')">MARKET</div>
+            <div id="tMkt2" class="tab" onclick="showTab('marketv2')">PLAYER MARKET</div>
             <div id="tMsg" class="tab" onclick="showTab('message')">SEND</div>
         </div>
 
@@ -331,7 +355,7 @@
                             <b style="font-size: 18px; color: #6366f1;">Click Power</b>
                             <p style="font-size: 16px; color: #94a3b8; font-weight:700;">+ $<span id="clickPowerVal">1</span></p>
                         </div>
-                        <button id="upgradeClickBtn" onclick="upgradeClicker()" style="width: auto; padding: 12px 20px; font-size: 14px;">
+                        <button id="upgradeClickBtn" class="buy-btn" data-cost="100" onclick="upgradeClicker()" style="width: auto; padding: 12px 20px; font-size: 14px;">
                             UPGRADE $<span id="clickCost">100</span>
                         </button>
                     </div>
@@ -422,13 +446,35 @@
                     <button id="dailyClaimBtn" class="buy-btn" onclick="claimDailyChest()">CLAIM</button>
                     <div id="dailyTimer" style="font-size:12px; color:#94a3b8; margin-top:5px; display:none;">Wait: <span id="dailyTimeLeft">00:00:00</span></div>
                 </div>
-                <div class="chest-card"><div class="chest-icon">🥉</div><div class="chest-title">BRONZE CHEST</div><div class="chest-cost" style="color:#d97706; font-weight:bold;">$25,000</div><button class="buy-btn btn-available" onclick="buyChest('bronze', 25000)">BUY</button></div>
-                <div class="chest-card"><div class="chest-icon">🥈</div><div class="chest-title">SILVER CHEST</div><div class="chest-cost" style="color:#cbd5e1; font-weight:bold;">$250,000</div><button class="buy-btn btn-available" onclick="buyChest('silver', 250000)">BUY</button></div>
-                <div class="chest-card"><div class="chest-icon">🥇</div><div class="chest-title">GOLD CHEST</div><div class="chest-cost" style="color:#facc15; font-weight:bold;">$10,000,000</div><button class="buy-btn btn-available" onclick="buyChest('gold', 10000000)">BUY</button></div>
-                <div class="chest-card"><div class="chest-icon">🏆</div><div class="chest-title">CHAMPION CHEST</div><div class="chest-cost" style="color:#a855f7; font-weight:bold;">$500,000,000</div><button class="buy-btn btn-available" onclick="buyChest('champion', 500000000)">BUY</button></div>
+                <div class="chest-card"><div class="chest-icon">🥉</div><div class="chest-title">BRONZE CHEST</div><div class="chest-cost" style="color:#d97706; font-weight:bold;">$25,000</div><button class="buy-btn btn-available" data-cost="25000" onclick="buyChest('bronze', 25000)">BUY</button></div>
+                <div class="chest-card"><div class="chest-icon">🥈</div><div class="chest-title">SILVER CHEST</div><div class="chest-cost" style="color:#cbd5e1; font-weight:bold;">$250,000</div><button class="buy-btn btn-available" data-cost="250000" onclick="buyChest('silver', 250000)">BUY</button></div>
+                <div class="chest-card"><div class="chest-icon">🥇</div><div class="chest-title">GOLD CHEST</div><div class="chest-cost" style="color:#facc15; font-weight:bold;">$10,000,000</div><button class="buy-btn btn-available" data-cost="10000000" onclick="buyChest('gold', 10000000)">BUY</button></div>
+                <div class="chest-card"><div class="chest-icon">🏆</div><div class="chest-title">CHAMPION CHEST</div><div class="chest-cost" style="color:#a855f7; font-weight:bold;">$500,000,000</div><button class="buy-btn btn-available" data-cost="500000000" onclick="buyChest('champion', 500000000)">BUY</button></div>
             </div>
             <h3 style="text-align:center; color:#f59e0b; margin-top:40px; margin-bottom:15px;">💎 YOUR LOOTED ARTIFACTS</h3>
             <div id="lootMarketplaceContainer"></div>
+        </div>
+
+        <div id="marketv2View" class="tab-view hidden">
+             <div class="section-header" style="color:#34d399; margin-top:0;">MARKET PLACE V2 - BUY ITEMS</div>
+             <p style="text-align:center; margin-bottom:20px; color:#94a3b8;">Purchase rare artifacts listed by other players.</p>
+             <div id="globalMarketGrid" class="orb-grid">Loading market...</div>
+
+             <div class="section-header" style="color:#facc15; margin-top:50px;">SELL YOUR ARTIFACTS</div>
+             <p style="text-align:center; margin-bottom:20px; color:#94a3b8;">Select a looted artifact to list on the market.</p>
+             
+             <div id="sellInterface" class="sell-form hidden">
+                <h4 id="sellItemName" style="margin-bottom:15px; color:#6366f1;"></h4>
+                <div id="sellItemVisual" style="margin-bottom:15px;"></div>
+                <label style="display:block; text-align:left; font-size:12px; color:#94a3b8; font-weight:bold; margin-bottom:5px;">ASKING PRICE ($)</label>
+                <input type="number" id="sellPriceInput" placeholder="Price">
+                <div style="display:flex; gap:10px;">
+                    <button onclick="confirmListing()" class="btn-available">LIST ITEM</button>
+                    <button onclick="document.getElementById('sellInterface').classList.add('hidden')" style="background:#334155;">CANCEL</button>
+                </div>
+             </div>
+
+             <div id="mySellableGrid" class="orb-grid"></div>
         </div>
 
         <div id="prestigeView" class="tab-view hidden">
@@ -478,7 +524,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, updateDoc, onSnapshot, query, collection, where, getDocs, increment, orderBy, addDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, updateDoc, onSnapshot, query, collection, where, getDocs, increment, orderBy, addDoc, arrayUnion, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = { apiKey: "AIzaSyBo2zhESYzv1OChHSAfSb2GLiP6XtI6q1s", authDomain: "mailcash-3da79.firebaseapp.com", projectId: "mailcash-3da79", storageBucket: "mailcash-3da79.firebasestorage.app", messagingSenderId: "9602664972", appId: "1:9602664972:web:2ded4f3a7f583558513c29" };
     const app = initializeApp(firebaseConfig);
@@ -497,6 +543,7 @@
     let pendingSellId = null;
     let pendingSellRefund = 0;
     let lastCollectionHash = "";
+    let selectedOrbForSale = null;
 
     const ORB_DATA = [
         { id: 'orb1', name: 'Apprentice Orb', baseCost: 15, baseInc: 1, time: 600, color: '#3b82f6' },
@@ -592,6 +639,7 @@
                         renderCollection();
                         renderUniqueLoot(); 
                         renderResearch(); 
+                        renderMarketV2(); // Re-render sell grid if inventory changes
                         lastCollectionHash = currentCollectionHash;
                     }
                     
@@ -745,16 +793,14 @@
         document.getElementById('passiveSecDisplay').innerText = Math.floor(totalPPS).toLocaleString();
 
         const upgradeBtn = document.getElementById('upgradeClickBtn');
-        if (currentLevel >= 100 || userData.balance < clickCost) {
-            upgradeBtn.innerText = currentLevel >= 100 ? "MAXED" : `UPGRADE $${clickCost.toLocaleString()}`;
-            upgradeBtn.style.background = "#334155";
-            upgradeBtn.style.color = "#64748b";
-            upgradeBtn.style.cursor = "not-allowed";
+        if (currentLevel >= 100) {
+            upgradeBtn.innerText = "MAXED";
+            upgradeBtn.classList.remove('btn-available');
+            upgradeBtn.classList.add('btn-locked');
+            upgradeBtn.classList.add('maxed'); // Marker for loop
         } else {
-            upgradeBtn.innerHTML = `UPGRADE $<span id="clickCost">${clickCost.toLocaleString()}</span>`;
-            upgradeBtn.style.background = "#6366f1";
-            upgradeBtn.style.color = "white";
-            upgradeBtn.style.cursor = "pointer";
+             upgradeBtn.innerHTML = `UPGRADE $<span id="clickCost">${clickCost.toLocaleString()}</span>`;
+             upgradeBtn.setAttribute('data-cost', clickCost);
         }
         
         const pts = (userData.prestigePoints || 0);
@@ -812,7 +858,7 @@
             const div = document.createElement('div'); div.className = 'orb-item';
             
             let btnLabel = isMaxed ? "MAXED (80/80)" : (isUnlocked ? `$${cost.toLocaleString()}` : "LOCKED");
-            let btnClass = (userData.balance >= cost && isUnlocked && !isMaxed) ? 'btn-available' : 'btn-locked';
+            let btnClass = 'btn-locked';
 
             const visualHTML = generateOrbHTML(orb, owned);
             div.innerHTML = `
@@ -827,12 +873,158 @@
                     <div class="owned-counter">Owned: ${owned} / 80</div>
                     <div class="progress-bg"><div class="progress-fill" id="bar-${orb.id}"></div></div>
                 ` : ''}
-                <button onclick="buyOrb('${orb.id}', ${cost}, ${owned})" class="buy-btn ${btnClass}">${btnLabel}</button>
+                <button onclick="buyOrb('${orb.id}', ${cost}, ${owned})" class="buy-btn ${btnClass}" data-cost="${cost}" ${!isUnlocked || isMaxed ? 'disabled' : ''}>${btnLabel}</button>
             `;
             if (!isUnlocked) div.innerHTML += `<div class="blur-lock"><div class="lock-q">?</div></div>`;
             grid.appendChild(div);
         });
     }
+
+    // --- MARKET V2 FUNCTIONS ---
+    window.renderMarketV2 = async () => {
+        // 1. Render Global Listings (Buy)
+        const marketGrid = document.getElementById('globalMarketGrid');
+        marketGrid.innerHTML = 'Loading listings...';
+        
+        onSnapshot(collection(db, "market_listings"), (snap) => {
+            if (snap.empty) {
+                marketGrid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:20px; color:#94a3b8; border:2px dashed #334155; border-radius:12px;">No items currently listed. Be the first!</div>';
+                return;
+            }
+            marketGrid.innerHTML = '';
+            snap.forEach(doc => {
+                const item = doc.data();
+                const listingId = doc.id;
+                // Don't show own listings in buy area (optional, but good UX)
+                if (item.sellerUid === myUid) return;
+
+                const div = document.createElement('div'); 
+                div.className = 'orb-item';
+                div.innerHTML = `
+                    <div class="orb-lvl-badge" style="background:#059669; border-color:#34d399;">FOR SALE</div>
+                    <div class="visual-container"><div class="unique-loot-visual" style="color:${item.orb.color};"></div></div>
+                    <b>${item.orb.name}</b>
+                    <div style="color:#94a3b8; font-size:12px;">Seller: @${item.sellerName}</div>
+                    <div style="margin: 10px 0;"><span class="mkt-price-tag">$${parseInt(item.price).toLocaleString()}</span></div>
+                    <div style="color:#10b981; font-size:12px;">Income: +$${item.orb.income.toLocaleString()}/s</div>
+                    <button class="buy-btn btn-locked" data-cost="${item.price}" onclick="buyMarketItem('${listingId}', ${item.price})">BUY NOW</button>
+                `;
+                marketGrid.appendChild(div);
+            });
+            if (marketGrid.innerHTML === '') marketGrid.innerHTML = '<div style="grid-column: 1/-1; text-align:center;">No items from other players.</div>';
+        });
+
+        // 2. Render My Sellable Inventory
+        const sellGrid = document.getElementById('mySellableGrid');
+        sellGrid.innerHTML = '';
+        if (userData.uniqueOrbs && userData.uniqueOrbs.length > 0) {
+            userData.uniqueOrbs.forEach(orb => {
+                const div = document.createElement('div');
+                div.className = 'orb-item';
+                div.innerHTML = `
+                    <div class="visual-container"><div class="unique-loot-visual" style="color:${orb.color};"></div></div>
+                    <b>${orb.name}</b>
+                    <div style="color:#10b981; font-size:12px;">+$${orb.income.toLocaleString()}/s</div>
+                    <button class="buy-btn btn-available" style="margin-top:10px;" onclick="selectItemForSale('${orb.id}')">SELL THIS</button>
+                `;
+                sellGrid.appendChild(div);
+            });
+        } else {
+            sellGrid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; color:#94a3b8;">You have no artifacts to sell. Open chests to get some!</div>';
+        }
+    };
+
+    window.selectItemForSale = (orbId) => {
+        const orb = userData.uniqueOrbs.find(o => o.id === orbId);
+        if (!orb) return;
+        selectedOrbForSale = orb;
+        
+        document.getElementById('sellInterface').classList.remove('hidden');
+        document.getElementById('sellItemName').innerText = orb.name;
+        document.getElementById('sellItemVisual').innerHTML = `<div class="unique-loot-visual" style="color:${orb.color}; margin:0 auto;"></div>`;
+        document.getElementById('sellPriceInput').value = '';
+        window.scrollTo(0, document.getElementById('sellInterface').offsetTop - 100);
+    };
+
+    window.confirmListing = async () => {
+        const price = parseInt(document.getElementById('sellPriceInput').value);
+        if (!price || price <= 0) return alert("Please enter a valid price.");
+        if (!selectedOrbForSale) return;
+
+        // Optimistic UI
+        const newList = userData.uniqueOrbs.filter(o => o.id !== selectedOrbForSale.id);
+        userData.uniqueOrbs = newList;
+        document.getElementById('sellInterface').classList.add('hidden');
+        renderMarketV2();
+        updateUI();
+
+        // Database
+        try {
+            await addDoc(collection(db, "market_listings"), {
+                sellerUid: myUid,
+                sellerName: userData.username,
+                orb: selectedOrbForSale,
+                price: price,
+                timestamp: Date.now()
+            });
+            await updateDoc(doc(db, "users", myUid), {
+                uniqueOrbs: newList
+            });
+            alert("Item Listed!");
+        } catch (e) {
+            console.error(e);
+            alert("Error listing item.");
+        }
+    };
+
+    window.buyMarketItem = async (listingId, price) => {
+        if (userData.balance < price) return alert("Insufficient Funds");
+        
+        try {
+            // Transactional-ish logic
+            // 1. Get Listing
+            const listingRef = doc(db, "market_listings", listingId);
+            const listingSnap = await getFirestore(app)._databaseId ? null : await getDocs(query(collection(db, "market_listings"), where("__name__", "==", listingId))); // simplified get for this context
+            
+            // Note: In real app, use runTransaction. simplifying here for prototype speed
+            // We read the doc from the snap in the render loop anyway, so assuming it exists.
+            
+            // Deduct Cash locally
+            userData.balance -= price;
+            
+            // Find seller UID from the DOM or re-fetch (DOM has it implicitly in logic, but let's grab doc for safety)
+            // Ideally we pass sellerUid to this function, but for now we assume the listing exists.
+            
+            // Real logic:
+            const listDoc = await getDocs(query(collection(db, "market_listings"))); // Inefficient but functional for prototype
+            let actualDoc = null;
+            listDoc.forEach(d => { if(d.id === listingId) actualDoc = d.data(); });
+
+            if (!actualDoc) return alert("Item already sold!");
+
+            // Update Buyer
+            await updateDoc(doc(db, "users", myUid), {
+                balance: increment(-price),
+                uniqueOrbs: arrayUnion(actualDoc.orb)
+            });
+
+            // Update Seller (Give them money)
+            await updateDoc(doc(db, "users", actualDoc.sellerUid), {
+                balance: increment(price)
+            });
+
+            // Delete Listing
+            await deleteDoc(doc(db, "market_listings", listingId));
+
+            // UI Update
+            updateUI();
+            alert("Purchase Successful!");
+
+        } catch (e) {
+            console.error(e);
+            alert("Transaction failed.");
+        }
+    };
 
     // --- ACHIEVEMENTS RENDER ---
     function renderAchievements() {
@@ -1072,9 +1264,9 @@
                     const div = document.createElement('div'); div.className = 'orb-item'; div.style.minHeight = '220px';
                     let mult = 1;
                     if(userData?.prestigeUpgrades) { 
-                         PRESTIGE_UPGRADES.orbs.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
-                         PRESTIGE_UPGRADES.artifacts.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
-                         PRESTIGE_UPGRADES.global.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
+                          PRESTIGE_UPGRADES.orbs.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
+                          PRESTIGE_UPGRADES.artifacts.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
+                          PRESTIGE_UPGRADES.global.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
                     }
                     const finalInc = Math.floor(orb.income * mult);
                     div.innerHTML = `<div class="gift-tag">FROM @${orb.giftedBy.toUpperCase()}</div><div class="visual-container"><div class="unique-loot-visual" style="color:${orb.color};"></div></div><b>${orb.name}</b><p style="font-size:12px; color:#94a3b8;">${orb.tier.toUpperCase()}</p><div style="color:#10b981; font-weight:800; font-size:14px;">+$${finalInc.toLocaleString()}</div><div class="progress-bg" style="margin-top:10px;"><div class="progress-fill" id="col-gift-bar-${orb.id}"></div></div>`;
@@ -1200,6 +1392,26 @@
                 const giftBar = document.getElementById(`col-gift-bar-${orb.id}`); if(giftBar) giftBar.style.width = pct + "%";
             });
         }
+        
+        // --- BUTTON STATE HIGH FREQUENCY UPDATE (FIX FOR DELAY) ---
+        const totalBal = userData.balance + localBalanceAccumulator;
+        const buyBtns = document.querySelectorAll('.buy-btn');
+        buyBtns.forEach(btn => {
+            if (btn.classList.contains('maxed')) return; 
+            const cost = parseInt(btn.dataset.cost);
+            if (!isNaN(cost)) {
+                if (totalBal >= cost) {
+                    btn.disabled = false;
+                    btn.classList.remove('btn-locked');
+                    btn.classList.add('btn-available');
+                } else {
+                    btn.disabled = true;
+                    btn.classList.add('btn-locked');
+                    btn.classList.remove('btn-available');
+                }
+            }
+        });
+
         updateUI();
     }, 100);
 
@@ -1211,7 +1423,7 @@
     }, 5000);
 
     window.showTab = (tabId) => {
-        const restrictedTabs = ['research', 'marketplace']; 
+        const restrictedTabs = ['research', 'marketplace', 'marketv2']; 
         if (restrictedTabs.includes(tabId)) {
             if (!userData.orbs || !userData.orbs['orb5'] || userData.orbs['orb5'] <= 0) {
                 window.showNotification("🔒 Unlock 'Void Eye' first to access!");
@@ -1229,6 +1441,8 @@
 
         if (tabId === 'prestige') { renderPrestige(); }
         if (tabId === 'achievements') { renderAchievements(); }
+
+        if (tabId === 'marketv2') { renderMarketV2(); }
 
         if (tabId === 'message') {
             const selector = document.getElementById('msgOrbSelector');
@@ -1274,6 +1488,9 @@
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         document.getElementById(tabId + 'View').classList.remove('hidden');
         const tabBtn = document.getElementById('t' + tabId.charAt(0).toUpperCase() + tabId.slice(1, 3)); if(tabBtn) tabBtn.classList.add('active');
+        // Handle "Player Market" ID manually since slice logic is tricky
+        if (tabId === 'marketv2') document.getElementById('tMkt2').classList.add('active');
+        
         if (tabId === 'marketplace') { renderUniqueLoot(); renderDailyChest(); }
         if (tabId === 'collection') renderCollection();
     };
