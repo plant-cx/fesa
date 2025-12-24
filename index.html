@@ -210,15 +210,17 @@
             white-space: pre-wrap; /* Preserve line breaks */
         }
 
-        .cash-highlight {
-            display: inline-block;
-            background: rgba(16, 185, 129, 0.1);
+.cash-highlight {
+            display: block; /* changed from inline-block */
+            width: 100%;    /* take full width */
+            text-align: center;
+            background: rgba(16, 185, 129, 0.15);
             color: #34d399;
-            padding: 2px 8px;
-            border-radius: 6px;
+            padding: 8px 12px;
+            border-radius: 8px;
             font-weight: 800;
             border: 1px solid rgba(16, 185, 129, 0.3);
-            margin: 0 2px;
+            margin-top: 15px; /* push it down from the text */
         }
         
         .empty-inbox {
@@ -1200,9 +1202,7 @@
     window.toggleSettings = () => document.getElementById('settingsMenu').classList.toggle('hidden');
     window.updateProfile = async () => { const n = document.getElementById('setNewUser').value.trim(); if(n) await updateDoc(doc(db, "users", myUid), { username: n }); };
     window.logout = () => signOut(auth).then(() => location.reload());
-
-    /* --- NEW MODERN INBOX LOGIC --- */
-    const loadInbox = () => {
+const loadInbox = () => {
         onSnapshot(query(collection(db, "messages"), where("to", "==", userData.username), orderBy("date", "desc")), s => {
             const container = document.getElementById('mailBox');
             if(s.empty) {
@@ -1216,14 +1216,30 @@
                 const dateObj = new Date(data.date);
                 const dateStr = dateObj.toLocaleDateString() + ' ' + dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                 
-                // Avatar generator based on sender name
+                // Avatar generator
                 const avatarUrl = `https://api.dicebear.com/7.x/identicon/svg?seed=${data.from}`;
 
-                // Highlight Cash if string present
+                // --- NEW LOGIC HERE ---
                 let bodyText = data.body;
-                if(bodyText.includes('[Sent $')) {
-                    // Regex to wrap the cash part in a span
-                    bodyText = bodyText.replace(/\[Sent \$([\d,]+)\]/g, '<span class="cash-highlight">+$1 CASH</span>');
+                let cashHtml = '';
+
+                // Check if message contains the cash tag
+                const cashMatch = bodyText.match(/\[Sent \$([\d,]+)\]/);
+
+                if (cashMatch) {
+                    // Extract the amount (e.g. "500")
+                    const amount = cashMatch[1];
+                    
+                    // Create the footer HTML
+                    cashHtml = `<div class="cash-highlight">💰 ATTACHED: $${amount}</div>`;
+                    
+                    // Remove the tag from the main body text so it doesn't show twice
+                    bodyText = bodyText.replace(/\[Sent \$[\d,]+\]/, '').trim();
+                }
+
+                // If body is empty after removing cash tag (user sent only cash), put a placeholder
+                if (!bodyText && cashHtml) {
+                    bodyText = "<i style='color:#64748b'>Sent you cash...</i>";
                 }
 
                 return `
@@ -1235,7 +1251,10 @@
                                 <div class="msg-time">${dateStr}</div>
                             </div>
                         </div>
-                        <div class="msg-body">${bodyText}</div>
+                        <div class="msg-body">
+                            ${bodyText}
+                        </div>
+                        ${cashHtml} 
                     </div>
                 `;
             }).join('');
@@ -1243,7 +1262,6 @@
             container.innerHTML = html;
         });
     };
-
     window.handleCombinedSend = async () => {
         const to = document.getElementById('msgTo').value.trim().toLowerCase().replace('@', '');
         const body = document.getElementById('msgBody').value;
