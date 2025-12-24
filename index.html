@@ -14,7 +14,7 @@
         
         /* Updated Button Styles */
         button { width: 100%; padding: 16px; background: #6366f1; color: white; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; transition: 0.2s; font-size: 18px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .buy-btn { padding: 10px 16px; font-size: 16px; } /* Smaller Buy Button */
+        .buy-btn { padding: 10px 16px; font-size: 16px; } 
         
         button:disabled, .btn-locked { background: #334155 !important; color: #64748b !important; cursor: not-allowed; border: 1px solid #475569; }
         .btn-available { background: #6366f1; }
@@ -33,120 +33,25 @@
         .tab.active { background: #334155; color: white; border: 1px solid #475569; }
         
         .orb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-top: 25px; transition: all 0.5s ease; }
-        /* Added z-index to title so atoms go behind it */
         .orb-item { background: #0f172a; border: 2px solid #334155; padding: 20px; border-radius: 16px; position: relative; text-align: center; min-height: 280px; display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.3s ease, opacity 0.3s ease; }
         .orb-item b { position: relative; z-index: 25; text-shadow: 0 2px 5px rgba(0,0,0,0.8); }
 
-        /* --- VISUAL ENGINE & EFFECTS --- */
-        .visual-container { 
-            position: relative; 
-            width: 100px; 
-            height: 100px; 
-            margin: 20px auto 10px; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            perspective: 800px; 
-            transform-style: preserve-3d;
-        }
+        /* --- VISUAL ENGINE --- */
+        .visual-container { position: relative; width: 100px; height: 100px; margin: 20px auto 10px; display: flex; justify-content: center; align-items: center; perspective: 800px; transform-style: preserve-3d; }
+        .orb-visual { width: 50px; height: 50px; transition: all 0.5s ease; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10; background: currentColor; box-shadow: 0 0 30px currentColor; border-radius: 50%; }
         
-        .orb-visual { 
-            width: 50px; height: 50px; 
-            transition: all 0.5s ease; 
-            position: absolute; 
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 10; 
-            background: currentColor; 
-            box-shadow: 0 0 30px currentColor; 
-            border-radius: 50%;
-        }
-        
-        /* --- UNIQUE CHEST ORB STYLES (Rounded Square & Flow) --- */
-        .unique-loot-visual {
-            width: 60px; height: 60px;
-            border-radius: 16px; /* Rounded Square */
-            position: relative;
-            background-color: currentColor; /* Base color */
-            overflow: hidden;
-            box-shadow: 0 0 15px currentColor;
-        }
+        .unique-loot-visual { width: 60px; height: 60px; border-radius: 16px; position: relative; background-color: currentColor; overflow: hidden; box-shadow: 0 0 15px currentColor; }
+        .unique-loot-visual::after { content: ''; position: absolute; top: 0; left: 0; width: 200%; height: 200%; background: linear-gradient(135deg, transparent 20%, rgba(255,255,255,0.4) 50%, transparent 80%); animation: shimmerFlow 3s infinite linear; }
+        @keyframes shimmerFlow { 0% { transform: translate(-50%, -50%); } 100% { transform: translate(0%, 0%); } }
 
-        .unique-loot-visual::after {
-            content: '';
-            position: absolute;
-            top: 0; left: 0;
-            width: 200%; height: 200%;
-            background: linear-gradient(135deg, transparent 20%, rgba(255,255,255,0.4) 50%, transparent 80%);
-            animation: shimmerFlow 3s infinite linear;
-        }
-
-        @keyframes shimmerFlow {
-            0% { transform: translate(-50%, -50%); }
-            100% { transform: translate(0%, 0%); }
-        }
-
-        /* --- FIXED ORBIT ENGINE --- */
-        .atom-cloud {
-            position: absolute;
-            top: 50%; left: 50%;
-            width: 100%; height: 100%;
-            transform: translate(-50%, -50%);
-            transform-style: preserve-3d;
-            pointer-events: none;
-            z-index: 15; /* Above the orb, but below title (25) */
-        }
-
-        .atom-ring-wrapper {
-            position: absolute;
-            top: 50%; left: 50%;
-            width: 160%; height: 160%; 
-            border-radius: 50%;
-            transform-style: preserve-3d;
-            border: 1px solid rgba(255,255,255,0.08);
-        }
-
-        .atom-spinner {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            border-radius: 50%;
-            transform-style: preserve-3d;
-        }
-
-        .atom-electron {
-            position: absolute;
-            top: 0; left: 50%;
-            width: 6px; height: 6px;
-            background: #ffffff;
-            border-radius: 50%;
-            box-shadow: 0 0 8px #ffffff, 0 0 15px currentColor;
-            transform: translate(-50%, -50%);
-        }
-
+        .atom-cloud { position: absolute; top: 50%; left: 50%; width: 100%; height: 100%; transform: translate(-50%, -50%); transform-style: preserve-3d; pointer-events: none; z-index: 15; }
+        .atom-ring-wrapper { position: absolute; top: 50%; left: 50%; width: 160%; height: 160%; border-radius: 50%; transform-style: preserve-3d; border: 1px solid rgba(255,255,255,0.08); }
+        .atom-spinner { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; transform-style: preserve-3d; }
+        .atom-electron { position: absolute; top: 0; left: 50%; width: 6px; height: 6px; background: #ffffff; border-radius: 50%; box-shadow: 0 0 8px #ffffff, 0 0 15px currentColor; transform: translate(-50%, -50%); }
         @keyframes atomSpin { 0% { transform: rotateZ(0deg); } 100% { transform: rotateZ(360deg); } }
 
-        /* --- CELESTIAL VISUAL FX ENGINE (RESEARCH) --- */
-        .celestial-wrapper {
-            position: absolute;
-            top: 50%; left: 50%;
-            width: 100%; height: 100%;
-            transform: translate(-50%, -50%);
-            pointer-events: none;
-            z-index: 1;
-            perspective: 800px;
-            transform-style: preserve-3d;
-        }
-
-        .celestial-glow {
-            position: absolute; top: 50%; left: 50%;
-            width: 140%; height: 140%;
-            transform: translate(-50%, -50%);
-            background: radial-gradient(circle, currentColor 0%, transparent 70%);
-            opacity: 0.3;
-            mix-blend-mode: screen;
-            animation: pulseGlow 3s infinite alternate;
-        }
+        .celestial-wrapper { position: absolute; top: 50%; left: 50%; width: 100%; height: 100%; transform: translate(-50%, -50%); pointer-events: none; z-index: 1; perspective: 800px; transform-style: preserve-3d; }
+        .celestial-glow { position: absolute; top: 50%; left: 50%; width: 140%; height: 140%; transform: translate(-50%, -50%); background: radial-gradient(circle, currentColor 0%, transparent 70%); opacity: 0.3; mix-blend-mode: screen; animation: pulseGlow 3s infinite alternate; }
 
         .c-system { position: absolute; top: 50%; left: 50%; transform-style: preserve-3d; border-radius: 50%; }
         .c-path { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 1px solid currentColor; border-radius: 50%; box-shadow: 0 0 4px currentColor; opacity: 0.6; box-sizing: border-box; }
@@ -165,14 +70,11 @@
         @keyframes ballRun { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         .fx-core { color: #3b82f6; } .fx-magic { color: #a855f7; } .fx-power { color: #ef4444; } .fx-wisdom { color: #10b981; } .fx-strength { color: #f97316; }
-
         @keyframes pulseGlow { 0% { opacity: 0.2; transform: translate(-50%, -50%) scale(0.9); } 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1.1); } }
 
         .orb-item .orb-lvl-badge { position: absolute; top: 10px; right: 10px; background: #334155; color: #94a3b8; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 800; border: 1px solid #475569; z-index: 5; }
-
         .sell-btn-corner { position: absolute; top: 10px; left: 10px; width: auto; height: 28px; padding: 0 8px; background: #ef4444; color: white; border-radius: 6px; font-weight: 900; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 11px; border: 2px solid #b91c1c; z-index: 25; letter-spacing: 0.5px; }
         .sell-btn-corner:hover { background: #dc2626; }
-
         .owned-counter { font-size: 14px; color: #94a3b8; font-weight: 700; background: #1e293b; padding: 4px 12px; border-radius: 20px; display: inline-block; margin: 5px auto; border: 1px solid #334155; }
 
         .preview-box { background: radial-gradient(circle at center, #1e293b 0%, #020617 100%); border-radius: 12px; height: 300px; display: flex; flex-direction: column; justify-content: center; align-items: center; margin-bottom: 25px; border: 2px solid; border-color: currentColor; position: relative; overflow: hidden; box-shadow: inset 0 0 60px rgba(0,0,0,0.8); perspective: 800px; color: #6366f1; }
@@ -181,7 +83,6 @@
 
         .research-sphere { width: 100px; height: 100px; border-radius: 50%; position: relative; z-index: 10; background: currentColor; box-shadow: inset -15px -15px 30px rgba(0,0,0,0.6), inset 10px 10px 30px rgba(255,255,255,0.4), 0 0 50px currentColor; animation: sphereFloat 4s ease-in-out infinite; }
         @keyframes sphereFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
-
         .gyro-ring { position: absolute; top: 50%; left: 50%; border: 2px solid rgba(255,255,255,0.05); border-top: 2px solid currentColor; border-bottom: 2px solid currentColor; border-radius: 50%; box-shadow: 0 0 10px currentColor; pointer-events: none; z-index: 5; opacity: 0.8; }
         .ring-1 { width: 180px; height: 180px; margin: -90px; animation: spin1 4s linear infinite; }
         .ring-2 { width: 140px; height: 140px; margin: -70px; animation: spin2 5s linear infinite; }
@@ -220,12 +121,12 @@
         .prestige-card { min-width: 200px; background: #1e293b; border: 2px solid #475569; padding: 15px; border-radius: 12px; text-align: center; }
         .prestige-card.owned { border-color: #10b981; opacity: 0.7; }
         
-        /* UPDATED SCROLLBAR FOR PRESTIGE ROWS */
+        /* UPDATED SCROLLBAR - LIGHTER TRACK */
         .prestige-row { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 25px; }
         .prestige-row::-webkit-scrollbar { height: 8px; }
-        .prestige-row::-webkit-scrollbar-track { background: #0f172a; border-radius: 4px; }
-        .prestige-row::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; border: 1px solid #475569; }
-        .prestige-row::-webkit-scrollbar-thumb:hover { background: #475569; }
+        .prestige-row::-webkit-scrollbar-track { background: #334155; border-radius: 4px; } /* Lighter Track */
+        .prestige-row::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; border: 1px solid #334155; }
+        .prestige-row::-webkit-scrollbar-thumb:hover { background: #64748b; }
 
         .loot-popup-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; display:flex; justify-content:center; align-items:center; }
         .loot-popup-card { background: #1e293b; padding:40px; border-radius:20px; text-align:center; max-width:400px; width:90%; border:2px solid #6366f1; animation: popIn 0.3s ease-out; }
@@ -243,6 +144,14 @@
         .tut-electron { position: absolute; width: 4px; height: 4px; background: white; border-radius: 50%; box-shadow: 0 0 5px white; top: 0; left: 50%; transform: translate(-50%, -50%); }
         .tut-gold-ring { position: absolute; top:50%; left:50%; width:60px; height:60px; border:2px solid #facc15; border-radius:50%; margin:-30px 0 0 -30px; opacity:0.6; }
         @keyframes tutSpin { 0% { transform: translate(-50%, -50%) rotate(0deg); } 100% { transform: translate(-50%, -50%) rotate(360deg); } }
+
+        /* Achievement Styles */
+        .achievement-list { display: grid; grid-template-columns: 1fr; gap: 10px; }
+        .achievement-card { display: flex; align-items: center; gap: 15px; padding: 15px; background: #1e293b; border: 1px solid #334155; border-radius: 12px; opacity: 0.6; filter: grayscale(1); transition: 0.3s; }
+        .achievement-card.unlocked { opacity: 1; filter: grayscale(0); border-color: #6366f1; background: #0f172a; }
+        .ach-icon { font-size: 24px; min-width: 40px; text-align: center; }
+        .ach-info b { display: block; color: #f8fafc; font-size: 16px; margin-bottom: 4px; }
+        .ach-info p { font-size: 13px; color: #94a3b8; }
     </style>
 </head>
 <body>
@@ -305,6 +214,7 @@
             <div id="tEar" class="tab active" onclick="showTab('earn')">EARN</div>
             <div id="tRes" class="tab" onclick="showTab('research')">RESEARCH</div>
             <div id="tCol" class="tab" onclick="showTab('collection')">COLLECTION</div>
+            <div id="tAch" class="tab" onclick="showTab('achievements')">ACHIEVEMENTS</div>
             <div id="tMkt" class="tab" onclick="showTab('marketplace')">MARKET</div>
             <div id="tIn" class="tab" onclick="showTab('inbox')">INBOX</div>
             <div id="tMsg" class="tab" onclick="showTab('message')">SEND</div>
@@ -324,46 +234,27 @@
                         </button>
                     </div>
                 </div>
+                <div style="margin: 10px auto 25px; padding: 10px; background: #1e293b; border: 1px solid #334155; border-radius: 12px; max-width: 300px; color: #94a3b8; font-size: 14px; font-weight: 700;">
+                    PASSIVE: <span style="color: #10b981;">$<span id="passiveSecDisplay">0</span> / sec</span>
+                </div>
             </div>
             <div class="orb-grid" id="orbGrid"></div>
+        </div>
+
+        <div id="achievementsView" class="tab-view hidden">
+            <h3 style="text-align:center; color:#6366f1; margin-bottom:25px;">🏆 ACHIEVEMENTS</h3>
+            <div class="achievement-list" id="achievementsList"></div>
         </div>
 
         <div id="researchView" class="tab-view hidden" style="position:relative;">
             <div id="researchTutorial" class="tutorial-overlay hidden">
                 <h2 style="color:#facc15; margin-bottom:30px; font-size:28px;">ORB EVOLUTION</h2>
                 <div class="tutorial-flow">
-                    <div class="evo-step">
-                        <div class="evo-orb-box">
-                            <div class="tut-center-orb"></div>
-                        </div>
-                        <div style="font-size:12px; color:#94a3b8;">BASIC</div>
-                    </div>
+                    <div class="evo-step"><div class="evo-orb-box"><div class="tut-center-orb"></div></div><div style="font-size:12px; color:#94a3b8;">BASIC</div></div>
                     <div class="evo-arrow">➜</div>
-                    <div class="evo-step">
-                        <div class="evo-orb-box">
-                             <div class="tut-center-orb"></div>
-                             <div class="tut-orbit" style="animation: tutSpin 2s linear infinite;"><div class="tut-electron"></div></div>
-                             <div class="tut-orbit" style="width:40px; height:40px; animation: tutSpin 3s linear infinite reverse; transform:translate(-50%, -50%) rotate(90deg);"><div class="tut-electron"></div></div>
-                        </div>
-                        <div style="font-size:12px; color:#94a3b8;">RESEARCHED</div>
-                    </div>
+                    <div class="evo-step"><div class="evo-orb-box"><div class="tut-center-orb"></div><div class="tut-orbit" style="animation: tutSpin 2s linear infinite;"><div class="tut-electron"></div></div><div class="tut-orbit" style="width:40px; height:40px; animation: tutSpin 3s linear infinite reverse; transform:translate(-50%, -50%) rotate(90deg);"><div class="tut-electron"></div></div></div><div style="font-size:12px; color:#94a3b8;">RESEARCHED</div></div>
                     <div class="evo-arrow">➜</div>
-                    <div class="evo-step">
-                        <div class="evo-orb-box">
-                            <div class="tut-center-orb" style="background:#facc15; box-shadow:0 0 15px #facc15;"></div>
-                            
-                            <div class="tut-orbit" style="animation: tutSpin 2s linear infinite; border-color:rgba(250, 204, 21, 0.3);">
-                                <div class="tut-electron" style="background:#facc15; box-shadow:0 0 5px #facc15;"></div>
-                            </div>
-                            <div class="tut-orbit" style="width:40px; height:40px; animation: tutSpin 3s linear infinite reverse; transform:translate(-50%, -50%) rotate(90deg); border-color:rgba(250, 204, 21, 0.3);">
-                                <div class="tut-electron" style="background:#facc15; box-shadow:0 0 5px #facc15;"></div>
-                            </div>
-                            <div class="tut-orbit" style="width:70px; height:70px; animation: tutSpin 5s linear infinite; border-color:rgba(250, 204, 21, 0.3);">
-                                <div class="tut-electron" style="background:#facc15; box-shadow:0 0 5px #facc15;"></div>
-                            </div>
-                        </div>
-                        <div style="font-size:12px; color:#facc15; font-weight:bold;">ASCENDED</div>
-                    </div>
+                    <div class="evo-step"><div class="evo-orb-box"><div class="tut-center-orb" style="background:#facc15; box-shadow:0 0 15px #facc15;"></div><div class="tut-orbit" style="animation: tutSpin 2s linear infinite; border-color:rgba(250, 204, 21, 0.3);"><div class="tut-electron" style="background:#facc15; box-shadow:0 0 5px #facc15;"></div></div><div class="tut-orbit" style="width:40px; height:40px; animation: tutSpin 3s linear infinite reverse; transform:translate(-50%, -50%) rotate(90deg); border-color:rgba(250, 204, 21, 0.3);"><div class="tut-electron" style="background:#facc15; box-shadow:0 0 5px #facc15;"></div></div><div class="tut-orbit" style="width:70px; height:70px; animation: tutSpin 5s linear infinite; border-color:rgba(250, 204, 21, 0.3);"><div class="tut-electron" style="background:#facc15; box-shadow:0 0 5px #facc15;"></div></div></div><div style="font-size:12px; color:#facc15; font-weight:bold;">ASCENDED</div></div>
                 </div>
                 <p style="color:#cbd5e1; max-width:400px; text-align:center; margin-bottom:30px; font-size:14px;">Unlock the hidden potential of your Orbs to multiply their power and visual effects.</p>
                 <button class="tut-btn" onclick="closeResearchTutorial()">UNDERSTOOD</button>
@@ -375,28 +266,20 @@
             </div>
 
             <div class="research-layout">
-                <div class="research-list" id="researchOrbList">
-                    </div>
+                <div class="research-list" id="researchOrbList"></div>
                 <div id="researchPanel" class="research-panel hidden">
-                    
                     <div class="preview-box" id="researchVisualBox">
                         <div class="holo-floor"></div>
                         <div class="gyro-ring ring-1"></div>
                         <div class="gyro-ring ring-2"></div>
                         <div class="gyro-ring ring-3"></div>
-                        
                         <div id="researchPreview"></div>
-
                         <div class="research-overlay-text">ANALYSIS IN PROGRESS</div>
                     </div>
-
                     <h2 id="researchOrbName" style="margin-bottom: 20px;">Orb Name</h2>
-                    
                     <div id="statContainer"></div>
                 </div>
-                <div id="researchPlaceholder" style="background:#1e293b; border-radius:16px; display:flex; align-items:center; justify-content:center; color:#64748b; height: 100%;">
-                    Select an owned orb to begin research.
-                </div>
+                <div id="researchPlaceholder" style="background:#1e293b; border-radius:16px; display:flex; align-items:center; justify-content:center; color:#64748b; height: 100%;">Select an owned orb to begin research.</div>
             </div>
         </div>
 
@@ -431,33 +314,11 @@
                     <button id="dailyClaimBtn" class="buy-btn" onclick="claimDailyChest()">CLAIM</button>
                     <div id="dailyTimer" style="font-size:12px; color:#94a3b8; margin-top:5px; display:none;">Wait: <span id="dailyTimeLeft">00:00:00</span></div>
                 </div>
-
-                <div class="chest-card">
-                    <div class="chest-icon">🥉</div>
-                    <div class="chest-title">BRONZE CHEST</div>
-                    <div class="chest-cost" style="color:#d97706; font-weight:bold;">$25,000</div>
-                    <button class="buy-btn btn-available" onclick="buyChest('bronze', 25000)">BUY</button>
-                </div>
-                <div class="chest-card">
-                    <div class="chest-icon">🥈</div>
-                    <div class="chest-title">SILVER CHEST</div>
-                    <div class="chest-cost" style="color:#cbd5e1; font-weight:bold;">$250,000</div>
-                    <button class="buy-btn btn-available" onclick="buyChest('silver', 250000)">BUY</button>
-                </div>
-                <div class="chest-card">
-                    <div class="chest-icon">🥇</div>
-                    <div class="chest-title">GOLD CHEST</div>
-                    <div class="chest-cost" style="color:#facc15; font-weight:bold;">$10,000,000</div>
-                    <button class="buy-btn btn-available" onclick="buyChest('gold', 10000000)">BUY</button>
-                </div>
-                <div class="chest-card">
-                    <div class="chest-icon">🏆</div>
-                    <div class="chest-title">CHAMPION CHEST</div>
-                    <div class="chest-cost" style="color:#a855f7; font-weight:bold;">$500,000,000</div>
-                    <button class="buy-btn btn-available" onclick="buyChest('champion', 500000000)">BUY</button>
-                </div>
+                <div class="chest-card"><div class="chest-icon">🥉</div><div class="chest-title">BRONZE CHEST</div><div class="chest-cost" style="color:#d97706; font-weight:bold;">$25,000</div><button class="buy-btn btn-available" onclick="buyChest('bronze', 25000)">BUY</button></div>
+                <div class="chest-card"><div class="chest-icon">🥈</div><div class="chest-title">SILVER CHEST</div><div class="chest-cost" style="color:#cbd5e1; font-weight:bold;">$250,000</div><button class="buy-btn btn-available" onclick="buyChest('silver', 250000)">BUY</button></div>
+                <div class="chest-card"><div class="chest-icon">🥇</div><div class="chest-title">GOLD CHEST</div><div class="chest-cost" style="color:#facc15; font-weight:bold;">$10,000,000</div><button class="buy-btn btn-available" onclick="buyChest('gold', 10000000)">BUY</button></div>
+                <div class="chest-card"><div class="chest-icon">🏆</div><div class="chest-title">CHAMPION CHEST</div><div class="chest-cost" style="color:#a855f7; font-weight:bold;">$500,000,000</div><button class="buy-btn btn-available" onclick="buyChest('champion', 500000000)">BUY</button></div>
             </div>
-            
             <h3 style="text-align:center; color:#f59e0b; margin-top:40px; margin-bottom:15px;">💎 YOUR LOOTED ARTIFACTS</h3>
             <div id="lootMarketplaceContainer"></div>
         </div>
@@ -465,26 +326,18 @@
         <div id="prestigeView" class="tab-view hidden">
             <div class="prestige-banner">
                 <h2 style="font-size:36px; margin-bottom:10px;">PRESTIGE SHOP</h2>
-                <div style="font-size:24px; font-weight:900; background:rgba(0,0,0,0.3); padding:15px; border-radius:12px; display:inline-block; border:1px solid #a855f7;">
-                    AVAILABLE POINTS: <span id="prestigePointsDisplay" style="color:#facc15">0</span>
-                </div>
+                <div style="font-size:24px; font-weight:900; background:rgba(0,0,0,0.3); padding:15px; border-radius:12px; display:inline-block; border:1px solid #a855f7;">AVAILABLE POINTS: <span id="prestigePointsDisplay" style="color:#facc15">0</span></div>
                 <div style="margin-top:25px;">
                     <div style="margin-bottom:10px; font-size:14px; color:#cbd5e1;">Available on Reset: <b id="pendingPrestigePoints" style="color:#facc15; font-size:18px;">0</b> Points</div>
                     <p style="font-size:12px; color:#94a3b8; margin-bottom:10px;">Requires $1 Billion Balance to Prestige</p>
                     <button id="doPrestigeBtn" onclick="doPrestige()" style="background:#ef4444; max-width:300px;">RESET & PRESTIGE NOW</button>
                 </div>
             </div>
-            
-            <h3 style="margin-bottom:15px; color:#a855f7; border-left:4px solid #a855f7; padding-left:10px;">🖱️ CLICK MULTIPLIERS</h3>
-            <div class="prestige-row" id="pRowClick"></div>
-            <h3 style="margin-bottom:15px; color:#38bdf8; border-left:4px solid #38bdf8; padding-left:10px;">🔮 ORB MULTIPLIERS</h3>
-            <div class="prestige-row" id="pRowOrb"></div>
-            <h3 style="margin-bottom:15px; color:#f59e0b; border-left:4px solid #f59e0b; padding-left:10px;">💎 ARTIFACT HUNTERS</h3>
-            <div class="prestige-row" id="pRowArtifacts"></div>
-            <h3 style="margin-bottom:15px; color:#2dd4bf; border-left:4px solid #2dd4bf; padding-left:10px;">🌍 GLOBAL EMPIRE</h3>
-            <div class="prestige-row" id="pRowGlobal"></div>
-            <h3 style="margin-bottom:15px; color:#f43f5e; border-left:4px solid #f43f5e; padding-left:10px;">⚡ CLICK FRENZY</h3>
-            <div class="prestige-row" id="pRowFrenzy"></div>
+            <h3 style="margin-bottom:15px; color:#a855f7; border-left:4px solid #a855f7; padding-left:10px;">🖱️ CLICK MULTIPLIERS</h3><div class="prestige-row" id="pRowClick"></div>
+            <h3 style="margin-bottom:15px; color:#38bdf8; border-left:4px solid #38bdf8; padding-left:10px;">🔮 ORB MULTIPLIERS</h3><div class="prestige-row" id="pRowOrb"></div>
+            <h3 style="margin-bottom:15px; color:#f59e0b; border-left:4px solid #f59e0b; padding-left:10px;">💎 ARTIFACT HUNTERS</h3><div class="prestige-row" id="pRowArtifacts"></div>
+            <h3 style="margin-bottom:15px; color:#2dd4bf; border-left:4px solid #2dd4bf; padding-left:10px;">🌍 GLOBAL EMPIRE</h3><div class="prestige-row" id="pRowGlobal"></div>
+            <h3 style="margin-bottom:15px; color:#f43f5e; border-left:4px solid #f43f5e; padding-left:10px;">⚡ CLICK FRENZY</h3><div class="prestige-row" id="pRowFrenzy"></div>
         </div>
 
         <div id="inboxView" class="tab-view hidden"><div id="mailBox">Loading...</div></div>
@@ -520,24 +373,20 @@
     const uniqueOrbProgress = {};
     let searchFilter = "";
     let selectedResearchOrb = null;
-    let transactionLock = false; // Lock to prevent race conditions
-    
-    // Variables for sell confirmation
+    let transactionLock = false; 
     let pendingSellId = null;
     let pendingSellRefund = 0;
-
-    // Track previous state to prevent flickering
     let lastCollectionHash = "";
 
     const ORB_DATA = [
-        { id: 'orb1', name: 'Apprentice Orb', baseCost: 15, baseInc: 1, time: 600, color: '#3b82f6' }, // Fast tick, low yield (Hook)
-        { id: 'orb2', name: 'Red Dwarf', baseCost: 500, baseInc: 25, time: 2500, color: '#ef4444' }, // First hurdle
-        { id: 'orb3', name: 'Emerald Core', baseCost: 12000, baseInc: 350, time: 5000, color: '#10b981' }, // Mid-game start
+        { id: 'orb1', name: 'Apprentice Orb', baseCost: 15, baseInc: 1, time: 600, color: '#3b82f6' },
+        { id: 'orb2', name: 'Red Dwarf', baseCost: 500, baseInc: 25, time: 2500, color: '#ef4444' },
+        { id: 'orb3', name: 'Emerald Core', baseCost: 12000, baseInc: 350, time: 5000, color: '#10b981' },
         { id: 'orb4', name: 'Golden Sun', baseCost: 150000, baseInc: 2200, time: 10000, color: '#f59e0b' },
-        { id: 'orb5', name: 'Void Eye', baseCost: 2000000, baseInc: 15000, time: 4000, color: '#8b5cf6' }, // Fast ticker, expensive
+        { id: 'orb5', name: 'Void Eye', baseCost: 2000000, baseInc: 15000, time: 4000, color: '#8b5cf6' },
         { id: 'orb6', name: 'Cyan Nova', baseCost: 25000000, baseInc: 300000, time: 12000, color: '#06b6d4' },
         { id: 'orb7', name: 'Plasma Heart', baseCost: 450000000, baseInc: 2500000, time: 8000, color: '#ec4899' },
-        { id: 'orb8', name: 'Neutron Star', baseCost: 8000000000, baseInc: 35000000, time: 20000, color: '#f8fafc' }, // The Wall
+        { id: 'orb8', name: 'Neutron Star', baseCost: 8000000000, baseInc: 35000000, time: 20000, color: '#f8fafc' },
         { id: 'orb9', name: 'Dark Matter', baseCost: 150000000000, baseInc: 500000000, time: 30000, color: '#475569' },
         { id: 'orb10', name: 'Singularity', baseCost: 5000000000000, baseInc: 12000000000, time: 15000, color: '#fbbf24' }
     ];
@@ -545,42 +394,35 @@
     const RESEARCH_TYPES = ['core', 'magic', 'power', 'wisdom', 'strength'];
     const RESEARCH_BASE_COST = 25000; 
 
+    const ACHIEVEMENTS = [
+        {id:'ach1',name:'First Mail Sent',desc:'Send your first mail.',icon:'📨'},
+        {id:'ach2',name:'Cash Collector',desc:'Earn $1,000.',icon:'💰'},
+        {id:'ach3',name:'Big Bucks',desc:'Reach $100,000.',icon:'💰'},
+        {id:'ach4',name:'Millionaire',desc:'Reach $1,000,000.',icon:'🤑'},
+        {id:'ach5',name:'Orb Novice',desc:'Open 10 chests.',icon:'📦'},
+        {id:'ach6',name:'Orb Veteran',desc:'Open 100 chests.',icon:'📦'},
+        {id:'ach7',name:'Research Rookie',desc:'Complete your first orb research.',icon:'🧪'},
+        {id:'ach8',name:'Collector',desc:'Own 50 different orbs.',icon:'🛍️'},
+        {id:'ach9',name:'Hoarder',desc:'Own 200 orbs total.',icon:'🗄️'},
+        {id:'ach10',name:'Clickstarter',desc:'Perform 100 clicks.',icon:'👆'},
+        {id:'ach11',name:'Standard Collector',desc:'Collect all standard orbs.',icon:'🎨'},
+        {id:'ach12',name:'First Prestige',desc:'Prestige your empire once.',icon:'🔥'},
+        {id:'ach13',name:'Market Master',desc:'Complete your first artifact sale.',icon:'🤝'},
+        {id:'ach14',name:'Investor',desc:'Buy your first upgrade.',icon:'📈'},
+        {id:'ach15',name:'Upgrade Addict',desc:'Buy 100 upgrades.',icon:'💉'},
+        {id:'ach16',name:'Champion Hoarder',desc:'Collect all champion chests.',icon:'🏆'},
+        {id:'ach17',name:'Completionist I',desc:'Unlock 10 achievements.',icon:'🎖️'},
+        {id:'ach18',name:'Secret Finder',desc:'Trigger a hidden event.',icon:'❓'},
+        {id:'ach19',name:'No Help Needed',desc:'Reach $10,000 without upgrades.',icon:'💪'},
+        {id:'ach20',name:'Legendary',desc:'Unlock all other achievements.',icon:'👑'}
+    ];
+
     const PRESTIGE_UPGRADES = {
-        clicks: [
-            { id: 'p_click_1', name: 'Iron Clicks', mult: 1.5, cost: 5 }, 
-            { id: 'p_click_2', name: 'Golden Finger', mult: 2.5, cost: 25 }, 
-            { id: 'p_click_3', name: 'Titan Tap', mult: 5.0, cost: 100 }, 
-            { id: 'p_click_4', name: 'Godly Touch', mult: 10.0, cost: 500 }, 
-            { id: 'p_click_5', name: 'Cosmic Click', mult: 50.0, cost: 2500 }
-        ],
-        orbs: [
-            { id: 'p_orb_1', name: 'Orb Polish', mult: 1.2, cost: 10 }, 
-            { id: 'p_orb_2', name: 'Mana Infusion', mult: 1.5, cost: 40 }, 
-            { id: 'p_orb_3', name: 'Time Warp', mult: 2.0, cost: 150 }, 
-            { id: 'p_orb_4', name: 'Star Power', mult: 4.0, cost: 600 }, 
-            { id: 'p_orb_5', name: 'Dark Matter', mult: 10.0, cost: 3000 }
-        ],
-        artifacts: [
-            { id: 'p_art_1', name: 'Loot Scope', mult: 1.5, cost: 50 }, 
-            { id: 'p_art_2', name: 'Treasure Map', mult: 2.5, cost: 200 }, 
-            { id: 'p_art_3', name: 'Ancient Key', mult: 5.0, cost: 800 }, 
-            { id: 'p_art_4', name: 'Midas Touch', mult: 10.0, cost: 2500 }, 
-            { id: 'p_art_5', name: 'Dragon Hoard', mult: 25.0, cost: 10000 }
-        ],
-        global: [
-            { id: 'p_glo_1', name: 'Small Tax', mult: 1.1, cost: 100 }, 
-            { id: 'p_glo_2', name: 'Big Business', mult: 1.25, cost: 500 }, 
-            { id: 'p_glo_3', name: 'Monopoly', mult: 1.5, cost: 2000 }, 
-            { id: 'p_glo_4', name: 'World Bank', mult: 2.0, cost: 8000 }, 
-            { id: 'p_glo_5', name: 'Galactic Trade', mult: 5.0, cost: 25000 }
-        ],
-        frenzy: [
-            { id: 'p_frz_1', name: 'Coffee Shot', mult: 2.0, cost: 50 }, 
-            { id: 'p_frz_2', name: 'Energy Drink', mult: 4.0, cost: 250 }, 
-            { id: 'p_frz_3', name: 'Adrenaline', mult: 8.0, cost: 1000 }, 
-            { id: 'p_frz_4', name: 'Berserk Mode', mult: 16.0, cost: 5000 }, 
-            { id: 'p_frz_5', name: 'Super Saiyan', mult: 50.0, cost: 20000 }
-        ]
+        clicks: [{ id: 'p_click_1', name: 'Iron Clicks', mult: 1.5, cost: 5 }, { id: 'p_click_2', name: 'Golden Finger', mult: 2.5, cost: 25 }, { id: 'p_click_3', name: 'Titan Tap', mult: 5.0, cost: 100 }, { id: 'p_click_4', name: 'Godly Touch', mult: 10.0, cost: 500 }, { id: 'p_click_5', name: 'Cosmic Click', mult: 50.0, cost: 2500 }],
+        orbs: [{ id: 'p_orb_1', name: 'Orb Polish', mult: 1.2, cost: 10 }, { id: 'p_orb_2', name: 'Mana Infusion', mult: 1.5, cost: 40 }, { id: 'p_orb_3', name: 'Time Warp', mult: 2.0, cost: 150 }, { id: 'p_orb_4', name: 'Star Power', mult: 4.0, cost: 600 }, { id: 'p_orb_5', name: 'Dark Matter', mult: 10.0, cost: 3000 }],
+        artifacts: [{ id: 'p_art_1', name: 'Loot Scope', mult: 1.5, cost: 50 }, { id: 'p_art_2', name: 'Treasure Map', mult: 2.5, cost: 200 }, { id: 'p_art_3', name: 'Ancient Key', mult: 5.0, cost: 800 }, { id: 'p_art_4', name: 'Midas Touch', mult: 10.0, cost: 2500 }, { id: 'p_art_5', name: 'Dragon Hoard', mult: 25.0, cost: 10000 }],
+        global: [{ id: 'p_glo_1', name: 'Small Tax', mult: 1.1, cost: 100 }, { id: 'p_glo_2', name: 'Big Business', mult: 1.25, cost: 500 }, { id: 'p_glo_3', name: 'Monopoly', mult: 1.5, cost: 2000 }, { id: 'p_glo_4', name: 'World Bank', mult: 2.0, cost: 8000 }, { id: 'p_glo_5', name: 'Galactic Trade', mult: 5.0, cost: 25000 }],
+        frenzy: [{ id: 'p_frz_1', name: 'Coffee Shot', mult: 2.0, cost: 50 }, { id: 'p_frz_2', name: 'Energy Drink', mult: 4.0, cost: 250 }, { id: 'p_frz_3', name: 'Adrenaline', mult: 8.0, cost: 1000 }, { id: 'p_frz_4', name: 'Berserk Mode', mult: 16.0, cost: 5000 }, { id: 'p_frz_5', name: 'Super Saiyan', mult: 50.0, cost: 20000 }]
     };
 
     const NAME_PREFIXES = ["Mystic", "Ancient", "Lost", "Cosmic", "Dark", "Radiant", "Frozen", "Burning", "Neon", "Shadow", "Holy", "Cursed"];
@@ -596,18 +438,14 @@
         setTimeout(() => b.classList.remove('active'), 3000);
     };
 
-window.closeResearchTutorial = () => {
-    // 1. Hide the visual overlay
-    document.getElementById('researchTutorial').classList.add('hidden');
+    window.closeResearchTutorial = () => {
+        document.getElementById('researchTutorial').classList.add('hidden');
+        localStorage.setItem('mailcash_tut_seen_v2', 'true');
+    };
     
-    // 2. Save a permanent note in the browser saying "User has seen this"
-    localStorage.setItem('mailcash_tut_seen_v2', 'true');
-};
-    
-window.openResearchTutorial = () => {
-    // Just remove the hidden class. We don't care about localStorage here.
-    document.getElementById('researchTutorial').classList.remove('hidden');
-}
+    window.openResearchTutorial = () => {
+        document.getElementById('researchTutorial').classList.remove('hidden');
+    }
 
     onAuthStateChanged(auth, u => {
         if(u) {
@@ -616,14 +454,10 @@ window.openResearchTutorial = () => {
                 if(d.exists()) {
                     userData = d.data();
                     if(!userData.research) userData.research = {};
-                    
                     updateUI(); 
                     renderDailyChest(); 
                     
-                    // -- FIX FOR COLLECTION FLICKER --
-                    // Only re-render grids if inventory actually changes
                     const currentCollectionHash = JSON.stringify(userData.orbs) + JSON.stringify(userData.uniqueOrbs);
-                    
                     if (currentCollectionHash !== lastCollectionHash) {
                         renderOrbs('orbGrid', ORB_DATA); 
                         renderCollection();
@@ -733,17 +567,15 @@ window.openResearchTutorial = () => {
     }
 
     window.buyResearch = async (orbId, type, cost) => {
-        if (transactionLock) return;
         if(userData.balance < cost) return;
-        transactionLock = true;
-        try {
-            userData.balance -= cost;
-            if (!userData.research[orbId]) userData.research[orbId] = {};
-            userData.research[orbId][type] = (userData.research[orbId][type] || 0) + 1;
-            updateResearchPanel(ORB_DATA.find(o => o.id === orbId));
-            updateUI();
-            await updateDoc(doc(db, "users", myUid), { balance: increment(-cost), [`research.${orbId}.${type}`]: increment(1) });
-        } finally { transactionLock = false; }
+        // Optimistic UI Update
+        userData.balance -= cost;
+        if (!userData.research[orbId]) userData.research[orbId] = {};
+        userData.research[orbId][type] = (userData.research[orbId][type] || 0) + 1;
+        updateResearchPanel(ORB_DATA.find(o => o.id === orbId));
+        updateUI();
+        // Background DB Update
+        await updateDoc(doc(db, "users", myUid), { balance: increment(-cost), [`research.${orbId}.${type}`]: increment(1) });
     };
 
     window.handleSearch = () => {
@@ -765,6 +597,27 @@ window.openResearchTutorial = () => {
         document.getElementById('userPfp').src = `https://api.dicebear.com/7.x/identicon/svg?seed=${userData.username}`;
         document.getElementById('clickPowerVal').innerText = getPower(currentLevel).toLocaleString();
         
+        // Calculate Passive Income
+        let totalPPS = 0;
+        ORB_DATA.forEach(orb => {
+            if (userData.orbs?.[orb.id] > 0) {
+                const pps = calcIncome(orb, userData.orbs[orb.id]) / (orb.time / 1000);
+                totalPPS += pps;
+            }
+        });
+        if (userData.uniqueOrbs) {
+            let artMult = 1;
+            if(userData.prestigeUpgrades) {
+                PRESTIGE_UPGRADES.orbs.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) artMult *= u.mult; });
+                PRESTIGE_UPGRADES.artifacts.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) artMult *= u.mult; });
+                PRESTIGE_UPGRADES.global.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) artMult *= u.mult; });
+            }
+            userData.uniqueOrbs.forEach(orb => {
+                 totalPPS += (Math.floor(orb.income * artMult) / (orb.time / 1000));
+            });
+        }
+        document.getElementById('passiveSecDisplay').innerText = Math.floor(totalPPS).toLocaleString();
+
         const upgradeBtn = document.getElementById('upgradeClickBtn');
         if (currentLevel >= 100 || userData.balance < clickCost) {
             upgradeBtn.innerText = currentLevel >= 100 ? "MAXED" : `UPGRADE $${clickCost.toLocaleString()}`;
@@ -829,7 +682,7 @@ window.openResearchTutorial = () => {
             const income = calcIncome(orb, owned);
             const isUnlocked = index === 0 || ((userData.orbs?.[dataList[index-1].id] || 0) > 0);
             
-            // --- NEW CAP: 80 ---
+            // CAP: 80
             const isMaxed = owned >= 80;
             const div = document.createElement('div'); div.className = 'orb-item';
             
@@ -856,26 +709,41 @@ window.openResearchTutorial = () => {
         });
     }
 
+    // --- ACHIEVEMENTS RENDER ---
+    function renderAchievements() {
+        const list = document.getElementById('achievementsList');
+        list.innerHTML = '';
+        ACHIEVEMENTS.forEach(ach => {
+            // Logic Placeholder: Real game would check userData stats
+            const unlocked = (ach.id === 'ach1' && userData.balance > 0) || (ach.id === 'ach2' && userData.balance >= 1000); 
+            const div = document.createElement('div');
+            div.className = `achievement-card ${unlocked ? 'unlocked' : ''}`;
+            div.innerHTML = `
+                <div class="ach-icon">${unlocked ? ach.icon : '🔒'}</div>
+                <div class="ach-info">
+                    <b>${ach.name}</b>
+                    <p>${ach.desc}</p>
+                </div>
+            `;
+            list.appendChild(div);
+        });
+    }
+
     window.buyOrb = async (id, cost, currentOwned) => {
-        if (transactionLock) return;
-        // --- NEW CAP: 80 ---
         if (userData.balance >= cost && currentOwned < 80) {
-            transactionLock = true;
-            try {
-                userData.balance -= cost;
-                if(!userData.orbs[id]) userData.orbs[id] = 0;
-                userData.orbs[id]++;
-                updateUI();
-                renderOrbs('orbGrid', ORB_DATA); 
-                const update = { balance: increment(-cost) }; update[`orbs.${id}`] = increment(1);
-                await updateDoc(doc(db, "users", myUid), update);
-            } finally { transactionLock = false; }
+            // Optimistic Update
+            userData.balance -= cost;
+            if(!userData.orbs[id]) userData.orbs[id] = 0;
+            userData.orbs[id]++;
+            updateUI();
+            renderOrbs('orbGrid', ORB_DATA); 
+            // Background DB Update
+            const update = { balance: increment(-cost) }; update[`orbs.${id}`] = increment(1);
+            await updateDoc(doc(db, "users", myUid), update);
         }
     };
 
-    // --- SELL CONFIRMATION LOGIC ---
     window.sellOrb = async (id, refund) => { 
-        if (transactionLock) return;
         if(userData?.orbs?.[id] > 0) {
             const hasSeenWarning = localStorage.getItem('mailcash_sell_warning_seen');
             if (!hasSeenWarning) {
@@ -900,18 +768,16 @@ window.openResearchTutorial = () => {
     };
 
     async function executeSell(id, refund) {
-        transactionLock = true;
-        try {
-            userData.balance += refund;
-            userData.orbs[id]--;
-            updateUI();
-            renderOrbs('orbGrid', ORB_DATA);
-            await updateDoc(doc(db, "users", myUid), { balance: increment(refund), [`orbs.${id}`]: increment(-1) });
-        } finally { transactionLock = false; }
+        // Optimistic
+        userData.balance += refund;
+        userData.orbs[id]--;
+        updateUI();
+        renderOrbs('orbGrid', ORB_DATA);
+        // DB
+        await updateDoc(doc(db, "users", myUid), { balance: increment(refund), [`orbs.${id}`]: increment(-1) });
     }
 
     window.buyChest = async (tier, cost) => {
-        if (transactionLock) return;
         if (userData.balance < cost) return alert("Insufficient Funds!");
         let minCash, maxCash, minTime, maxTime;
         if (tier === 'bronze') { minCash = 100; maxCash = 5000; minTime = 500; maxTime = 15000; }
@@ -926,39 +792,33 @@ window.openResearchTutorial = () => {
         content.innerHTML = `<h2 style="color:#facc15; margin-bottom:15px;">CHEST OPENED!</h2><h3 style="font-size:28px; margin-bottom:10px; color:${newOrb.color}">${newOrb.name}</h3><div style="margin: 20px auto; transform: scale(1.5); width:100px; height:100px; display:flex; justify-content:center; align-items:center;"><div class="unique-loot-visual" style="color:${newOrb.color};"></div></div><p style="color:#94a3b8; font-size:16px; margin-bottom:25px;">Tier: ${tier.toUpperCase()}<br><span style="color:#10b981; font-weight:800;">+$${newOrb.income.toLocaleString()}</span> / ${(newOrb.time/1000).toFixed(1)}s</p><button onclick="document.getElementById('lootPopup').classList.add('hidden')">COLLECT</button>`;
         popup.classList.remove('hidden');
 
-        transactionLock = true;
-        try {
-            userData.balance -= cost;
-            if(!userData.uniqueOrbs) userData.uniqueOrbs = [];
-            userData.uniqueOrbs.push(newOrb);
-            updateUI();
-            await updateDoc(doc(db, "users", myUid), { balance: increment(-cost), uniqueOrbs: arrayUnion(newOrb) });
-        } finally { transactionLock = false; }
+        // Optimistic
+        userData.balance -= cost;
+        if(!userData.uniqueOrbs) userData.uniqueOrbs = [];
+        userData.uniqueOrbs.push(newOrb);
+        updateUI();
+        // DB
+        await updateDoc(doc(db, "users", myUid), { balance: increment(-cost), uniqueOrbs: arrayUnion(newOrb) });
     };
 
     window.claimDailyChest = async () => {
-        if (transactionLock) return;
         const now = Date.now();
         const last = userData.lastDailyClaim || 0;
         if (now - last < 86400000) return alert("Come back later!");
-
         const tier = 'daily';
         const newOrb = { id: 'u_' + Date.now() + '_' + Math.floor(Math.random()*1000), name: getRandomName(), color: getRandomColor(), income: Math.floor(Math.random() * (250 - 1 + 1)) + 1, time: Math.floor(Math.random() * (10000 - 2000 + 1)) + 2000, tier: tier, acquiredAt: Date.now() };
-
         const popup = document.getElementById('lootPopup');
         const content = document.getElementById('lootCardContent');
         content.innerHTML = `<h2 style="color:#facc15; margin-bottom:15px;">CHEST OPENED!</h2><h3 style="font-size:28px; margin-bottom:10px; color:${newOrb.color}">${newOrb.name}</h3><div style="margin: 20px auto; transform: scale(1.5); width:100px; height:100px; display:flex; justify-content:center; align-items:center;"><div class="unique-loot-visual" style="color:${newOrb.color};"></div></div><p style="color:#94a3b8; font-size:16px; margin-bottom:25px;">Tier: DAILY SUPPLY<br><span style="color:#10b981; font-weight:800;">+$${newOrb.income.toLocaleString()}</span> / ${(newOrb.time/1000).toFixed(1)}s</p><button onclick="document.getElementById('lootPopup').classList.add('hidden')">COLLECT</button>`;
         popup.classList.remove('hidden');
-
-        transactionLock = true;
-        try {
-            if(!userData.uniqueOrbs) userData.uniqueOrbs = [];
-            userData.uniqueOrbs.push(newOrb);
-            userData.lastDailyClaim = now;
-            renderDailyChest();
-            updateUI();
-            await updateDoc(doc(db, "users", myUid), { uniqueOrbs: arrayUnion(newOrb), lastDailyClaim: now });
-        } finally { transactionLock = false; }
+        // Optimistic
+        if(!userData.uniqueOrbs) userData.uniqueOrbs = [];
+        userData.uniqueOrbs.push(newOrb);
+        userData.lastDailyClaim = now;
+        renderDailyChest();
+        updateUI();
+        // DB
+        await updateDoc(doc(db, "users", myUid), { uniqueOrbs: arrayUnion(newOrb), lastDailyClaim: now });
     }
 
     function renderDailyChest() {
@@ -967,12 +827,10 @@ window.openResearchTutorial = () => {
         const timeText = document.getElementById('dailyTimeLeft');
         const card = document.getElementById('dailyChestCard');
         if (!userData || !btn) return;
-
         const now = Date.now();
         const last = userData.lastDailyClaim || 0;
         const diff = now - last;
         const oneDay = 86400000;
-
         if (diff >= oneDay) {
             btn.disabled = false;
             btn.classList.add('btn-available'); btn.classList.remove('btn-locked');
@@ -996,7 +854,6 @@ window.openResearchTutorial = () => {
         const container = document.getElementById('lootMarketplaceContainer');
         if (!container || !userData.uniqueOrbs) return;
         container.innerHTML = '';
-        // --- CHANGED ORDER: Daily at bottom ---
         const tiers = ['champion', 'gold', 'silver', 'bronze', 'daily']; 
         tiers.forEach(tier => {
             const orbsInTier = userData.uniqueOrbs.filter(o => o.tier === tier);
@@ -1089,46 +946,35 @@ window.openResearchTutorial = () => {
     }
 
     window.upgradeClicker = async () => {
-        if (transactionLock) return;
         const currentLevel = userData.clickLevel || 1;
         const cost = Math.floor(100 * Math.pow(1.5, currentLevel - 1));
         if (userData.balance >= cost && currentLevel < 100) {
-            transactionLock = true;
-            try {
-                userData.balance -= cost;
-                userData.clickLevel = (userData.clickLevel || 1) + 1;
-                updateUI();
-                await updateDoc(doc(db, "users", myUid), { balance: increment(-cost), clickLevel: increment(1) });
-            } finally { transactionLock = false; }
+            userData.balance -= cost;
+            userData.clickLevel = (userData.clickLevel || 1) + 1;
+            updateUI();
+            await updateDoc(doc(db, "users", myUid), { balance: increment(-cost), clickLevel: increment(1) });
         }
     };
 
     window.buyPrestigeUpgrade = async (id, cost) => { 
-        if (transactionLock) return;
         if(userData.prestigePoints < cost || userData.prestigeUpgrades?.includes(id)) return; 
-        transactionLock = true;
-        try {
-            userData.prestigePoints -= cost;
-            if(!userData.prestigeUpgrades) userData.prestigeUpgrades = [];
-            userData.prestigeUpgrades.push(id);
-            renderPrestige();
-            updateUI();
-            await updateDoc(doc(db, "users", myUid), { prestigePoints: increment(-cost), prestigeUpgrades: arrayUnion(id) }); 
-        } finally { transactionLock = false; }
+        userData.prestigePoints -= cost;
+        if(!userData.prestigeUpgrades) userData.prestigeUpgrades = [];
+        userData.prestigeUpgrades.push(id);
+        renderPrestige();
+        updateUI();
+        await updateDoc(doc(db, "users", myUid), { prestigePoints: increment(-cost), prestigeUpgrades: arrayUnion(id) }); 
     };
 
     window.doPrestige = async () => {
         const units = (userData.balance || 0) / 1000000000;
         if (userData.balance < 1000000000) return;
         let pointsToAdd = Math.floor(units + Math.pow(units, 1.2));
-        
-        // --- PRESTIGE CAP: 10M ---
         const currentPoints = userData.prestigePoints || 0;
         if ((currentPoints + pointsToAdd) > 10000000) {
             pointsToAdd = 10000000 - currentPoints;
             if (pointsToAdd < 0) pointsToAdd = 0;
         }
-
         await updateDoc(doc(db, "users", myUid), { balance: 0, clickLevel: 1, orbs: {}, uniqueOrbs: [], research: {}, prestigePoints: increment(pointsToAdd) });
         location.reload();
     };
@@ -1192,19 +1038,16 @@ window.openResearchTutorial = () => {
             }
         }
         
-if (tabId === 'research') {
-         // Check if they have seen the tutorial before
-         const seen = localStorage.getItem('mailcash_tut_seen_v2');
-         
-         // If 'seen' is null (false), remove the hidden class to show it
-         if (!seen) {
-             document.getElementById('researchTutorial').classList.remove('hidden');
-         }
-         
-         renderResearch();
-    }
+        if (tabId === 'research') {
+             const seen = localStorage.getItem('mailcash_tut_seen_v2');
+             if (!seen) {
+                 document.getElementById('researchTutorial').classList.remove('hidden');
+             }
+             renderResearch();
+        }
 
         if (tabId === 'prestige') { renderPrestige(); }
+        if (tabId === 'achievements') { renderAchievements(); }
 
         document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -1228,7 +1071,7 @@ if (tabId === 'research') {
         try {
             if(isReg) {
                 const res = await createUserWithEmailAndPassword(auth, e, p);
-                await setDoc(doc(db, "users", res.user.uid), { username: u, email: e, balance: 2500000000, orbs: {}, uniqueOrbs: [], research: {}, clickLevel: 1, prestigePoints: 0, prestigeUpgrades: [] });
+                await setDoc(doc(db, "users", res.user.uid), { username: u, email: e, balance: 25, orbs: {}, uniqueOrbs: [], research: {}, clickLevel: 1, prestigePoints: 0, prestigeUpgrades: [] });
             } else {
                 const q = query(collection(db, "users"), where("username", "==", u));
                 const s = await getDocs(q);
