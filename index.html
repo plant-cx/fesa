@@ -596,14 +596,18 @@
         setTimeout(() => b.classList.remove('active'), 3000);
     };
 
-    window.closeResearchTutorial = () => {
-        document.getElementById('researchTutorial').classList.add('hidden');
-        localStorage.setItem('mailcash_tut_seen_v2', 'true');
-    };
+window.closeResearchTutorial = () => {
+    // 1. Hide the visual overlay
+    document.getElementById('researchTutorial').classList.add('hidden');
     
-    window.openResearchTutorial = () => {
-        document.getElementById('researchTutorial').classList.remove('hidden');
-    }
+    // 2. Save a permanent note in the browser saying "User has seen this"
+    localStorage.setItem('mailcash_tut_seen_v2', 'true');
+};
+    
+window.openResearchTutorial = () => {
+    // Just remove the hidden class. We don't care about localStorage here.
+    document.getElementById('researchTutorial').classList.remove('hidden');
+}
 
     onAuthStateChanged(auth, u => {
         if(u) {
@@ -1188,13 +1192,17 @@
             }
         }
         
-        if (tabId === 'research') {
-             const seen = localStorage.getItem('mailcash_tut_seen_v2');
-             if (!seen) {
-                 document.getElementById('researchTutorial').classList.remove('hidden');
-             }
-             renderResearch();
-        }
+if (tabId === 'research') {
+         // Check if they have seen the tutorial before
+         const seen = localStorage.getItem('mailcash_tut_seen_v2');
+         
+         // If 'seen' is null (false), remove the hidden class to show it
+         if (!seen) {
+             document.getElementById('researchTutorial').classList.remove('hidden');
+         }
+         
+         renderResearch();
+    }
 
         if (tabId === 'prestige') { renderPrestige(); }
 
