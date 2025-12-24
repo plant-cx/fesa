@@ -144,6 +144,51 @@
         .progress-bar-container { background: #334155; height: 12px; border-radius: 6px; width: 100%; max-width: 600px; margin: 0 auto 30px; position: relative; overflow: hidden; border: 1px solid #475569; }
         .progress-bar-fill { background: linear-gradient(90deg, #6366f1, #a855f7); height: 100%; width: 0%; transition: width 0.5s ease; }
         .progress-text { text-align: center; margin-bottom: 10px; color: #cbd5e1; font-weight: 800; font-size: 14px; }
+
+        .chat-container {
+    max-width: 600px;
+    margin: 20px auto;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  /* The Bubble Design */
+  .message-bubble {
+    background-color: #f1f0f0; /* Light gray bubble */
+    border-radius: 20px;
+    padding: 15px 20px;
+    position: relative;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    max-width: 85%;
+  }
+
+  /* Make the sender name look distinct */
+  .message-sender {
+    font-weight: bold;
+    font-size: 0.9rem;
+    color: #333;
+    margin-bottom: 5px;
+    display: block;
+  }
+
+  /* The actual message text */
+  .message-text {
+    color: #1a1a1a;
+    line-height: 1.5;
+    font-size: 1rem;
+    white-space: pre-wrap; /* Keeps paragraphs intact */
+  }
+
+  /* Token Saver: Visual truncation hint */
+  .truncated-note {
+    font-size: 0.7rem;
+    color: #888;
+    margin-top: 5px;
+    font-style: italic;
+  }
+    
     </style>
 </head>
 <body>
@@ -1133,6 +1178,41 @@
         await updateDoc(doc(db, "users", myUid), { totalMails: increment(1) });
         alert("Mail Sent!");
     };
+    // CONFIGURATION
+const MAX_MESSAGES = 5; // Only show the last 5 (Fixes "Ages to load")
+const MAX_CHARS = 500;   // Token/Data saver
+
+function displayMessages(messages) {
+    const container = document.getElementById('chat-container'); // Make sure you have a <div id="chat-container"></div>
+    container.innerHTML = ''; // Clear loading text
+
+    // 1. REVERSE & SLICE: Only take the last 5 messages so it loads instantly
+    // (Assumes 'messages' is your array of data)
+    const recentMessages = messages.slice(-MAX_MESSAGES).reverse(); 
+
+    recentMessages.forEach(msg => {
+        // 2. TOKEN SAVER: Cut text if it's too long
+        let cleanText = msg.body || msg.text || ""; // Adjust '.body' to whatever your database calls the text
+        let wasTruncated = false;
+
+        if (cleanText.length > MAX_CHARS) {
+            cleanText = cleanText.substring(0, MAX_CHARS) + "...";
+            wasTruncated = true;
+        }
+
+        // 3. GENERATE BUBBLE HTML
+        const bubble = document.createElement('div');
+        bubble.className = 'message-bubble';
+        
+        bubble.innerHTML = `
+            <span class="message-sender">${msg.sender || "Unknown"}</span>
+            <div class="message-text">${cleanText}</div>
+            ${wasTruncated ? '<div class="truncated-note">(Message truncated to save data)</div>' : ''}
+        `;
+
+        container.appendChild(bubble);
+    });
+}
 </script>
 </body>
 </html>
