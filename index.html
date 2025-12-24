@@ -25,7 +25,6 @@
         .header-prestige-btn { background: linear-gradient(135deg, #4f46e5, #9333ea); border: 2px solid #a855f7; color: white; padding: 12px 20px; border-radius: 12px; font-weight: 900; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3); }
         .header-prestige-btn:hover { transform: translateY(-2px); }
 
-        /* New Inbox Icon Style */
         .inbox-icon-btn { width: 50px; height: 50px; background: #334155; border: 2px solid #475569; border-radius: 12px; font-size: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: white; }
         .inbox-icon-btn:hover { background: #475569; }
 
@@ -39,7 +38,6 @@
         .orb-item { background: #0f172a; border: 2px solid #334155; padding: 20px; border-radius: 16px; position: relative; text-align: center; min-height: 280px; display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.3s ease, opacity 0.3s ease; }
         .orb-item b { position: relative; z-index: 25; text-shadow: 0 2px 5px rgba(0,0,0,0.8); }
 
-        /* VISUAL ENGINE */
         .visual-container { position: relative; width: 100px; height: 100px; margin: 20px auto 10px; display: flex; justify-content: center; align-items: center; perspective: 800px; transform-style: preserve-3d; }
         .orb-visual { width: 50px; height: 50px; transition: all 0.5s ease; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10; background: currentColor; box-shadow: 0 0 30px currentColor; border-radius: 50%; }
         .unique-loot-visual { width: 60px; height: 60px; border-radius: 16px; position: relative; background-color: currentColor; overflow: hidden; box-shadow: 0 0 15px currentColor; }
@@ -133,8 +131,7 @@
         .tut-gold-ring { position: absolute; top:50%; left:50%; width:60px; height:60px; border:2px solid #facc15; border-radius:50%; margin:-30px 0 0 -30px; opacity:0.6; }
         @keyframes tutSpin { 0% { transform: translate(-50%, -50%) rotate(0deg); } 100% { transform: translate(-50%, -50%) rotate(360deg); } }
 
-        /* Updated Achievement Styles */
-        .achievement-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; } /* Increased Gap */
+        .achievement-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; } 
         .achievement-card { display: flex; align-items: center; gap: 15px; padding: 20px; background: #1e293b; border: 1px solid #334155; border-radius: 12px; opacity: 0.6; filter: grayscale(1); transition: 0.3s; min-height: 100px; }
         .achievement-card.unlocked { opacity: 1; filter: grayscale(0); border-color: #6366f1; background: #0f172a; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
         .ach-icon { font-size: 32px; min-width: 50px; text-align: center; }
@@ -145,7 +142,6 @@
         .progress-bar-fill { background: linear-gradient(90deg, #6366f1, #a855f7); height: 100%; width: 0%; transition: width 0.5s ease; }
         .progress-text { text-align: center; margin-bottom: 10px; color: #cbd5e1; font-weight: 800; font-size: 14px; }
 
-        /* --- NEW MODERN MESSAGING STYLES --- */
         .msg-list-container {
             display: flex;
             flex-direction: column;
@@ -207,12 +203,12 @@
             color: #cbd5e1;
             line-height: 1.6;
             font-size: 15px;
-            white-space: pre-wrap; /* Preserve line breaks */
+            white-space: pre-wrap; 
         }
 
-.cash-highlight {
-            display: block; /* changed from inline-block */
-            width: 100%;    /* take full width */
+        .cash-highlight {
+            display: block;
+            width: 100%;
             text-align: center;
             background: rgba(16, 185, 129, 0.15);
             color: #34d399;
@@ -220,7 +216,20 @@
             border-radius: 8px;
             font-weight: 800;
             border: 1px solid rgba(16, 185, 129, 0.3);
-            margin-top: 15px; /* push it down from the text */
+            margin-top: 15px; 
+        }
+
+        .orb-highlight {
+            display: block;
+            width: 100%;
+            text-align: center;
+            background: rgba(99, 102, 241, 0.15);
+            color: #818cf8;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: 800;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            margin-top: 8px;
         }
         
         .empty-inbox {
@@ -230,6 +239,19 @@
             font-style: italic;
             border: 2px dashed #334155;
             border-radius: 16px;
+        }
+
+        .gift-tag {
+            background: #6366f1; 
+            color: white; 
+            font-size: 10px; 
+            padding: 2px 6px; 
+            border-radius: 4px; 
+            position: absolute; 
+            top: 10px; 
+            left: 10px; 
+            z-index: 20; 
+            font-weight: bold;
         }
 
     </style>
@@ -374,6 +396,10 @@
                 </select>
             </div>
             <h3 style="text-align:center; color:#6366f1; margin-bottom:25px; font-size:28px;">YOUR COLLECTION</h3>
+            <div id="giftedOrbsSection" class="hidden">
+                 <div class="section-header" style="color:#a855f7; border-color:#a855f7;">SENT ITEMS (GIFTS)</div>
+                 <div class="orb-grid" id="collectionGiftGrid"></div>
+            </div>
             <div id="standardOrbsSection">
                 <div class="section-header" style="border:none; margin-top:0;">OWNED STANDARD ORBS</div>
                 <div class="orb-grid" id="collectionGrid"></div>
@@ -428,14 +454,23 @@
         </div>
 
         <div id="messageView" class="tab-view hidden card" style="max-width: 650px; margin: 0 auto;">
-            <h3 style="margin-bottom: 20px;">SEND MAIL & CASH</h3>
+            <h3 style="margin-bottom: 20px;">SEND MAIL, CASH & ORBS</h3>
             <input type="text" id="msgTo" placeholder="Recipient @username">
             <textarea id="msgBody" rows="4" placeholder="Write your message..."></textarea>
+            
             <div style="background: #0f172a; padding: 15px; border-radius: 12px; border: 1px solid #475569; margin-bottom: 15px;">
                 <label style="font-size: 14px; font-weight: 800; color: #94a3b8; display: block; margin-bottom: 8px;">ATTACH CASH (OPTIONAL)</label>
                 <input type="number" id="payAmt" placeholder="Amount to send ($)" style="margin-bottom: 0;">
             </div>
-            <button onclick="handleCombinedSend()">SEND MAIL</button>
+
+            <div style="background: #0f172a; padding: 15px; border-radius: 12px; border: 1px solid #475569; margin-bottom: 15px;">
+                <label style="font-size: 14px; font-weight: 800; color: #94a3b8; display: block; margin-bottom: 8px;">ATTACH ARTIFACT (OPTIONAL)</label>
+                <select id="msgOrbSelector" style="margin-bottom:0;">
+                    <option value="">-- Select an Artifact to Send --</option>
+                </select>
+            </div>
+
+            <button onclick="handleCombinedSend()" id="sendMailBtn">SEND MAIL</button>
         </div>
     </div>
 </div>
@@ -1001,6 +1036,9 @@
         if (!userData) return;
         const collectionGrid = document.getElementById('collectionGrid');
         const chestGrid = document.getElementById('collectionChestGrid');
+        const giftGrid = document.getElementById('collectionGiftGrid');
+        const giftSection = document.getElementById('giftedOrbsSection');
+        
         if (!collectionGrid) return;
         
         const sortMode = document.getElementById('collectionSortOrder').value;
@@ -1020,10 +1058,37 @@
             setTimeout(() => { div.style.opacity = '1'; div.style.transform = 'translateY(0)'; }, index * 40);
         });
 
+        // Split Unique Orbs into Gifts vs Self-Found
+        const allUnique = userData.uniqueOrbs || [];
+        const giftedOrbs = allUnique.filter(o => o.giftedBy);
+        const selfOrbs = allUnique.filter(o => !o.giftedBy && (!searchFilter || o.name.toLowerCase().includes(searchFilter)));
+
+        // Render Gifts
+        if (giftGrid) {
+            giftGrid.innerHTML = '';
+            if (giftedOrbs.length > 0) {
+                giftSection.classList.remove('hidden');
+                giftedOrbs.forEach(orb => {
+                    const div = document.createElement('div'); div.className = 'orb-item'; div.style.minHeight = '220px';
+                    let mult = 1;
+                    if(userData?.prestigeUpgrades) { /* Calc Multiplier */
+                         PRESTIGE_UPGRADES.orbs.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
+                         PRESTIGE_UPGRADES.artifacts.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
+                         PRESTIGE_UPGRADES.global.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
+                    }
+                    const finalInc = Math.floor(orb.income * mult);
+                    div.innerHTML = `<div class="gift-tag">FROM @${orb.giftedBy.toUpperCase()}</div><div class="visual-container"><div class="unique-loot-visual" style="color:${orb.color};"></div></div><b>${orb.name}</b><p style="font-size:12px; color:#94a3b8;">${orb.tier.toUpperCase()}</p><div style="color:#10b981; font-weight:800; font-size:14px;">+$${finalInc.toLocaleString()}</div><div class="progress-bg" style="margin-top:10px;"><div class="progress-fill" id="col-gift-bar-${orb.id}"></div></div>`;
+                    giftGrid.appendChild(div);
+                });
+            } else {
+                giftSection.classList.add('hidden');
+            }
+        }
+
+        // Render Chest/Self Orbs
         if(chestGrid) {
             chestGrid.innerHTML = '';
-            const chestOrbs = (userData.uniqueOrbs || []).filter(o => !searchFilter || o.name.toLowerCase().includes(searchFilter));
-            chestOrbs.forEach((orb, index) => {
+            selfOrbs.forEach((orb) => {
                 const div = document.createElement('div'); div.className = 'orb-item'; div.style.minHeight = '220px';
                 let mult = 1;
                 if(userData?.prestigeUpgrades) {
@@ -1132,6 +1197,8 @@
                 }
                 const pct = (uniqueOrbProgress[orb.id] / orb.time) * 100;
                 const bar = document.getElementById(`unique-bar-${orb.id}`); if(bar) bar.style.width = pct + "%";
+                // also update gift progress bars if they exist
+                const giftBar = document.getElementById(`col-gift-bar-${orb.id}`); if(giftBar) giftBar.style.width = pct + "%";
             });
         }
         updateUI();
@@ -1163,6 +1230,25 @@
 
         if (tabId === 'prestige') { renderPrestige(); }
         if (tabId === 'achievements') { renderAchievements(); }
+
+        // Logic for message dropdown population
+        if (tabId === 'message') {
+            const selector = document.getElementById('msgOrbSelector');
+            selector.innerHTML = '<option value="">-- Select an Artifact to Send --</option>';
+            if (userData.uniqueOrbs && userData.uniqueOrbs.length > 0) {
+                userData.uniqueOrbs.forEach(orb => {
+                    const opt = document.createElement('option');
+                    opt.value = orb.id;
+                    opt.text = `${orb.name} (Tier: ${orb.tier.toUpperCase()}) - $${orb.income}/s`;
+                    selector.appendChild(opt);
+                });
+            } else {
+                const opt = document.createElement('option');
+                opt.text = "No Artifacts to send!";
+                opt.disabled = true;
+                selector.appendChild(opt);
+            }
+        }
 
         document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -1202,7 +1288,8 @@
     window.toggleSettings = () => document.getElementById('settingsMenu').classList.toggle('hidden');
     window.updateProfile = async () => { const n = document.getElementById('setNewUser').value.trim(); if(n) await updateDoc(doc(db, "users", myUid), { username: n }); };
     window.logout = () => signOut(auth).then(() => location.reload());
-const loadInbox = () => {
+
+    const loadInbox = () => {
         onSnapshot(query(collection(db, "messages"), where("to", "==", userData.username), orderBy("date", "desc")), s => {
             const container = document.getElementById('mailBox');
             if(s.empty) {
@@ -1215,31 +1302,29 @@ const loadInbox = () => {
                 // Format Date nicely
                 const dateObj = new Date(data.date);
                 const dateStr = dateObj.toLocaleDateString() + ' ' + dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                
-                // Avatar generator
                 const avatarUrl = `https://api.dicebear.com/7.x/identicon/svg?seed=${data.from}`;
 
-                // --- NEW LOGIC HERE ---
                 let bodyText = data.body;
-                let cashHtml = '';
+                let footerHtml = '';
 
-                // Check if message contains the cash tag
+                // 1. Detect Cash
                 const cashMatch = bodyText.match(/\[Sent \$([\d,]+)\]/);
-
                 if (cashMatch) {
-                    // Extract the amount (e.g. "500")
                     const amount = cashMatch[1];
-                    
-                    // Create the footer HTML
-                    cashHtml = `<div class="cash-highlight">💰 ATTACHED: $${amount}</div>`;
-                    
-                    // Remove the tag from the main body text so it doesn't show twice
+                    footerHtml += `<div class="cash-highlight">💰 ATTACHED: $${amount}</div>`;
                     bodyText = bodyText.replace(/\[Sent \$[\d,]+\]/, '').trim();
                 }
 
-                // If body is empty after removing cash tag (user sent only cash), put a placeholder
-                if (!bodyText && cashHtml) {
-                    bodyText = "<i style='color:#64748b'>Sent you cash...</i>";
+                // 2. Detect Orb
+                const orbMatch = bodyText.match(/\[Attached Orb: (.+)\]/);
+                if (orbMatch) {
+                    const orbName = orbMatch[1];
+                    footerHtml += `<div class="orb-highlight">🔮 ATTACHED: ${orbName}</div>`;
+                    bodyText = bodyText.replace(/\[Attached Orb: .+\]/, '').trim();
+                }
+
+                if (!bodyText && footerHtml) {
+                    bodyText = "<i style='color:#64748b'>Sent you items...</i>";
                 }
 
                 return `
@@ -1251,10 +1336,8 @@ const loadInbox = () => {
                                 <div class="msg-time">${dateStr}</div>
                             </div>
                         </div>
-                        <div class="msg-body">
-                            ${bodyText}
-                        </div>
-                        ${cashHtml} 
+                        <div class="msg-body">${bodyText}</div>
+                        ${footerHtml}
                     </div>
                 `;
             }).join('');
@@ -1262,27 +1345,72 @@ const loadInbox = () => {
             container.innerHTML = html;
         });
     };
+
     window.handleCombinedSend = async () => {
+        const btn = document.getElementById('sendMailBtn');
+        btn.disabled = true;
+
         const to = document.getElementById('msgTo').value.trim().toLowerCase().replace('@', '');
         const body = document.getElementById('msgBody').value;
         const amt = parseInt(document.getElementById('payAmt').value) || 0;
-        if (amt > userData.balance) return alert("Insufficient funds!");
+        const orbIdToSend = document.getElementById('msgOrbSelector').value;
+
+        if (amt > userData.balance) { btn.disabled = false; return alert("Insufficient funds!"); }
+        
         const q = query(collection(db, "users"), where("username", "==", to));
         const snap = await getDocs(q);
-        if (snap.empty) return alert("Recipient not found!");
+        if (snap.empty) { btn.disabled = false; return alert("Recipient not found!"); }
         const targetUid = snap.docs[0].id;
         
-        // Append cash string if money is sent
-        const finalBody = body + (amt > 0 ? ` [Sent $${amt.toLocaleString()}]` : "");
+        let finalBody = body;
+        if (amt > 0) finalBody += ` [Sent $${amt.toLocaleString()}]`;
 
+        // Handle Orb Logic
+        let orbData = null;
+        if (orbIdToSend) {
+            // Find the orb object in local data
+            const idx = userData.uniqueOrbs.findIndex(o => o.id === orbIdToSend);
+            if (idx > -1) {
+                orbData = userData.uniqueOrbs[idx];
+                finalBody += ` [Attached Orb: ${orbData.name}]`;
+                
+                // Add Gift tag
+                orbData.giftedBy = userData.username;
+            }
+        }
+
+        // --- ATOMIC-ISH OPERATIONS ---
+        
+        // 1. Send Message
         await addDoc(collection(db, "messages"), { to: to, from: userData.username, body: finalBody, date: Date.now() });
-        if (amt > 0) { await updateDoc(doc(db, "users", myUid), { balance: increment(-amt) }); await updateDoc(doc(db, "users", targetUid), { balance: increment(amt) }); }
+        
+        // 2. Transfer Cash
+        if (amt > 0) { 
+            await updateDoc(doc(db, "users", myUid), { balance: increment(-amt) }); 
+            await updateDoc(doc(db, "users", targetUid), { balance: increment(amt) }); 
+        }
+
+        // 3. Transfer Orb (Remove from Sender, Add to Receiver)
+        if (orbData) {
+             // To remove a specific object from array is hard in Firestore if we modified it locally.
+             // Strategy: Update local arrays and overwrite whole array. (Safe enough for this scope)
+             
+             // Remove from sender
+             const newSenderOrbs = userData.uniqueOrbs.filter(o => o.id !== orbIdToSend);
+             await updateDoc(doc(db, "users", myUid), { uniqueOrbs: newSenderOrbs });
+
+             // Add to receiver
+             await updateDoc(doc(db, "users", targetUid), { uniqueOrbs: arrayUnion(orbData) });
+        }
         
         await updateDoc(doc(db, "users", myUid), { totalMails: increment(1) });
+        
         // Clear inputs
         document.getElementById('msgBody').value = '';
         document.getElementById('payAmt').value = '';
-        alert("Mail Sent!");
+        document.getElementById('msgOrbSelector').value = '';
+        btn.disabled = false;
+        alert("Mail & Items Sent!");
     };
 </script>
 </body>
