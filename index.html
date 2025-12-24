@@ -145,50 +145,91 @@
         .progress-bar-fill { background: linear-gradient(90deg, #6366f1, #a855f7); height: 100%; width: 0%; transition: width 0.5s ease; }
         .progress-text { text-align: center; margin-bottom: 10px; color: #cbd5e1; font-weight: 800; font-size: 14px; }
 
-        .chat-container {
-    max-width: 600px;
-    margin: 20px auto;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-  }
+        /* --- NEW MODERN MESSAGING STYLES --- */
+        .msg-list-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
 
-  /* The Bubble Design */
-  .message-bubble {
-    background-color: #f1f0f0; /* Light gray bubble */
-    border-radius: 20px;
-    padding: 15px 20px;
-    position: relative;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    max-width: 85%;
-  }
+        .msg-bubble {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 20px;
+            position: relative;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
 
-  /* Make the sender name look distinct */
-  .message-sender {
-    font-weight: bold;
-    font-size: 0.9rem;
-    color: #333;
-    margin-bottom: 5px;
-    display: block;
-  }
+        .msg-bubble:hover {
+            border-color: #6366f1;
+            transform: translateX(4px);
+            background: #253147;
+        }
 
-  /* The actual message text */
-  .message-text {
-    color: #1a1a1a;
-    line-height: 1.5;
-    font-size: 1rem;
-    white-space: pre-wrap; /* Keeps paragraphs intact */
-  }
+        .msg-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
 
-  /* Token Saver: Visual truncation hint */
-  .truncated-note {
-    font-size: 0.7rem;
-    color: #888;
-    margin-top: 5px;
-    font-style: italic;
-  }
-    
+        .msg-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid #6366f1;
+            background: #0f172a;
+        }
+
+        .msg-info {
+            flex: 1;
+        }
+
+        .msg-sender-name {
+            font-weight: 800;
+            color: #f8fafc;
+            font-size: 16px;
+        }
+
+        .msg-time {
+            font-size: 12px;
+            color: #94a3b8;
+            font-weight: 500;
+        }
+
+        .msg-body {
+            color: #cbd5e1;
+            line-height: 1.6;
+            font-size: 15px;
+            white-space: pre-wrap; /* Preserve line breaks */
+        }
+
+        .cash-highlight {
+            display: inline-block;
+            background: rgba(16, 185, 129, 0.1);
+            color: #34d399;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-weight: 800;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            margin: 0 2px;
+        }
+        
+        .empty-inbox {
+            text-align: center;
+            padding: 50px 20px;
+            color: #64748b;
+            font-style: italic;
+            border: 2px dashed #334155;
+            border-radius: 16px;
+        }
+
     </style>
 </head>
 <body>
@@ -379,7 +420,10 @@
             <h3 style="margin-bottom:15px; color:#f43f5e; border-left:4px solid #f43f5e; padding-left:10px;">⚡ CLICK FRENZY</h3><div class="prestige-row" id="pRowFrenzy"></div>
         </div>
 
-        <div id="inboxView" class="tab-view hidden"><div id="mailBox">Loading...</div></div>
+        <div id="inboxView" class="tab-view hidden">
+            <h3 style="text-align:center; color:#6366f1; margin-bottom:20px;">INBOX</h3>
+            <div id="mailBox" class="msg-list-container">Loading messages...</div>
+        </div>
 
         <div id="messageView" class="tab-view hidden card" style="max-width: 650px; margin: 0 auto;">
             <h3 style="margin-bottom: 20px;">SEND MAIL & CASH</h3>
@@ -1157,9 +1201,46 @@
     window.updateProfile = async () => { const n = document.getElementById('setNewUser').value.trim(); if(n) await updateDoc(doc(db, "users", myUid), { username: n }); };
     window.logout = () => signOut(auth).then(() => location.reload());
 
+    /* --- NEW MODERN INBOX LOGIC --- */
     const loadInbox = () => {
         onSnapshot(query(collection(db, "messages"), where("to", "==", userData.username), orderBy("date", "desc")), s => {
-            document.getElementById('mailBox').innerHTML = s.docs.map(d => `<div class="msg-card"><b>@${d.data().from}</b><p>${d.data().body}</p></div>`).join('') || "NO MESSAGES.";
+            const container = document.getElementById('mailBox');
+            if(s.empty) {
+                container.innerHTML = `<div class="empty-inbox">No messages yet.</div>`;
+                return;
+            }
+
+            const html = s.docs.map(d => {
+                const data = d.data();
+                // Format Date nicely
+                const dateObj = new Date(data.date);
+                const dateStr = dateObj.toLocaleDateString() + ' ' + dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                
+                // Avatar generator based on sender name
+                const avatarUrl = `https://api.dicebear.com/7.x/identicon/svg?seed=${data.from}`;
+
+                // Highlight Cash if string present
+                let bodyText = data.body;
+                if(bodyText.includes('[Sent $')) {
+                    // Regex to wrap the cash part in a span
+                    bodyText = bodyText.replace(/\[Sent \$([\d,]+)\]/g, '<span class="cash-highlight">+$1 CASH</span>');
+                }
+
+                return `
+                    <div class="msg-bubble">
+                        <div class="msg-header">
+                            <img src="${avatarUrl}" class="msg-avatar">
+                            <div class="msg-info">
+                                <div class="msg-sender-name">@${data.from}</div>
+                                <div class="msg-time">${dateStr}</div>
+                            </div>
+                        </div>
+                        <div class="msg-body">${bodyText}</div>
+                    </div>
+                `;
+            }).join('');
+            
+            container.innerHTML = html;
         });
     };
 
@@ -1172,47 +1253,19 @@
         const snap = await getDocs(q);
         if (snap.empty) return alert("Recipient not found!");
         const targetUid = snap.docs[0].id;
-        await addDoc(collection(db, "messages"), { to: to, from: userData.username, body: body + (amt > 0 ? ` [Sent $${amt.toLocaleString()}]` : ""), date: Date.now() });
+        
+        // Append cash string if money is sent
+        const finalBody = body + (amt > 0 ? ` [Sent $${amt.toLocaleString()}]` : "");
+
+        await addDoc(collection(db, "messages"), { to: to, from: userData.username, body: finalBody, date: Date.now() });
         if (amt > 0) { await updateDoc(doc(db, "users", myUid), { balance: increment(-amt) }); await updateDoc(doc(db, "users", targetUid), { balance: increment(amt) }); }
         
         await updateDoc(doc(db, "users", myUid), { totalMails: increment(1) });
+        // Clear inputs
+        document.getElementById('msgBody').value = '';
+        document.getElementById('payAmt').value = '';
         alert("Mail Sent!");
     };
-    // CONFIGURATION
-const MAX_MESSAGES = 5; // Only show the last 5 (Fixes "Ages to load")
-const MAX_CHARS = 500;   // Token/Data saver
-
-function displayMessages(messages) {
-    const container = document.getElementById('chat-container'); // Make sure you have a <div id="chat-container"></div>
-    container.innerHTML = ''; // Clear loading text
-
-    // 1. REVERSE & SLICE: Only take the last 5 messages so it loads instantly
-    // (Assumes 'messages' is your array of data)
-    const recentMessages = messages.slice(-MAX_MESSAGES).reverse(); 
-
-    recentMessages.forEach(msg => {
-        // 2. TOKEN SAVER: Cut text if it's too long
-        let cleanText = msg.body || msg.text || ""; // Adjust '.body' to whatever your database calls the text
-        let wasTruncated = false;
-
-        if (cleanText.length > MAX_CHARS) {
-            cleanText = cleanText.substring(0, MAX_CHARS) + "...";
-            wasTruncated = true;
-        }
-
-        // 3. GENERATE BUBBLE HTML
-        const bubble = document.createElement('div');
-        bubble.className = 'message-bubble';
-        
-        bubble.innerHTML = `
-            <span class="message-sender">${msg.sender || "Unknown"}</span>
-            <div class="message-text">${cleanText}</div>
-            ${wasTruncated ? '<div class="truncated-note">(Message truncated to save data)</div>' : ''}
-        `;
-
-        container.appendChild(bubble);
-    });
-}
 </script>
 </body>
 </html>
