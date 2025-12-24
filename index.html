@@ -33,8 +33,10 @@
         .tab.active { background: #334155; color: white; border: 1px solid #475569; }
         
         .orb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-top: 25px; transition: all 0.5s ease; }
+        /* Added z-index to title so atoms go behind it */
         .orb-item { background: #0f172a; border: 2px solid #334155; padding: 20px; border-radius: 16px; position: relative; text-align: center; min-height: 280px; display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.3s ease, opacity 0.3s ease; }
-        
+        .orb-item b { position: relative; z-index: 25; text-shadow: 0 2px 5px rgba(0,0,0,0.8); }
+
         /* --- VISUAL ENGINE & EFFECTS --- */
         .visual-container { 
             position: relative; 
@@ -94,7 +96,7 @@
             transform: translate(-50%, -50%);
             transform-style: preserve-3d;
             pointer-events: none;
-            z-index: 15; /* Above the orb */
+            z-index: 15; /* Above the orb, but below title (25) */
         }
 
         /* The Ring Wrapper: Rotated to a specific angle to create the path */
@@ -239,7 +241,7 @@
             border-radius: 6px; font-weight: 900; 
             display: flex; align-items: center; justify-content: center; 
             cursor: pointer; font-size: 11px; 
-            border: 2px solid #b91c1c; z-index: 5; 
+            border: 2px solid #b91c1c; z-index: 25; /* High priority */
             letter-spacing: 0.5px;
         }
         .sell-btn-corner:hover { background: #dc2626; }
@@ -384,7 +386,7 @@
 
         /* Custom Tutorial Visuals */
         .tut-center-orb { width:30px; height:30px; background:#6366f1; border-radius:50%; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); box-shadow:0 0 10px #6366f1; z-index: 5; }
-        .tut-orbit { position: absolute; top: 50%; left: 50%; width: 50px; height: 50px; border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; }
+        .tut-orbit { position: absolute; top: 50%; left: 50%; width: 50px; height: 50px; border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; border: 1px solid rgba(255,255,255,0.1); }
         .tut-electron { position: absolute; width: 4px; height: 4px; background: white; border-radius: 50%; box-shadow: 0 0 5px white; top: 0; left: 50%; transform: translate(-50%, -50%); }
         .tut-gold-ring { position: absolute; top:50%; left:50%; width:60px; height:60px; border:2px solid #facc15; border-radius:50%; margin:-30px 0 0 -30px; opacity:0.6; }
         
@@ -482,11 +484,17 @@
                     <div class="evo-arrow">➜</div>
                     <div class="evo-step">
                         <div class="evo-orb-box">
-                            <div class="tut-center-orb" style="box-shadow:0 0 20px gold;"></div>
-                            <div class="tut-orbit" style="animation: tutSpin 2s linear infinite;"><div class="tut-electron"></div></div>
-                            <div class="tut-orbit" style="width:40px; height:40px; animation: tutSpin 3s linear infinite reverse; transform:translate(-50%, -50%) rotate(90deg);"><div class="tut-electron"></div></div>
-                            <div class="tut-gold-ring" style="animation: tutSpin 6s linear infinite;"></div>
-                            <div class="tut-gold-ring" style="width:50px; height:50px; margin:-25px 0 0 -25px; border-color:white; animation: tutSpin 8s linear infinite reverse;"></div>
+                            <div class="tut-center-orb" style="background:#facc15; box-shadow:0 0 15px #facc15;"></div>
+                            
+                            <div class="tut-orbit" style="animation: tutSpin 2s linear infinite; border-color:rgba(250, 204, 21, 0.3);">
+                                <div class="tut-electron" style="background:#facc15; box-shadow:0 0 5px #facc15;"></div>
+                            </div>
+                            <div class="tut-orbit" style="width:40px; height:40px; animation: tutSpin 3s linear infinite reverse; transform:translate(-50%, -50%) rotate(90deg); border-color:rgba(250, 204, 21, 0.3);">
+                                <div class="tut-electron" style="background:#facc15; box-shadow:0 0 5px #facc15;"></div>
+                            </div>
+                            <div class="tut-orbit" style="width:70px; height:70px; animation: tutSpin 5s linear infinite; border-color:rgba(250, 204, 21, 0.3);">
+                                <div class="tut-electron" style="background:#facc15; box-shadow:0 0 5px #facc15;"></div>
+                            </div>
                         </div>
                         <div style="font-size:12px; color:#facc15; font-weight:bold;">ASCENDED</div>
                     </div>
@@ -647,8 +655,8 @@
     let lastCollectionHash = "";
 
     /* --- HARDCORE BALANCE UPDATE --- 
-       Logic: Slower starts, massive gaps between tiers, more rewarding scaling.
-       Timer: Varied times (0.6s to 30s) creates rhythm.
+        Logic: Slower starts, massive gaps between tiers, more rewarding scaling.
+        Timer: Varied times (0.6s to 30s) creates rhythm.
     */
     const ORB_DATA = [
         { id: 'orb1', name: 'Apprentice Orb', baseCost: 15, baseInc: 1, time: 600, color: '#3b82f6' }, // Fast tick, low yield (Hook)
@@ -734,17 +742,18 @@
                     
                     updateUI(); // Always update balance/text
                     renderDailyChest(); 
-                    renderOrbs('orbGrid', ORB_DATA); // Render earn grid (less intensive)
-
-                    // -- FIX FOR COLLECTION FLICKER --
-                    // We only re-render the collection grid if the actual content (Inventory) changes
+                    
+                    // -- FIX FOR COLLECTION/ORB REFRESH FLICKER --
+                    // We only re-render the grids if the actual content (Inventory) changes
                     // Not when balance changes.
                     const currentCollectionHash = JSON.stringify(userData.orbs) + JSON.stringify(userData.uniqueOrbs);
                     
                     if (currentCollectionHash !== lastCollectionHash) {
+                        // This block only runs when inventory changes (buy/sell/open chest)
+                        renderOrbs('orbGrid', ORB_DATA); // Moved inside so it doesn't refresh on balance tick
                         renderCollection();
                         renderUniqueLoot(); 
-                        renderResearch(); // In case levels changed
+                        renderResearch(); 
                         lastCollectionHash = currentCollectionHash;
                     }
                     
@@ -761,7 +770,7 @@
         let celestialHTML = '';
 
         const effects = [];
-        if ((r['core'] || 0) >= 5) effects.push('fx-core');        
+        if ((r['core'] || 0) >= 5) effects.push('fx-core');         
         if ((r['magic'] || 0) >= 5) effects.push('fx-magic');       
         if ((r['power'] || 0) >= 5) effects.push('fx-power');       
         if ((r['wisdom'] || 0) >= 5) effects.push('fx-wisdom');     
@@ -1244,7 +1253,7 @@
                         </div>
                         <b style="font-size:16px;">${orb.name}</b>
                         <div style="color:#10b981; font-weight:800; font-size:14px; margin-top:5px;">+$${finalInc.toLocaleString()}</div>
-                        <div style="font-size:12px; color:#94a3b8;">Every ${(orb.time/1000).toFixed(1)}s</div>
+                        <div style="font-size:12px; color:#94a3b8;">Rate: ${(orb.time/1000).toFixed(1)}s</div>
                         <div class="progress-bg" style="margin-top:10px;"><div class="progress-fill" id="unique-bar-${orb.id}"></div></div>
                     `;
                     grid.appendChild(div);
@@ -1279,7 +1288,8 @@
             div.className = 'orb-item'; div.style.minHeight = '220px'; div.style.opacity = '0'; div.style.transform = 'translateY(20px)';
             const income = calcIncome(orb, count);
             const visualHTML = generateOrbHTML(orb, count);
-            div.innerHTML = `<div class="orb-lvl-badge">LVL ${calculateOrbLevel(orb, count)}</div>${visualHTML}<b>${orb.name}</b><p style="font-size:12px;">Owned: ${count}</p><div style="color:#10b981; font-weight:800; font-size:14px;">Total: +$${income.toLocaleString()}</div><div class="progress-bg" style="margin-top:10px;"><div class="progress-fill" id="col-bar-${orb.id}"></div></div>`;
+            // ADDED PERIOD TIME TO COLLECTION
+            div.innerHTML = `<div class="orb-lvl-badge">LVL ${calculateOrbLevel(orb, count)}</div>${visualHTML}<b>${orb.name}</b><p style="font-size:12px;">Owned: ${count}</p><div style="color:#10b981; font-weight:800; font-size:14px;">Total: +$${income.toLocaleString()}</div><div style="font-size:12px; color:#94a3b8; margin-top:2px;">Period: ${(orb.time/1000).toFixed(1)}s</div><div class="progress-bg" style="margin-top:10px;"><div class="progress-fill" id="col-bar-${orb.id}"></div></div>`;
             collectionGrid.appendChild(div);
             setTimeout(() => { div.style.opacity = '1'; div.style.transform = 'translateY(0)'; }, index * 40);
         });
@@ -1437,6 +1447,12 @@
              if (!seen) {
                  document.getElementById('researchTutorial').classList.remove('hidden');
              }
+             renderResearch();
+        }
+
+        // --- PRESTIGE FIX ---
+        if (tabId === 'prestige') {
+            renderPrestige();
         }
 
         document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
@@ -1445,7 +1461,6 @@
         const tabBtn = document.getElementById('t' + tabId.charAt(0).toUpperCase() + tabId.slice(1, 3)); if(tabBtn) tabBtn.classList.add('active');
         if (tabId === 'marketplace') { renderUniqueLoot(); renderDailyChest(); }
         if (tabId === 'collection') renderCollection();
-        if (tabId === 'research') renderResearch();
     };
 
     document.getElementById('mainClicker').onclick = (e) => {
