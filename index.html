@@ -473,6 +473,11 @@
         <div id="marketv2View" class="tab-view hidden">
              <div class="section-header" style="color:#34d399; margin-top:0;">MARKET PLACE V2 - BUY ITEMS</div>
              <p style="text-align:center; margin-bottom:20px; color:#94a3b8;">Purchase rare artifacts listed by other players.</p>
+             
+             <div style="max-width: 600px; margin: 0 auto 20px;">
+                <input type="text" id="marketPlayerSearch" class="search-bar" style="width:100%;" placeholder="🔍 Filter Player Listings..." onkeyup="renderMarketGrid()">
+             </div>
+
              <div id="globalMarketGrid" class="orb-grid">Loading market...</div>
 
              <div class="section-header" style="color:#facc15; margin-top:50px;">SELL YOUR ARTIFACTS</div>
@@ -559,6 +564,9 @@
     let pendingSellRefund = 0;
     let lastCollectionHash = "";
     let selectedOrbForSale = null;
+
+    // Cache for market to support filtering without re-querying
+    let marketListingsCache = [];
 
     const ORB_DATA = [
         { id: 'orb1', name: 'Apprentice Orb', baseCost: 15, baseInc: 1, time: 600, color: '#3b82f6' },
@@ -907,37 +915,68 @@
     }
 
     // --- MARKET V2 FUNCTIONS ---
-    window.renderMarketV2 = async () => {
-        // 1. Render Global Listings (Buy)
+    // Helper to render from cache
+    window.renderMarketGrid = () => {
         const marketGrid = document.getElementById('globalMarketGrid');
-        marketGrid.innerHTML = 'Loading listings...';
+        const filterText = document.getElementById('marketPlayerSearch').value.toLowerCase();
         
+        marketGrid.innerHTML = '';
+        
+        // Filter listings based on search text
+        const filteredListings = marketListingsCache.filter(item => {
+             return item.orb.name.toLowerCase().includes(filterText) || item.sellerName.toLowerCase().includes(filterText);
+        });
+
+        if (filteredListings.length === 0) {
+             marketGrid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:20px; color:#94a3b8; border:2px dashed #334155; border-radius:12px;">No items found matching your search.</div>';
+             return;
+        }
+
+        filteredListings.forEach(item => {
+            const div = document.createElement('div'); 
+            div.className = 'orb-item';
+            div.innerHTML = `
+                <div class="orb-lvl-badge" style="background:#059669; border-color:#34d399;">FOR SALE</div>
+                <div class="visual-container"><div class="unique-loot-visual" style="color:${item.orb.color};"></div></div>
+                <b>${item.orb.name}</b>
+                <div style="color:#94a3b8; font-size:12px;">Seller: @${item.sellerName}</div>
+                <div style="margin: 10px 0;"><span class="mkt-price-tag">$${parseInt(item.price).toLocaleString()}</span></div>
+                <div style="color:#10b981; font-size:12px;">Income: +$${item.orb.income.toLocaleString()}/s</div>
+                <button class="buy-btn btn-locked" data-cost="${item.price}" onclick="buyMarketItem('${item.id}', ${item.price})">BUY NOW</button>
+            `;
+            marketGrid.appendChild(div);
+        });
+    };
+
+    window.renderMarketV2 = async () => {
+        // 1. Setup Listener for Global Listings (Buy) - Only once
+        // We use a global listener to update cache, then call renderMarketGrid
+        // This allows filtering without re-querying Firestore
+        
+        // Clear previous grid to show loading
+        const marketGrid = document.getElementById('globalMarketGrid');
+        
+        // If we haven't set up the listener yet, do it now
+        // Using a check to avoid multiple listeners if tab is toggled
+        // For simplicity in this structure, we'll re-attach but rely on snapshot efficient updates
         onSnapshot(collection(db, "market_listings"), (snap) => {
+            marketListingsCache = [];
             if (snap.empty) {
                 marketGrid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:20px; color:#94a3b8; border:2px dashed #334155; border-radius:12px;">No items currently listed. Be the first!</div>';
                 return;
             }
-            marketGrid.innerHTML = '';
+            
             snap.forEach(doc => {
                 const item = doc.data();
-                const listingId = doc.id;
-                // Don't show own listings in buy area (optional, but good UX)
-                if (item.sellerUid === myUid) return;
-
-                const div = document.createElement('div'); 
-                div.className = 'orb-item';
-                div.innerHTML = `
-                    <div class="orb-lvl-badge" style="background:#059669; border-color:#34d399;">FOR SALE</div>
-                    <div class="visual-container"><div class="unique-loot-visual" style="color:${item.orb.color};"></div></div>
-                    <b>${item.orb.name}</b>
-                    <div style="color:#94a3b8; font-size:12px;">Seller: @${item.sellerName}</div>
-                    <div style="margin: 10px 0;"><span class="mkt-price-tag">$${parseInt(item.price).toLocaleString()}</span></div>
-                    <div style="color:#10b981; font-size:12px;">Income: +$${item.orb.income.toLocaleString()}/s</div>
-                    <button class="buy-btn btn-locked" data-cost="${item.price}" onclick="buyMarketItem('${listingId}', ${item.price})">BUY NOW</button>
-                `;
-                marketGrid.appendChild(div);
+                item.id = doc.id; // Save doc ID
+                // Don't show own listings in buy area
+                if (item.sellerUid !== myUid) {
+                    marketListingsCache.push(item);
+                }
             });
-            if (marketGrid.innerHTML === '') marketGrid.innerHTML = '<div style="grid-column: 1/-1; text-align:center;">No items from other players.</div>';
+            
+            // Initial Render
+            renderMarketGrid();
         });
 
         // 2. Render My Sellable Inventory
@@ -1014,8 +1053,13 @@
             if (!actualDoc) return alert("Item already sold!");
 
             // Add the "Auction Find" tag to the orb before giving it to buyer
-            const boughtOrb = actualDoc.orb;
+            // IMPORTANT: Create a deep copy to detach from previous reference
+            const boughtOrb = JSON.parse(JSON.stringify(actualDoc.orb));
+            
             boughtOrb.isAuction = true; // Tag for visual badge
+            boughtOrb.originalOwner = actualDoc.sellerName; // Track lineage
+            // Reset acquired time so it shows up at the top/end of their list
+            boughtOrb.acquiredAt = Date.now();
 
             // Update Buyer
             await updateDoc(doc(db, "users", myUid), {
@@ -1033,7 +1077,7 @@
 
             // UI Update
             updateUI();
-            alert("Purchase Successful! Check your Chest Finds.");
+            alert("Purchase Successful! You can now use or resell this item.");
 
         } catch (e) {
             console.error(e);
