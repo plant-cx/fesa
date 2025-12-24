@@ -1706,7 +1706,7 @@
     };
 
     const handleAuth = async () => {
-        const u = document.getElementById('loginUser').value.trim().toLowerCase();
+        const u = document.getElementById('loginUser').value.trim();
         const p = document.getElementById('authPass').value;
         const e = document.getElementById('regEmail').value;
         if (!u || !p || (isReg && !e)) return showNotification("Please fill all fields", 'error');
@@ -1802,7 +1802,7 @@
             return showNotification("Daily message limit reached (5/5). Try tomorrow.", 'error');
         }
 
-        const to = document.getElementById('msgTo').value.trim().toLowerCase().replace('@', '');
+        const to = document.getElementById('msgTo').value.trim().replace('@', '');
         const body = document.getElementById('msgBody').value;
         const amt = parseInt(document.getElementById('payAmt').value) || 0;
 
