@@ -503,7 +503,11 @@
                 <button class="tut-btn" onclick="closeResearchTutorial()">UNDERSTOOD</button>
             </div>
 
-            <h3 style="color:#6366f1; margin-bottom: 20px;">🧪 ORB RESEARCH LAB</h3>
+            <div style="position: relative; margin-bottom: 20px; text-align: center;">
+                 <h3 style="color:#6366f1; font-size: 24px; text-transform: uppercase; letter-spacing: 1px;">🧪 Orb Research Lab</h3>
+                 <button onclick="openResearchTutorial()" style="position: absolute; right: 0; top: 0; width: 30px; height: 30px; padding: 0; font-size: 16px; border-radius: 50%; background: #334155; border: 1px solid #475569; color:#94a3b8; cursor:pointer;" title="Replay Tutorial">?</button>
+            </div>
+
             <div class="research-layout">
                 <div class="research-list" id="researchOrbList">
                     </div>
@@ -650,6 +654,7 @@
     const uniqueOrbProgress = {};
     let searchFilter = "";
     let selectedResearchOrb = null;
+    let transactionLock = false; // Lock to prevent race conditions
     
     // Track previous state to prevent flickering
     let lastCollectionHash = "";
@@ -731,6 +736,10 @@
         document.getElementById('researchTutorial').classList.add('hidden');
         localStorage.setItem('mailcash_tut_seen_v2', 'true');
     };
+    
+    window.openResearchTutorial = () => {
+        document.getElementById('researchTutorial').classList.remove('hidden');
+    }
 
     onAuthStateChanged(auth, u => {
         if(u) {
@@ -926,6 +935,7 @@
     }
 
     window.buyResearch = async (orbId, type, cost) => {
+        if (transactionLock) return;
         if(userData.balance < cost) return;
         const currentLvl = (userData.research?.[orbId]?.[type] || 0);
         const r = userData.research?.[orbId] || {};
@@ -933,17 +943,24 @@
         if (currentLvl >= 5) return;
         if (currentLvl >= 2 && currentSpec && currentSpec !== type) return;
         
-        userData.balance -= cost;
-        if (!userData.research[orbId]) userData.research[orbId] = {};
-        userData.research[orbId][type] = (userData.research[orbId][type] || 0) + 1;
-        updateResearchPanel(ORB_DATA.find(o => o.id === orbId));
-        updateUI();
+        transactionLock = true;
+        try {
+            userData.balance -= cost;
+            if (!userData.research[orbId]) userData.research[orbId] = {};
+            userData.research[orbId][type] = (userData.research[orbId][type] || 0) + 1;
+            updateResearchPanel(ORB_DATA.find(o => o.id === orbId));
+            updateUI();
 
-        await updateDoc(doc(db, "users", myUid), { balance: increment(-cost), [`research.${orbId}.${type}`]: increment(1) });
+            await updateDoc(doc(db, "users", myUid), { balance: increment(-cost), [`research.${orbId}.${type}`]: increment(1) });
+        } finally {
+            transactionLock = false;
+        }
     };
 
     window.handleSearch = () => {
         searchFilter = document.getElementById('globalSearch').value.toLowerCase();
+        // --- SEARCH REDIRECT: INSTANTLY OPEN COLLECTION ---
+        showTab('collection');
         renderOrbs('orbGrid', ORB_DATA);
         renderCollection();
     };
@@ -957,7 +974,6 @@
         const currentLevel = userData.clickLevel || 1;
         
         // --- HARDCORE CLICKER SCALING ---
-        // Cost rises faster (1.5x) to prevent cheap spamming
         const clickCost = Math.floor(100 * Math.pow(1.5, currentLevel - 1));
         const totalVisualBal = Math.floor((userData.balance || 0) + localBalanceAccumulator);
         
@@ -967,13 +983,21 @@
         document.getElementById('clickPowerVal').innerText = getPower(currentLevel).toLocaleString();
         
         const upgradeBtn = document.getElementById('upgradeClickBtn');
+        // --- NEW CLICKER BUTTON LOGIC (GREY OUT IF CANT AFFORD) ---
         if (currentLevel >= 100) {
             upgradeBtn.innerText = "MAXED";
             upgradeBtn.style.background = "#334155";
+            upgradeBtn.style.color = "#64748b";
+            upgradeBtn.style.cursor = "not-allowed";
+        } else if (userData.balance < clickCost) {
+            upgradeBtn.innerHTML = `UPGRADE $<span id="clickCost">${clickCost.toLocaleString()}</span>`;
+            upgradeBtn.style.background = "#334155";
+            upgradeBtn.style.color = "#64748b";
             upgradeBtn.style.cursor = "not-allowed";
         } else {
             upgradeBtn.innerHTML = `UPGRADE $<span id="clickCost">${clickCost.toLocaleString()}</span>`;
             upgradeBtn.style.background = "#6366f1";
+            upgradeBtn.style.color = "white";
             upgradeBtn.style.cursor = "pointer";
         }
         
@@ -989,7 +1013,6 @@
         document.getElementById('doPrestigeBtn').style.opacity = userData.balance < 1000000000 ? "0.5" : "1";
 
         // --- LOCK TABS VISUALS ---
-        // Requirement: Lock tabs until Void Eye (orb5) is owned
         const hasVoidEye = (userData.orbs && userData.orbs['orb5'] > 0);
         document.getElementById('tRes').innerText = hasVoidEye ? "RESEARCH" : "🔒 RESEARCH";
         document.getElementById('tCol').innerText = "COLLECTION"; 
@@ -997,7 +1020,6 @@
     };
 
     const getPower = (lvl) => {
-        // Base power linear but weak
         let base = lvl * 2; 
         let mult = 1;
         if(userData?.prestigeUpgrades) {
@@ -1010,10 +1032,8 @@
 
     const calcIncome = (orb, owned) => {
         let totalIncome = 0;
-        // Standard Idle Formula: Base * owned
         if (owned > 0) totalIncome = orb.baseInc * owned;
         
-        // Research Multipliers
         const r = userData.research?.[orb.id] || {};
         const researchMult = 1 + ((r['core']||0) * 0.5) + ((r['power']||0) * 1);
 
@@ -1036,10 +1056,6 @@
             if(searchFilter && !orb.name.toLowerCase().includes(searchFilter)) return;
 
             const owned = userData.orbs?.[orb.id] || 0;
-            
-            // --- NEW PRICE SCALING FORMULA ---
-            // Base * 1.15^owned (Standard Idle Curve)
-            // Allows higher owned counts, but initial prices are higher.
             const cost = Math.floor(orb.baseCost * Math.pow(1.15, owned));
             
             const income = calcIncome(orb, owned);
@@ -1072,37 +1088,46 @@
     }
 
     window.buyOrb = async (id, cost, currentOwned) => {
+        if (transactionLock) return;
         if (userData.balance >= cost && currentOwned < 200) {
-            userData.balance -= cost;
-            if(!userData.orbs[id]) userData.orbs[id] = 0;
-            userData.orbs[id]++;
-            
-            updateUI();
-            
-            // Manually trigger render here so it feels instant
-            renderOrbs('orbGrid', ORB_DATA); 
+            transactionLock = true;
+            try {
+                userData.balance -= cost;
+                if(!userData.orbs[id]) userData.orbs[id] = 0;
+                userData.orbs[id]++;
+                
+                updateUI();
+                renderOrbs('orbGrid', ORB_DATA); 
 
-            const update = { balance: increment(-cost) }; update[`orbs.${id}`] = increment(1);
-            await updateDoc(doc(db, "users", myUid), update);
+                const update = { balance: increment(-cost) }; update[`orbs.${id}`] = increment(1);
+                await updateDoc(doc(db, "users", myUid), update);
+            } finally {
+                transactionLock = false;
+            }
         }
     };
 
     window.sellOrb = async (id, refund) => { 
+        if (transactionLock) return;
         if(userData?.orbs?.[id] > 0) {
-            userData.balance += refund;
-            userData.orbs[id]--;
-            updateUI();
-            
-            renderOrbs('orbGrid', ORB_DATA);
-
-            await updateDoc(doc(db, "users", myUid), { balance: increment(refund), [`orbs.${id}`]: increment(-1) });
+            transactionLock = true;
+            try {
+                userData.balance += refund;
+                userData.orbs[id]--;
+                updateUI();
+                renderOrbs('orbGrid', ORB_DATA);
+                await updateDoc(doc(db, "users", myUid), { balance: increment(refund), [`orbs.${id}`]: increment(-1) });
+            } finally {
+                transactionLock = false;
+            }
         }
     };
 
     window.buyChest = async (tier, cost) => {
+        if (transactionLock) return;
         if (userData.balance < cost) return alert("Insufficient Funds!");
+        
         let minCash, maxCash, minTime, maxTime;
-        // High variance gambling
         if (tier === 'bronze') { minCash = 100; maxCash = 5000; minTime = 500; maxTime = 15000; }
         else if (tier === 'silver') { minCash = 5000; maxCash = 50000; minTime = 500; maxTime = 12000; }
         else if (tier === 'gold') { minCash = 100000; maxCash = 5000000; minTime = 500; maxTime = 10000; }
@@ -1113,7 +1138,6 @@
         const popup = document.getElementById('lootPopup');
         const content = document.getElementById('lootCardContent');
         
-        // --- MODIFIED POPUP STRUCTURE: NAME TOP, VISUAL MIDDLE, STATS BOTTOM ---
         content.innerHTML = `
             <h2 style="color:#facc15; margin-bottom:15px;">CHEST OPENED!</h2>
             <h3 style="font-size:28px; margin-bottom:10px; color:${newOrb.color}">${newOrb.name}</h3>
@@ -1128,16 +1152,21 @@
         `;
         popup.classList.remove('hidden');
 
-        userData.balance -= cost;
-        if(!userData.uniqueOrbs) userData.uniqueOrbs = [];
-        userData.uniqueOrbs.push(newOrb);
-        updateUI();
-
-        await updateDoc(doc(db, "users", myUid), { balance: increment(-cost), uniqueOrbs: arrayUnion(newOrb) });
+        transactionLock = true;
+        try {
+            userData.balance -= cost;
+            if(!userData.uniqueOrbs) userData.uniqueOrbs = [];
+            userData.uniqueOrbs.push(newOrb);
+            updateUI();
+            await updateDoc(doc(db, "users", myUid), { balance: increment(-cost), uniqueOrbs: arrayUnion(newOrb) });
+        } finally {
+            transactionLock = false;
+        }
     };
 
     // --- NEW DAILY CHEST LOGIC ---
     window.claimDailyChest = async () => {
+        if (transactionLock) return;
         const now = Date.now();
         const last = userData.lastDailyClaim || 0;
         if (now - last < 86400000) return alert("Come back later!");
@@ -1159,7 +1188,6 @@
         const popup = document.getElementById('lootPopup');
         const content = document.getElementById('lootCardContent');
 
-        // --- MODIFIED POPUP STRUCTURE FOR DAILY ---
         content.innerHTML = `
             <h2 style="color:#facc15; margin-bottom:15px;">CHEST OPENED!</h2>
             <h3 style="font-size:28px; margin-bottom:10px; color:${newOrb.color}">${newOrb.name}</h3>
@@ -1174,18 +1202,22 @@
         `;
         popup.classList.remove('hidden');
 
-        // Note: Free, so no balance check
-        if(!userData.uniqueOrbs) userData.uniqueOrbs = [];
-        userData.uniqueOrbs.push(newOrb);
-        userData.lastDailyClaim = now;
-        
-        renderDailyChest();
-        updateUI();
+        transactionLock = true;
+        try {
+            if(!userData.uniqueOrbs) userData.uniqueOrbs = [];
+            userData.uniqueOrbs.push(newOrb);
+            userData.lastDailyClaim = now;
+            
+            renderDailyChest();
+            updateUI();
 
-        await updateDoc(doc(db, "users", myUid), { 
-            uniqueOrbs: arrayUnion(newOrb),
-            lastDailyClaim: now
-        });
+            await updateDoc(doc(db, "users", myUid), { 
+                uniqueOrbs: arrayUnion(newOrb),
+                lastDailyClaim: now
+            });
+        } finally {
+            transactionLock = false;
+        }
     }
 
     function renderDailyChest() {
@@ -1227,7 +1259,8 @@
         const container = document.getElementById('lootMarketplaceContainer');
         if (!container || !userData.uniqueOrbs) return;
         container.innerHTML = '';
-        const tiers = ['daily', 'bronze', 'silver', 'gold', 'champion']; // Added Daily
+        // --- SORT ORDER CHANGED AS REQUESTED: Champion -> Gold -> Silver -> Bronze ---
+        const tiers = ['daily', 'champion', 'gold', 'silver', 'bronze']; 
         tiers.forEach(tier => {
             const orbsInTier = userData.uniqueOrbs.filter(o => o.tier === tier);
             if (orbsInTier.length > 0) {
@@ -1288,7 +1321,6 @@
             div.className = 'orb-item'; div.style.minHeight = '220px'; div.style.opacity = '0'; div.style.transform = 'translateY(20px)';
             const income = calcIncome(orb, count);
             const visualHTML = generateOrbHTML(orb, count);
-            // ADDED PERIOD TIME TO COLLECTION
             div.innerHTML = `<div class="orb-lvl-badge">LVL ${calculateOrbLevel(orb, count)}</div>${visualHTML}<b>${orb.name}</b><p style="font-size:12px;">Owned: ${count}</p><div style="color:#10b981; font-weight:800; font-size:14px;">Total: +$${income.toLocaleString()}</div><div style="font-size:12px; color:#94a3b8; margin-top:2px;">Period: ${(orb.time/1000).toFixed(1)}s</div><div class="progress-bg" style="margin-top:10px;"><div class="progress-fill" id="col-bar-${orb.id}"></div></div>`;
             collectionGrid.appendChild(div);
             setTimeout(() => { div.style.opacity = '1'; div.style.transform = 'translateY(0)'; }, index * 40);
@@ -1348,24 +1380,37 @@
     }
 
     window.upgradeClicker = async () => {
+        if (transactionLock) return;
         const currentLevel = userData.clickLevel || 1;
         const cost = Math.floor(100 * Math.pow(1.5, currentLevel - 1));
         if (userData.balance >= cost && currentLevel < 100) {
-            userData.balance -= cost;
-            userData.clickLevel = (userData.clickLevel || 1) + 1;
-            updateUI();
-            await updateDoc(doc(db, "users", myUid), { balance: increment(-cost), clickLevel: increment(1) });
+            transactionLock = true;
+            try {
+                userData.balance -= cost;
+                userData.clickLevel = (userData.clickLevel || 1) + 1;
+                updateUI();
+                await updateDoc(doc(db, "users", myUid), { balance: increment(-cost), clickLevel: increment(1) });
+            } finally {
+                transactionLock = false;
+            }
         }
     };
 
     window.buyPrestigeUpgrade = async (id, cost) => { 
+        if (transactionLock) return;
         if(userData.prestigePoints < cost || userData.prestigeUpgrades?.includes(id)) return; 
-        userData.prestigePoints -= cost;
-        if(!userData.prestigeUpgrades) userData.prestigeUpgrades = [];
-        userData.prestigeUpgrades.push(id);
-        renderPrestige();
-        updateUI();
-        await updateDoc(doc(db, "users", myUid), { prestigePoints: increment(-cost), prestigeUpgrades: arrayUnion(id) }); 
+        
+        transactionLock = true;
+        try {
+            userData.prestigePoints -= cost;
+            if(!userData.prestigeUpgrades) userData.prestigeUpgrades = [];
+            userData.prestigeUpgrades.push(id);
+            renderPrestige();
+            updateUI();
+            await updateDoc(doc(db, "users", myUid), { prestigePoints: increment(-cost), prestigeUpgrades: arrayUnion(id) }); 
+        } finally {
+            transactionLock = false;
+        }
     };
 
     window.doPrestige = async () => {
