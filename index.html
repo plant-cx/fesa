@@ -464,9 +464,9 @@
             </div>
 
             <div style="background: #0f172a; padding: 15px; border-radius: 12px; border: 1px solid #475569; margin-bottom: 15px;">
-                <label style="font-size: 14px; font-weight: 800; color: #94a3b8; display: block; margin-bottom: 8px;">ATTACH ARTIFACT (OPTIONAL)</label>
+                <label style="font-size: 14px; font-weight: 800; color: #94a3b8; display: block; margin-bottom: 8px;">ATTACH ANY ORB (OPTIONAL)</label>
                 <select id="msgOrbSelector" style="margin-bottom:0;">
-                    <option value="">-- Select an Artifact to Send --</option>
+                    <option value="">-- Select an Item to Send --</option>
                 </select>
             </div>
 
@@ -1071,7 +1071,7 @@
                 giftedOrbs.forEach(orb => {
                     const div = document.createElement('div'); div.className = 'orb-item'; div.style.minHeight = '220px';
                     let mult = 1;
-                    if(userData?.prestigeUpgrades) { /* Calc Multiplier */
+                    if(userData?.prestigeUpgrades) { 
                          PRESTIGE_UPGRADES.orbs.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
                          PRESTIGE_UPGRADES.artifacts.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
                          PRESTIGE_UPGRADES.global.forEach(u => { if(userData.prestigeUpgrades.includes(u.id)) mult *= u.mult; });
@@ -1197,7 +1197,6 @@
                 }
                 const pct = (uniqueOrbProgress[orb.id] / orb.time) * 100;
                 const bar = document.getElementById(`unique-bar-${orb.id}`); if(bar) bar.style.width = pct + "%";
-                // also update gift progress bars if they exist
                 const giftBar = document.getElementById(`col-gift-bar-${orb.id}`); if(giftBar) giftBar.style.width = pct + "%";
             });
         }
@@ -1230,20 +1229,18 @@
 
         if (tabId === 'prestige') { renderPrestige(); }
         if (tabId === 'achievements') { renderAchievements(); }
-// ... inside window.showTab ...
 
         if (tabId === 'message') {
             const selector = document.getElementById('msgOrbSelector');
             selector.innerHTML = '<option value="">-- Select an Item to Send --</option>';
             
-            // 1. Add Standard Orbs (Grouped)
             const standardGroup = document.createElement('optgroup');
             standardGroup.label = "Standard Orbs (Will convert to Gift)";
             let hasStandard = false;
             ORB_DATA.forEach(orb => {
                 if (userData.orbs && userData.orbs[orb.id] > 0) {
                     const opt = document.createElement('option');
-                    opt.value = orb.id; // e.g. "orb1"
+                    opt.value = orb.id; 
                     opt.innerText = `${orb.name} (Owned: ${userData.orbs[orb.id]})`;
                     standardGroup.appendChild(opt);
                     hasStandard = true;
@@ -1251,14 +1248,13 @@
             });
             if (hasStandard) selector.appendChild(standardGroup);
 
-            // 2. Add Unique Artifacts (Grouped)
             const artifactGroup = document.createElement('optgroup');
             artifactGroup.label = "Unique Artifacts";
             let hasArtifacts = false;
             if (userData.uniqueOrbs && userData.uniqueOrbs.length > 0) {
                 userData.uniqueOrbs.forEach(orb => {
                     const opt = document.createElement('option');
-                    opt.value = orb.id; // e.g. "u_173..."
+                    opt.value = orb.id; 
                     opt.innerText = `${orb.name} (Tier: ${orb.tier.toUpperCase()}) - $${orb.income}/s`;
                     artifactGroup.appendChild(opt);
                     hasArtifacts = true;
@@ -1323,7 +1319,6 @@
 
             const html = s.docs.map(d => {
                 const data = d.data();
-                // Format Date nicely
                 const dateObj = new Date(data.date);
                 const dateStr = dateObj.toLocaleDateString() + ' ' + dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                 const avatarUrl = `https://api.dicebear.com/7.x/identicon/svg?seed=${data.from}`;
@@ -1331,7 +1326,6 @@
                 let bodyText = data.body;
                 let footerHtml = '';
 
-                // 1. Detect Cash
                 const cashMatch = bodyText.match(/\[Sent \$([\d,]+)\]/);
                 if (cashMatch) {
                     const amount = cashMatch[1];
@@ -1339,7 +1333,6 @@
                     bodyText = bodyText.replace(/\[Sent \$[\d,]+\]/, '').trim();
                 }
 
-                // 2. Detect Orb
                 const orbMatch = bodyText.match(/\[Attached Orb: (.+)\]/);
                 if (orbMatch) {
                     const orbName = orbMatch[1];
@@ -1368,7 +1361,9 @@
             
             container.innerHTML = html;
         });
-    }window.handleCombinedSend = async () => {
+    };
+
+    window.handleCombinedSend = async () => {
         const btn = document.getElementById('sendMailBtn');
         btn.disabled = true;
         btn.innerText = "SENDING...";
@@ -1383,7 +1378,6 @@
             return alert("Insufficient funds!"); 
         }
         
-        // 1. Find Recipient
         const q = query(collection(db, "users"), where("username", "==", to));
         const snap = await getDocs(q);
         if (snap.empty) { 
@@ -1395,36 +1389,30 @@
         let finalBody = body;
         if (amt > 0) finalBody += ` [Sent $${amt.toLocaleString()}]`;
 
-        // 2. Prepare Orb Logic
         let orbDataToSend = null;
         let isStandardTransfer = false;
 
         if (orbIdToSend) {
-            // Check if it is an Artifact (starts with 'u_')
             if (orbIdToSend.startsWith('u_')) {
                 const idx = userData.uniqueOrbs.findIndex(o => o.id === orbIdToSend);
                 if (idx > -1) {
-                    orbDataToSend = userData.uniqueOrbs[idx];
-                    orbDataToSend.giftedBy = userData.username; // Add signature
+                    orbDataToSend = JSON.parse(JSON.stringify(userData.uniqueOrbs[idx]));
+                    orbDataToSend.giftedBy = userData.username; 
                     finalBody += ` [Attached Orb: ${orbDataToSend.name}]`;
                 }
             }
-            // Check if it is a Standard Orb (starts with 'orb')
             else if (orbIdToSend.startsWith('orb')) {
                 if (userData.orbs[orbIdToSend] > 0) {
                     isStandardTransfer = true;
                     const refOrb = ORB_DATA.find(o => o.id === orbIdToSend);
-                    
-                    // CONVERT STANDARD TO UNIQUE GIFT
-                    // This ensures it shows up in "Sent Items" with a tag
                     orbDataToSend = {
                         id: 'u_gift_' + Date.now() + '_' + Math.floor(Math.random()*100),
                         name: refOrb.name,
                         color: refOrb.color,
-                        income: refOrb.baseInc, // It keeps its base stats
+                        income: refOrb.baseInc,
                         time: refOrb.time,
                         tier: 'gift',
-                        giftedBy: userData.username, // Signed by you
+                        giftedBy: userData.username,
                         acquiredAt: Date.now()
                     };
                     finalBody += ` [Attached Orb: ${refOrb.name}]`;
@@ -1432,38 +1420,28 @@
             }
         }
 
-        // 3. Execute Database Operations
         try {
-            // A. Send Message
             await addDoc(collection(db, "messages"), { to: to, from: userData.username, body: finalBody, date: Date.now() });
             
-            // B. Transfer Cash
             if (amt > 0) { 
                 await updateDoc(doc(db, "users", myUid), { balance: increment(-amt) }); 
                 await updateDoc(doc(db, "users", targetUid), { balance: increment(amt) }); 
             }
 
-            // C. Transfer Orb
             if (orbDataToSend) {
                  if (isStandardTransfer) {
-                     // If standard, just subtract 1 from your count
                      const updatePayload = {};
                      updatePayload[`orbs.${orbIdToSend}`] = increment(-1);
                      await updateDoc(doc(db, "users", myUid), updatePayload);
                  } else {
-                     // If artifact, remove the specific object from your array
-                     // (We filter it out locally and update the whole array)
                      const newSenderOrbs = userData.uniqueOrbs.filter(o => o.id !== orbIdToSend);
                      await updateDoc(doc(db, "users", myUid), { uniqueOrbs: newSenderOrbs });
                  }
-
-                 // Add to Receiver's Collection
                  await updateDoc(doc(db, "users", targetUid), { uniqueOrbs: arrayUnion(orbDataToSend) });
             }
             
             await updateDoc(doc(db, "users", myUid), { totalMails: increment(1) });
             
-            // Reset Form
             document.getElementById('msgBody').value = '';
             document.getElementById('payAmt').value = '';
             document.getElementById('msgOrbSelector').value = '';
@@ -1471,7 +1449,7 @@
 
         } catch (e) {
             console.error(e);
-            alert("Error sending mail. Check console.");
+            alert("Error sending mail.");
         }
 
         btn.disabled = false;
