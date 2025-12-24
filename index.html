@@ -1820,6 +1820,154 @@
         btn.disabled = false;
         btn.innerText = "SEND MAIL";
     };
+// Helper to get random number between min and max (inclusive)
+function getRandom(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function openChest(type) {
+    const roll = Math.random(); // 0.0 to 1.0
+    const mythicRoll = Math.floor(Math.random() * 10000) + 1; // 1 to 10000
+    
+    let reward = 0;
+    let cooldownTime = 0; // In milliseconds
+    let isMythic = false;
+
+    // --- 1. CHECK FOR MYTHIC DROP (1 in 10,000) ---
+    if (mythicRoll === 1) {
+        reward = 1000000;
+        cooldownTime = 10 * 60 * 1000; // 10 Minutes cooldown if you hit Mythic
+        isMythic = true;
+        alert("MYTHIC DROP! YOU FOUND $1,000,000!");
+    } 
+    
+    // --- 2. STANDARD DROPS (If not Mythic) ---
+    else if (type === 'free') {
+        // 85% $1-10, 15% $10-15 | CD: 8-10s
+        if (roll < 0.85) reward = getRandom(1, 10);
+        else reward = getRandom(10, 15);
+        
+        cooldownTime = getRandom(8000, 10000);
+    } 
+    else if (type === 'bronze') {
+        // 85% $10-15, 15% $15-20 | CD: 5-10s
+        if (roll < 0.85) reward = getRandom(10, 15);
+        else reward = getRandom(15, 20);
+
+        cooldownTime = getRandom(5000, 10000);
+    } 
+    else if (type === 'silver') {
+        // 85% $10-30, 15% $50-60 | CD: 3-6s
+        if (roll < 0.85) reward = getRandom(10, 30);
+        else reward = getRandom(50, 60);
+
+        cooldownTime = getRandom(3000, 6000);
+    } 
+    else if (type === 'gold') {
+        // 85% $500-950, 15% $1000-2000 | CD: 1-5s
+        if (roll < 0.85) reward = getRandom(500, 950);
+        else reward = getRandom(1000, 2000);
+
+        cooldownTime = getRandom(1000, 5000);
+    } 
+    else if (type === 'champion') {
+        // Champion has logic where cooldown depends on the reward tier
+        if (roll < 0.50) {
+            // 50%: $10k-50k | CD: 10-12s
+            reward = getRandom(10000, 50000);
+            cooldownTime = getRandom(10000, 12000);
+        } else if (roll < 0.75) {
+            // 25%: $50k-75k | CD: 8-12s
+            reward = getRandom(50000, 75000);
+            cooldownTime = getRandom(8000, 12000);
+        } else {
+            // 25%: $75k-100k | CD: 9-15s
+            reward = getRandom(75000, 100000);
+            cooldownTime = getRandom(9000, 15000);
+        }
+    }
+
+    // --- APPLY REWARDS ---
+    userBalance += reward;
+    updateBalanceDisplay(); // Your function to update UI
+    
+    // Trigger Cooldown for this specific chest button
+    startChestCooldown(type, cooldownTime); 
+}
+    function renderMarket() {
+    const marketContainer = document.getElementById('market-container');
+    marketContainer.innerHTML = '';
+
+    marketListings.forEach(listing => {
+        const card = document.createElement('div');
+        card.className = 'market-card';
+        
+        // Even if I am the seller, I can buy it (effectively taking it off market back to inventory)
+        const buyBtn = `<button onclick="buyOrb(${listing.id})">Buy for $${listing.price}</button>`;
+
+        card.innerHTML = `
+            <h3>${listing.orbName}</h3>
+            <p>Seller: ${listing.seller}</p>
+            <p>Price: $${listing.price}</p>
+            ${buyBtn} 
+        `;
+        marketContainer.appendChild(card);
+    });
+}
+function renderInventory() {
+    const container = document.getElementById('inventory-container');
+    container.innerHTML = '';
+
+    // Add a master "Send Selected" button at the top of inventory
+    const bulkSendBtn = document.createElement('button');
+    bulkSendBtn.innerText = "Send Selected Orbs";
+    bulkSendBtn.onclick = openBulkSendModal; // Function defined below
+    bulkSendBtn.style.marginBottom = "10px";
+    container.appendChild(bulkSendBtn);
+
+    myOrbs.forEach(orb => {
+        const div = document.createElement('div');
+        div.className = 'orb-item';
+        div.innerHTML = `
+            <input type="checkbox" class="orb-select-box" value="${orb.id}">
+            <span>${orb.name} (Rarity: ${orb.rarity})</span>
+        `;
+        container.appendChild(div);
+    });
+}
+function openBulkSendModal() {
+    // 1. Get all checked boxes
+    const checkboxes = document.querySelectorAll('.orb-select-box:checked');
+    if (checkboxes.length === 0) {
+        alert("Please select at least one orb to send.");
+        return;
+    }
+
+    // 2. Ask for username
+    const recipient = prompt(`Enter username to send ${checkboxes.length} orb(s) to:`);
+    if (!recipient || recipient === currentUser) {
+        alert("Invalid user.");
+        return;
+    }
+
+    // 3. Process the transfer
+    let idsToSend = [];
+    checkboxes.forEach(box => idsToSend.push(parseInt(box.value)));
+
+    // Filter myOrbs to remove sent ones, and push them to the other user
+    // (This logic depends on your database/storage method. Here is array logic:)
+    
+    // Remove from my inventory
+    myOrbs = myOrbs.filter(orb => !idsToSend.includes(orb.id));
+    
+    // Determine user object (Mock logic)
+    // In a real app, you would send a POST request to server here
+    console.log(`Sent orbs IDs: ${idsToSend.join(', ')} to ${recipient}`);
+
+    alert(`Successfully sent ${idsToSend.length} orbs to ${recipient}!`);
+    
+    renderInventory(); // Refresh view
+}
 </script>
 </body>
 </html>
