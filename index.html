@@ -505,12 +505,42 @@
         {id:'ach28',name:'Legendary',desc:'Unlock all achievements.',icon:'👑'}
     ];
 
-    const PRESTIGE_UPGRADES = {
-        clicks: [{ id: 'p_click_1', name: 'Iron Clicks', mult: 1.5, cost: 5 }, { id: 'p_click_2', name: 'Golden Finger', mult: 2.5, cost: 25 }, { id: 'p_click_3', name: 'Titan Tap', mult: 5.0, cost: 100 }, { id: 'p_click_4', name: 'Godly Touch', mult: 10.0, cost: 500 }, { id: 'p_click_5', name: 'Cosmic Click', mult: 50.0, cost: 2500 }],
-        orbs: [{ id: 'p_orb_1', name: 'Orb Polish', mult: 1.2, cost: 10 }, { id: 'p_orb_2', name: 'Mana Infusion', mult: 1.5, cost: 40 }, { id: 'p_orb_3', name: 'Time Warp', mult: 2.0, cost: 150 }, { id: 'p_orb_4', name: 'Star Power', mult: 4.0, cost: 600 }, { id: 'p_orb_5', name: 'Dark Matter', mult: 10.0, cost: 3000 }],
-        artifacts: [{ id: 'p_art_1', name: 'Loot Scope', mult: 1.5, cost: 50 }, { id: 'p_art_2', name: 'Treasure Map', mult: 2.5, cost: 200 }, { id: 'p_art_3', name: 'Ancient Key', mult: 5.0, cost: 800 }, { id: 'p_art_4', name: 'Midas Touch', mult: 10.0, cost: 2500 }, { id: 'p_art_5', name: 'Dragon Hoard', mult: 25.0, cost: 10000 }],
-        global: [{ id: 'p_glo_1', name: 'Small Tax', mult: 1.1, cost: 100 }, { id: 'p_glo_2', name: 'Big Business', mult: 1.25, cost: 500 }, { id: 'p_glo_3', name: 'Monopoly', mult: 1.5, cost: 2000 }, { id: 'p_glo_4', name: 'World Bank', mult: 2.0, cost: 8000 }, { id: 'p_glo_5', name: 'Galactic Trade', mult: 5.0, cost: 25000 }],
-        frenzy: [{ id: 'p_frz_1', name: 'Coffee Shot', mult: 2.0, cost: 50 }, { id: 'p_frz_2', name: 'Energy Drink', mult: 4.0, cost: 250 }, { id: 'p_frz_3', name: 'Adrenaline', mult: 8.0, cost: 1000 }, { id: 'p_frz_4', name: 'Berserk Mode', mult: 16.0, cost: 5000 }, { id: 'p_frz_5', name: 'Super Saiyan', mult: 50.0, cost: 20000 }]
+const PRESTIGE_UPGRADES = {
+        clicks: [
+            { id: 'p_click_1', name: 'Iron Clicks', mult: 1.5, cost: 20 }, 
+            { id: 'p_click_2', name: 'Golden Finger', mult: 2.5, cost: 100 }, 
+            { id: 'p_click_3', name: 'Titan Tap', mult: 5.0, cost: 400 }, 
+            { id: 'p_click_4', name: 'Godly Touch', mult: 10.0, cost: 2000 }, 
+            { id: 'p_click_5', name: 'Cosmic Click', mult: 50.0, cost: 10000 }
+        ],
+        orbs: [
+            { id: 'p_orb_1', name: 'Orb Polish', mult: 1.2, cost: 40 }, 
+            { id: 'p_orb_2', name: 'Mana Infusion', mult: 1.5, cost: 160 }, 
+            { id: 'p_orb_3', name: 'Time Warp', mult: 2.0, cost: 600 }, 
+            { id: 'p_orb_4', name: 'Star Power', mult: 4.0, cost: 2400 }, 
+            { id: 'p_orb_5', name: 'Dark Matter', mult: 10.0, cost: 12000 }
+        ],
+        artifacts: [
+            { id: 'p_art_1', name: 'Loot Scope', mult: 1.5, cost: 200 }, 
+            { id: 'p_art_2', name: 'Treasure Map', mult: 2.5, cost: 800 }, 
+            { id: 'p_art_3', name: 'Ancient Key', mult: 5.0, cost: 3200 }, 
+            { id: 'p_art_4', name: 'Midas Touch', mult: 10.0, cost: 10000 }, 
+            { id: 'p_art_5', name: 'Dragon Hoard', mult: 25.0, cost: 40000 }
+        ],
+        global: [
+            { id: 'p_glo_1', name: 'Small Tax', mult: 1.1, cost: 400 }, 
+            { id: 'p_glo_2', name: 'Big Business', mult: 1.25, cost: 2000 }, 
+            { id: 'p_glo_3', name: 'Monopoly', mult: 1.5, cost: 8000 }, 
+            { id: 'p_glo_4', name: 'World Bank', mult: 2.0, cost: 32000 }, 
+            { id: 'p_glo_5', name: 'Galactic Trade', mult: 5.0, cost: 100000 }
+        ],
+        frenzy: [
+            { id: 'p_frz_1', name: 'Coffee Shot', mult: 2.0, cost: 200 }, 
+            { id: 'p_frz_2', name: 'Energy Drink', mult: 4.0, cost: 1000 }, 
+            { id: 'p_frz_3', name: 'Adrenaline', mult: 8.0, cost: 4000 }, 
+            { id: 'p_frz_4', name: 'Berserk Mode', mult: 16.0, cost: 20000 }, 
+            { id: 'p_frz_5', name: 'Super Saiyan', mult: 50.0, cost: 80000 }
+        ]
     };
 
     const NAME_PREFIXES = ["Mystic", "Ancient", "Lost", "Cosmic", "Dark", "Radiant", "Frozen", "Burning", "Neon", "Shadow", "Holy", "Cursed"];
