@@ -44,6 +44,10 @@
         .unique-loot-visual::after { content: ''; position: absolute; top: 0; left: 0; width: 200%; height: 200%; background: linear-gradient(135deg, transparent 20%, rgba(255,255,255,0.4) 50%, transparent 80%); animation: shimmerFlow 3s infinite linear; }
         @keyframes shimmerFlow { 0% { transform: translate(-50%, -50%); } 100% { transform: translate(0%, 0%); } }
 
+        /* MYTHIC VISUALS */
+        .mythic-glow { animation: rainbowGlow 2s linear infinite; border: 2px solid white; }
+        @keyframes rainbowGlow { 0% { box-shadow: 0 0 10px #ff0000; border-color:#ff0000; } 20% { box-shadow: 0 0 15px #ff00ea; border-color:#ff00ea; } 40% { box-shadow: 0 0 20px #0004ff; border-color:#0004ff; } 60% { box-shadow: 0 0 15px #00ffea; border-color:#00ffea; } 80% { box-shadow: 0 0 10px #00ff04; border-color:#00ff04; } 100% { box-shadow: 0 0 10px #ff0000; border-color:#ff0000; } }
+
         .atom-cloud { position: absolute; top: 50%; left: 50%; width: 100%; height: 100%; transform: translate(-50%, -50%); transform-style: preserve-3d; pointer-events: none; z-index: 15; }
         .atom-ring-wrapper { position: absolute; top: 50%; left: 50%; width: 160%; height: 160%; border-radius: 50%; transform-style: preserve-3d; border: 1px solid rgba(255,255,255,0.08); }
         .atom-spinner { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; transform-style: preserve-3d; }
@@ -142,153 +146,30 @@
         .progress-bar-fill { background: linear-gradient(90deg, #6366f1, #a855f7); height: 100%; width: 0%; transition: width 0.5s ease; }
         .progress-text { text-align: center; margin-bottom: 10px; color: #cbd5e1; font-weight: 800; font-size: 14px; }
 
-        .msg-list-container {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            max-width: 700px;
-            margin: 0 auto;
-        }
+        .msg-list-container { display: flex; flex-direction: column; gap: 15px; max-width: 700px; margin: 0 auto; }
+        .msg-bubble { background: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 20px; position: relative; transition: all 0.2s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .msg-bubble:hover { border-color: #6366f1; transform: translateX(4px); background: #253147; }
+        .msg-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .msg-avatar { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #6366f1; background: #0f172a; }
+        .msg-info { flex: 1; }
+        .msg-sender-name { font-weight: 800; color: #f8fafc; font-size: 16px; }
+        .msg-time { font-size: 12px; color: #94a3b8; font-weight: 500; }
+        .msg-body { color: #cbd5e1; line-height: 1.6; font-size: 15px; white-space: pre-wrap; }
+        .cash-highlight { display: block; width: 100%; text-align: center; background: rgba(16, 185, 129, 0.15); color: #34d399; padding: 8px 12px; border-radius: 8px; font-weight: 800; border: 1px solid rgba(16, 185, 129, 0.3); margin-top: 15px; }
+        .orb-highlight { display: block; width: 100%; text-align: center; background: rgba(99, 102, 241, 0.15); color: #818cf8; padding: 8px 12px; border-radius: 8px; font-weight: 800; border: 1px solid rgba(99, 102, 241, 0.3); margin-top: 8px; }
+        .empty-inbox { text-align: center; padding: 50px 20px; color: #64748b; font-style: italic; border: 2px dashed #334155; border-radius: 16px; }
 
-        .msg-bubble {
-            background: #1e293b;
-            border: 1px solid #334155;
-            border-radius: 16px;
-            padding: 20px;
-            position: relative;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
+        .gift-tag { background: #6366f1; color: white; font-size: 10px; padding: 2px 6px; border-radius: 4px; position: absolute; top: 10px; left: 10px; z-index: 20; font-weight: bold; }
+        .auction-badge { background: #9333ea; color: white; font-size: 10px; padding: 2px 6px; border-radius: 4px; position: absolute; top: 10px; right: 10px; z-index: 20; font-weight: bold; border: 1px solid #c084fc; }
 
-        .msg-bubble:hover {
-            border-color: #6366f1;
-            transform: translateX(4px);
-            background: #253147;
-        }
+        .sell-form { background: #1e293b; border: 2px solid #6366f1; padding: 20px; border-radius: 16px; max-width: 400px; margin: 0 auto 30px; text-align: center; }
+        .mkt-price-tag { background: #0f172a; color: #34d399; border: 1px solid #059669; padding: 5px 10px; border-radius: 8px; font-weight: 800; font-size: 14px; margin-bottom: 10px; display: inline-block; }
 
-        .msg-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 12px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .msg-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: 2px solid #6366f1;
-            background: #0f172a;
-        }
-
-        .msg-info {
-            flex: 1;
-        }
-
-        .msg-sender-name {
-            font-weight: 800;
-            color: #f8fafc;
-            font-size: 16px;
-        }
-
-        .msg-time {
-            font-size: 12px;
-            color: #94a3b8;
-            font-weight: 500;
-        }
-
-        .msg-body {
-            color: #cbd5e1;
-            line-height: 1.6;
-            font-size: 15px;
-            white-space: pre-wrap; 
-        }
-
-        .cash-highlight {
-            display: block;
-            width: 100%;
-            text-align: center;
-            background: rgba(16, 185, 129, 0.15);
-            color: #34d399;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-weight: 800;
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            margin-top: 15px; 
-        }
-
-        .orb-highlight {
-            display: block;
-            width: 100%;
-            text-align: center;
-            background: rgba(99, 102, 241, 0.15);
-            color: #818cf8;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-weight: 800;
-            border: 1px solid rgba(99, 102, 241, 0.3);
-            margin-top: 8px;
-        }
-        
-        .empty-inbox {
-            text-align: center;
-            padding: 50px 20px;
-            color: #64748b;
-            font-style: italic;
-            border: 2px dashed #334155;
-            border-radius: 16px;
-        }
-
-        .gift-tag {
-            background: #6366f1; 
-            color: white; 
-            font-size: 10px; 
-            padding: 2px 6px; 
-            border-radius: 4px; 
-            position: absolute; 
-            top: 10px; 
-            left: 10px; 
-            z-index: 20; 
-            font-weight: bold;
-        }
-        
-        .auction-badge {
-            background: #9333ea; 
-            color: white; 
-            font-size: 10px; 
-            padding: 2px 6px; 
-            border-radius: 4px; 
-            position: absolute; 
-            top: 10px; 
-            right: 10px; 
-            z-index: 20; 
-            font-weight: bold;
-            border: 1px solid #c084fc;
-        }
-
-        .sell-form {
-            background: #1e293b;
-            border: 2px solid #6366f1;
-            padding: 20px;
-            border-radius: 16px;
-            max-width: 400px;
-            margin: 0 auto 30px;
-            text-align: center;
-        }
-
-        .mkt-price-tag {
-            background: #0f172a;
-            color: #34d399;
-            border: 1px solid #059669;
-            padding: 5px 10px;
-            border-radius: 8px;
-            font-weight: 800;
-            font-size: 14px;
-            margin-bottom: 10px;
-            display: inline-block;
-        }
+        .orb-select-list { max-height: 250px; overflow-y: auto; background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 5px; margin-bottom: 0; }
+        .orb-option { display: flex; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid #1e293b; }
+        .orb-option:last-child { border-bottom: none; }
+        .orb-option label { font-size: 14px; color: #cbd5e1; flex: 1; cursor: pointer; }
+        .orb-checkbox { width: 20px; height: 20px; accent-color: #6366f1; margin: 0; cursor: pointer; }
 
     </style>
 </head>
@@ -457,14 +338,14 @@
                     <div class="chest-icon">📦</div>
                     <div class="chest-title">DAILY SUPPLY</div>
                     <div class="chest-cost" style="color:#34d399; font-weight:bold;">FREE</div>
-                    <div style="font-size:12px; color:#94a3b8; margin: 5px 0 10px;">Contains $1-$250 Orb</div>
+                    <div style="font-size:12px; color:#94a3b8; margin: 5px 0 10px;">85% $1-10 | 15% $10-15</div>
                     <button id="dailyClaimBtn" class="buy-btn" onclick="claimDailyChest()">CLAIM</button>
                     <div id="dailyTimer" style="font-size:12px; color:#94a3b8; margin-top:5px; display:none;">Wait: <span id="dailyTimeLeft">00:00:00</span></div>
                 </div>
-                <div class="chest-card"><div class="chest-icon">🥉</div><div class="chest-title">BRONZE CHEST</div><div class="chest-cost" style="color:#d97706; font-weight:bold;">$25,000</div><button class="buy-btn btn-available" data-cost="25000" onclick="buyChest('bronze', 25000)">BUY</button></div>
-                <div class="chest-card"><div class="chest-icon">🥈</div><div class="chest-title">SILVER CHEST</div><div class="chest-cost" style="color:#cbd5e1; font-weight:bold;">$250,000</div><button class="buy-btn btn-available" data-cost="250000" onclick="buyChest('silver', 250000)">BUY</button></div>
-                <div class="chest-card"><div class="chest-icon">🥇</div><div class="chest-title">GOLD CHEST</div><div class="chest-cost" style="color:#facc15; font-weight:bold;">$10,000,000</div><button class="buy-btn btn-available" data-cost="10000000" onclick="buyChest('gold', 10000000)">BUY</button></div>
-                <div class="chest-card"><div class="chest-icon">🏆</div><div class="chest-title">CHAMPION CHEST</div><div class="chest-cost" style="color:#a855f7; font-weight:bold;">$500,000,000</div><button class="buy-btn btn-available" data-cost="500000000" onclick="buyChest('champion', 500000000)">BUY</button></div>
+                <div class="chest-card"><div class="chest-icon">🥉</div><div class="chest-title">BRONZE CHEST</div><div class="chest-cost" style="color:#d97706; font-weight:bold;">$25,000</div><div style="font-size:11px;color:#94a3b8;margin-bottom:5px;">85% $10-15 | 15% $15-20</div><button class="buy-btn btn-available" data-cost="25000" onclick="buyChest('bronze', 25000)">BUY</button></div>
+                <div class="chest-card"><div class="chest-icon">🥈</div><div class="chest-title">SILVER CHEST</div><div class="chest-cost" style="color:#cbd5e1; font-weight:bold;">$250,000</div><div style="font-size:11px;color:#94a3b8;margin-bottom:5px;">85% $10-30 | 15% $50-60</div><button class="buy-btn btn-available" data-cost="250000" onclick="buyChest('silver', 250000)">BUY</button></div>
+                <div class="chest-card"><div class="chest-icon">🥇</div><div class="chest-title">GOLD CHEST</div><div class="chest-cost" style="color:#facc15; font-weight:bold;">$10,000,000</div><div style="font-size:11px;color:#94a3b8;margin-bottom:5px;">85% $500-950 | 15% $1k-2k</div><button class="buy-btn btn-available" data-cost="10000000" onclick="buyChest('gold', 10000000)">BUY</button></div>
+                <div class="chest-card"><div class="chest-icon">🏆</div><div class="chest-title">CHAMPION CHEST</div><div class="chest-cost" style="color:#a855f7; font-weight:bold;">$500,000,000</div><div style="font-size:11px;color:#94a3b8;margin-bottom:5px;">50% $10k-50k | 25% $50k-75k | 25% $75k-100k</div><button class="buy-btn btn-available" data-cost="500000000" onclick="buyChest('champion', 500000000)">BUY</button></div>
             </div>
             <h3 style="text-align:center; color:#f59e0b; margin-top:40px; margin-bottom:15px;">💎 YOUR LOOTED ARTIFACTS</h3>
             <div id="lootMarketplaceContainer"></div>
@@ -530,10 +411,9 @@
             </div>
 
             <div style="background: #0f172a; padding: 15px; border-radius: 12px; border: 1px solid #475569; margin-bottom: 15px;">
-                <label style="font-size: 14px; font-weight: 800; color: #94a3b8; display: block; margin-bottom: 8px;">ATTACH ANY ORB (OPTIONAL)</label>
-                <select id="msgOrbSelector" style="margin-bottom:0;">
-                    <option value="">-- Select an Item to Send --</option>
-                </select>
+                <label style="font-size: 14px; font-weight: 800; color: #94a3b8; display: block; margin-bottom: 8px;">ATTACH ORBS (SELECT MULTIPLE)</label>
+                <div id="multiOrbSelector" class="orb-select-list">
+                    </div>
             </div>
 
             <button onclick="handleCombinedSend()" id="sendMailBtn">SEND MAIL</button>
@@ -565,7 +445,6 @@
     let lastCollectionHash = "";
     let selectedOrbForSale = null;
 
-    // Cache for market to support filtering without re-querying
     let marketListingsCache = [];
 
     const ORB_DATA = [
@@ -584,7 +463,7 @@
     const RESEARCH_TYPES = ['core', 'magic', 'power', 'wisdom', 'strength'];
     const RESEARCH_BASE_COST = 25000; 
 
-    // FULL ACHIEVEMENTS LIST - EXPANDED
+    // FULL ACHIEVEMENTS LIST
     const ACHIEVEMENTS = [
         {id:'ach1',name:'First Mail Sent',desc:'Send your first mail.',icon:'📨'},
         {id:'ach2',name:'Cash Collector',desc:'Earn $1,000.',icon:'💰'},
@@ -651,7 +530,7 @@
         document.getElementById('researchTutorial').classList.add('hidden');
         localStorage.setItem('mailcash_tut_seen_v2', 'true');
     };
-    
+     
     window.openResearchTutorial = () => {
         document.getElementById('researchTutorial').classList.remove('hidden');
     }
@@ -666,7 +545,7 @@
                     if(!userData.unlockedAchievements) userData.unlockedAchievements = [];
                     updateUI(); 
                     renderDailyChest(); 
-                    
+                     
                     const currentCollectionHash = JSON.stringify(userData.orbs) + JSON.stringify(userData.uniqueOrbs);
                     if (currentCollectionHash !== lastCollectionHash) {
                         renderOrbs('orbGrid', ORB_DATA); 
@@ -676,7 +555,7 @@
                         renderMarketV2(); // Re-render sell grid if inventory changes
                         lastCollectionHash = currentCollectionHash;
                     }
-                    
+                     
                     loadInbox();
                     document.getElementById('authScreen').classList.add('hidden');
                     document.getElementById('appScreen').classList.remove('hidden');
@@ -689,7 +568,7 @@
         const r = userData.research?.[orb.id] || {};
         let celestialHTML = '';
         const effects = [];
-        if ((r['core'] || 0) >= 5) effects.push('fx-core');         
+        if ((r['core'] || 0) >= 5) effects.push('fx-core');          
         if ((r['magic'] || 0) >= 5) effects.push('fx-magic');       
         if ((r['power'] || 0) >= 5) effects.push('fx-power');       
         if ((r['wisdom'] || 0) >= 5) effects.push('fx-wisdom');     
@@ -719,9 +598,12 @@
             }
             atomHTML = `<div class="atom-cloud">${orbits}</div>`;
         }
+
+        let mythicClass = '';
+        if (orb.tier === 'mythic') mythicClass = 'mythic-glow';
         
-        if (isResearchPreview) return `<div style="position:relative;">${celestialHTML}<div class="research-sphere" style="color:${orb.color};"></div></div>`;
-        return `<div class="visual-container">${celestialHTML}${atomHTML}<div class="orb-visual" style="background:currentColor; color:${orb.color};"></div></div>`;
+        if (isResearchPreview) return `<div style="position:relative;">${celestialHTML}<div class="research-sphere ${mythicClass}" style="color:${orb.color};"></div></div>`;
+        return `<div class="visual-container">${celestialHTML}${atomHTML}<div class="orb-visual ${mythicClass}" style="background:currentColor; color:${orb.color};"></div></div>`;
     };
 
     function renderResearch() {
@@ -915,14 +797,12 @@
     }
 
     // --- MARKET V2 FUNCTIONS ---
-    // Helper to render from cache
     window.renderMarketGrid = () => {
         const marketGrid = document.getElementById('globalMarketGrid');
         const filterText = document.getElementById('marketPlayerSearch').value.toLowerCase();
         
         marketGrid.innerHTML = '';
         
-        // Filter listings based on search text
         const filteredListings = marketListingsCache.filter(item => {
              return item.orb.name.toLowerCase().includes(filterText) || item.sellerName.toLowerCase().includes(filterText);
         });
@@ -935,8 +815,13 @@
         filteredListings.forEach(item => {
             const div = document.createElement('div'); 
             div.className = 'orb-item';
+            
+            // Allow buying own item now
+            const isOwn = item.sellerUid === myUid;
+            const badge = isOwn ? '<div class="orb-lvl-badge" style="background:#6366f1; border-color:#818cf8;">YOURS</div>' : '<div class="orb-lvl-badge" style="background:#059669; border-color:#34d399;">FOR SALE</div>';
+
             div.innerHTML = `
-                <div class="orb-lvl-badge" style="background:#059669; border-color:#34d399;">FOR SALE</div>
+                ${badge}
                 <div class="visual-container"><div class="unique-loot-visual" style="color:${item.orb.color};"></div></div>
                 <b>${item.orb.name}</b>
                 <div style="color:#94a3b8; font-size:12px;">Seller: @${item.sellerName}</div>
@@ -949,16 +834,9 @@
     };
 
     window.renderMarketV2 = async () => {
-        // 1. Setup Listener for Global Listings (Buy) - Only once
-        // We use a global listener to update cache, then call renderMarketGrid
-        // This allows filtering without re-querying Firestore
-        
-        // Clear previous grid to show loading
+        // Clear previous grid
         const marketGrid = document.getElementById('globalMarketGrid');
         
-        // If we haven't set up the listener yet, do it now
-        // Using a check to avoid multiple listeners if tab is toggled
-        // For simplicity in this structure, we'll re-attach but rely on snapshot efficient updates
         onSnapshot(collection(db, "market_listings"), (snap) => {
             marketListingsCache = [];
             if (snap.empty) {
@@ -968,18 +846,14 @@
             
             snap.forEach(doc => {
                 const item = doc.data();
-                item.id = doc.id; // Save doc ID
-                // Don't show own listings in buy area
-                if (item.sellerUid !== myUid) {
-                    marketListingsCache.push(item);
-                }
+                item.id = doc.id; 
+                marketListingsCache.push(item);
             });
             
-            // Initial Render
             renderMarketGrid();
         });
 
-        // 2. Render My Sellable Inventory
+        // Render My Sellable Inventory
         const sellGrid = document.getElementById('mySellableGrid');
         sellGrid.innerHTML = '';
         if (userData.uniqueOrbs && userData.uniqueOrbs.length > 0) {
@@ -1046,19 +920,16 @@
         if (userData.balance < price) return alert("Insufficient Funds");
         
         try {
-            const listDoc = await getDocs(query(collection(db, "market_listings"))); // Inefficient but functional for prototype
+            const listDoc = await getDocs(query(collection(db, "market_listings"))); 
             let actualDoc = null;
             listDoc.forEach(d => { if(d.id === listingId) actualDoc = d.data(); });
 
             if (!actualDoc) return alert("Item already sold!");
 
-            // Add the "Auction Find" tag to the orb before giving it to buyer
-            // IMPORTANT: Create a deep copy to detach from previous reference
+            // Tag orb
             const boughtOrb = JSON.parse(JSON.stringify(actualDoc.orb));
-            
-            boughtOrb.isAuction = true; // Tag for visual badge
-            boughtOrb.originalOwner = actualDoc.sellerName; // Track lineage
-            // Reset acquired time so it shows up at the top/end of their list
+            boughtOrb.isAuction = true; 
+            boughtOrb.originalOwner = actualDoc.sellerName; 
             boughtOrb.acquiredAt = Date.now();
 
             // Update Buyer
@@ -1067,7 +938,7 @@
                 uniqueOrbs: arrayUnion(boughtOrb)
             });
 
-            // Update Seller (Give them money)
+            // Update Seller 
             await updateDoc(doc(db, "users", actualDoc.sellerUid), {
                 balance: increment(price)
             });
@@ -1075,9 +946,8 @@
             // Delete Listing
             await deleteDoc(doc(db, "market_listings", listingId));
 
-            // UI Update
             updateUI();
-            alert("Purchase Successful! You can now use or resell this item.");
+            alert("Purchase Successful!");
 
         } catch (e) {
             console.error(e);
@@ -1085,14 +955,14 @@
         }
     };
 
-    // --- ACHIEVEMENTS SYSTEM (PERMANENT) ---
+    // --- ACHIEVEMENTS SYSTEM ---
     function checkAchievements() {
         if (!userData) return;
         const currentUnlocked = userData.unlockedAchievements || [];
         const newUnlocks = [];
 
         ACHIEVEMENTS.forEach(ach => {
-            if (currentUnlocked.includes(ach.id)) return; // Already unlocked
+            if (currentUnlocked.includes(ach.id)) return; 
 
             let unlocked = false;
             // Balance Goals
@@ -1141,7 +1011,7 @@
                 showNotification(`🏆 Achievement Unlocked!`);
             });
             if (document.getElementById('achievementsView').classList.contains('hidden') === false) {
-                renderAchievements(); // Refresh UI if looking at page
+                renderAchievements(); 
             }
         }
     }
@@ -1168,7 +1038,6 @@
             list.appendChild(div);
         });
 
-        // Update Progress Bar
         const percentage = (unlockedIds.length / ACHIEVEMENTS.length) * 100;
         progressBar.style.width = percentage + "%";
         progressText.innerText = `${unlockedIds.length} / ${ACHIEVEMENTS.length} Unlocked`;
@@ -1218,19 +1087,85 @@
         await updateDoc(doc(db, "users", myUid), { balance: increment(refund), [`orbs.${id}`]: increment(-1) });
     }
 
+    // --- REBALANCED CHEST LOGIC ---
+    function generateChestReward(tier) {
+        // GLOBAL MYTHIC ROLL: 1 in 10000 (0.01%)
+        const mythicRoll = Math.random();
+        if (mythicRoll < 0.0001) {
+             return {
+                id: 'u_mythic_' + Date.now(),
+                name: 'MYTHIC ETERNITY STAR',
+                color: '#ffffff', // Will have rainbow glow via css
+                income: 1000000,
+                time: 600000, // 10 minutes
+                tier: 'mythic',
+                acquiredAt: Date.now()
+             };
+        }
+
+        let minCash, maxCash, minTime, maxTime;
+        const roll = Math.random() * 100; // 0-100
+
+        if (tier === 'daily') {
+            // 85% $1-10, 15% $10-15. Time 8-10s
+            minTime = 8000; maxTime = 10000;
+            if (roll < 85) { minCash = 1; maxCash = 10; }
+            else { minCash = 10; maxCash = 15; }
+        } else if (tier === 'bronze') {
+            // 85% $10-15, 15% $15-20. Time 5-10s
+            minTime = 5000; maxTime = 10000;
+            if (roll < 85) { minCash = 10; maxCash = 15; }
+            else { minCash = 15; maxCash = 20; }
+        } else if (tier === 'silver') {
+            // 85% $10-30, 15% $50-60. Time 3-6s
+            minTime = 3000; maxTime = 6000;
+            if (roll < 85) { minCash = 10; maxCash = 30; }
+            else { minCash = 50; maxCash = 60; }
+        } else if (tier === 'gold') {
+            // 85% $500-950, 15% $1000-2000. Time 1-5s
+            minTime = 1000; maxTime = 5000;
+            if (roll < 85) { minCash = 500; maxCash = 950; }
+            else { minCash = 1000; maxCash = 2000; }
+        } else if (tier === 'champion') {
+            // 50% 10k-50k (10-12s), 25% 50k-75k (8-12s), 25% 75k-100k (9-15s)
+            if (roll < 50) { 
+                minCash = 10000; maxCash = 50000; 
+                minTime = 10000; maxTime = 12000; 
+            } else if (roll < 75) { 
+                minCash = 50000; maxCash = 75000; 
+                minTime = 8000; maxTime = 12000; 
+            } else { 
+                minCash = 75000; maxCash = 100000; 
+                minTime = 9000; maxTime = 15000; 
+            }
+        }
+
+        const income = Math.floor(Math.random() * (maxCash - minCash + 1)) + minCash;
+        const time = Math.floor(Math.random() * (maxTime - minTime + 1)) + minTime;
+        
+        return {
+            id: 'u_' + Date.now() + '_' + Math.floor(Math.random()*1000),
+            name: getRandomName(),
+            color: getRandomColor(),
+            income: income,
+            time: time,
+            tier: tier,
+            acquiredAt: Date.now()
+        };
+    }
+
     window.buyChest = async (tier, cost) => {
         if (userData.balance < cost) return alert("Insufficient Funds!");
-        let minCash, maxCash, minTime, maxTime;
-        if (tier === 'bronze') { minCash = 5000; maxCash = 15000; minTime = 1000; maxTime = 5000; } 
-        else if (tier === 'silver') { minCash = 50000; maxCash = 150000; minTime = 1000; maxTime = 5000; }
-        else if (tier === 'gold') { minCash = 2000000; maxCash = 5000000; minTime = 1000; maxTime = 8000; }
-        else if (tier === 'champion') { minCash = 100000000; maxCash = 500000000; minTime = 500; maxTime = 3000; }
-
-        const newOrb = { id: 'u_' + Date.now() + '_' + Math.floor(Math.random()*1000), name: getRandomName(), color: getRandomColor(), income: Math.floor(Math.random() * (maxCash - minCash + 1)) + minCash, time: Math.floor(Math.random() * (maxTime - minTime + 1)) + minTime, tier: tier, acquiredAt: Date.now() };
+        
+        const newOrb = generateChestReward(tier);
 
         const popup = document.getElementById('lootPopup');
         const content = document.getElementById('lootCardContent');
-        content.innerHTML = `<h2 style="color:#facc15; margin-bottom:15px;">CHEST OPENED!</h2><h3 style="font-size:28px; margin-bottom:10px; color:${newOrb.color}">${newOrb.name}</h3><div style="margin: 20px auto; transform: scale(1.5); width:100px; height:100px; display:flex; justify-content:center; align-items:center;"><div class="unique-loot-visual" style="color:${newOrb.color};"></div></div><p style="color:#94a3b8; font-size:16px; margin-bottom:25px;">Tier: ${tier.toUpperCase()}<br><span style="color:#10b981; font-weight:800;">+$${newOrb.income.toLocaleString()}</span> / ${(newOrb.time/1000).toFixed(1)}s</p><button onclick="document.getElementById('lootPopup').classList.add('hidden')">COLLECT</button>`;
+        
+        let visualClass = "unique-loot-visual";
+        if (newOrb.tier === 'mythic') visualClass += " mythic-glow";
+
+        content.innerHTML = `<h2 style="color:#facc15; margin-bottom:15px;">CHEST OPENED!</h2><h3 style="font-size:28px; margin-bottom:10px; color:${newOrb.color}">${newOrb.name}</h3><div style="margin: 20px auto; transform: scale(1.5); width:100px; height:100px; display:flex; justify-content:center; align-items:center;"><div class="${visualClass}" style="color:${newOrb.color};"></div></div><p style="color:#94a3b8; font-size:16px; margin-bottom:25px;">Tier: ${newOrb.tier.toUpperCase()}<br><span style="color:#10b981; font-weight:800;">+$${newOrb.income.toLocaleString()}</span> / ${(newOrb.time/1000).toFixed(1)}s</p><button onclick="document.getElementById('lootPopup').classList.add('hidden')">COLLECT</button>`;
         popup.classList.remove('hidden');
 
         userData.balance -= cost;
@@ -1244,12 +1179,17 @@
         const now = Date.now();
         const last = userData.lastDailyClaim || 0;
         if (now - last < 86400000) return alert("Come back later!");
-        const tier = 'daily';
-        const newOrb = { id: 'u_' + Date.now() + '_' + Math.floor(Math.random()*1000), name: getRandomName(), color: getRandomColor(), income: Math.floor(Math.random() * (5000 - 100 + 1)) + 100, time: Math.floor(Math.random() * (5000 - 2000 + 1)) + 2000, tier: tier, acquiredAt: Date.now() };
+        
+        const newOrb = generateChestReward('daily');
+        
         const popup = document.getElementById('lootPopup');
         const content = document.getElementById('lootCardContent');
-        content.innerHTML = `<h2 style="color:#facc15; margin-bottom:15px;">CHEST OPENED!</h2><h3 style="font-size:28px; margin-bottom:10px; color:${newOrb.color}">${newOrb.name}</h3><div style="margin: 20px auto; transform: scale(1.5); width:100px; height:100px; display:flex; justify-content:center; align-items:center;"><div class="unique-loot-visual" style="color:${newOrb.color};"></div></div><p style="color:#94a3b8; font-size:16px; margin-bottom:25px;">Tier: DAILY SUPPLY<br><span style="color:#10b981; font-weight:800;">+$${newOrb.income.toLocaleString()}</span> / ${(newOrb.time/1000).toFixed(1)}s</p><button onclick="document.getElementById('lootPopup').classList.add('hidden')">COLLECT</button>`;
+        let visualClass = "unique-loot-visual";
+        if (newOrb.tier === 'mythic') visualClass += " mythic-glow";
+
+        content.innerHTML = `<h2 style="color:#facc15; margin-bottom:15px;">CHEST OPENED!</h2><h3 style="font-size:28px; margin-bottom:10px; color:${newOrb.color}">${newOrb.name}</h3><div style="margin: 20px auto; transform: scale(1.5); width:100px; height:100px; display:flex; justify-content:center; align-items:center;"><div class="${visualClass}" style="color:${newOrb.color};"></div></div><p style="color:#94a3b8; font-size:16px; margin-bottom:25px;">Tier: ${newOrb.tier.toUpperCase()}<br><span style="color:#10b981; font-weight:800;">+$${newOrb.income.toLocaleString()}</span> / ${(newOrb.time/1000).toFixed(1)}s</p><button onclick="document.getElementById('lootPopup').classList.add('hidden')">COLLECT</button>`;
         popup.classList.remove('hidden');
+        
         if(!userData.uniqueOrbs) userData.uniqueOrbs = [];
         userData.uniqueOrbs.push(newOrb);
         userData.lastDailyClaim = now;
@@ -1291,13 +1231,13 @@
         const container = document.getElementById('lootMarketplaceContainer');
         if (!container || !userData.uniqueOrbs) return;
         container.innerHTML = '';
-        const tiers = ['champion', 'gold', 'silver', 'bronze', 'daily']; 
+        const tiers = ['mythic', 'champion', 'gold', 'silver', 'bronze', 'daily', 'gift']; 
         tiers.forEach(tier => {
             const orbsInTier = userData.uniqueOrbs.filter(o => o.tier === tier);
             if (orbsInTier.length > 0) {
                 const header = document.createElement('div'); header.className = 'loot-category-header'; 
                 header.innerText = `${tier.toUpperCase()} ARTIFACTS`; 
-                header.style.color = tier === 'daily' ? '#34d399' : tier === 'bronze' ? '#d97706' : tier === 'silver' ? '#cbd5e1' : tier === 'gold' ? '#facc15' : '#a855f7';
+                header.style.color = tier === 'daily' ? '#34d399' : tier === 'bronze' ? '#d97706' : tier === 'silver' ? '#cbd5e1' : tier === 'gold' ? '#facc15' : tier === 'mythic' ? '#ffffff' : '#a855f7';
                 container.appendChild(header);
                 const grid = document.createElement('div'); grid.className = 'orb-grid';
                 orbsInTier.forEach(orb => {
@@ -1310,13 +1250,14 @@
                     const finalInc = Math.floor(orb.income * mult);
                     const div = document.createElement('div'); div.className = `orb-item unique-loot-card tier-${tier}`;
                     
-                    // CHECK IF AUCTION ITEM AND ADD BADGE
                     let auctionBadgeHTML = '';
                     if (orb.isAuction) {
                         auctionBadgeHTML = '<div class="auction-badge">AUCTION FIND</div>';
                     }
 
-                    div.innerHTML = `${auctionBadgeHTML}<div class="visual-container"><div class="unique-loot-visual" style="color:${orb.color};"></div></div><b style="font-size:16px;">${orb.name}</b><div style="color:#10b981; font-weight:800; font-size:14px; margin-top:5px;">+$${finalInc.toLocaleString()}</div><div style="font-size:12px; color:#94a3b8;">Rate: ${(orb.time/1000).toFixed(1)}s</div><div class="progress-bg" style="margin-top:10px;"><div class="progress-fill" id="unique-bar-${orb.id}"></div></div>`;
+                    let mythicClass = tier === 'mythic' ? 'mythic-glow' : '';
+
+                    div.innerHTML = `${auctionBadgeHTML}<div class="visual-container"><div class="unique-loot-visual ${mythicClass}" style="color:${orb.color};"></div></div><b style="font-size:16px;">${orb.name}</b><div style="color:#10b981; font-weight:800; font-size:14px; margin-top:5px;">+$${finalInc.toLocaleString()}</div><div style="font-size:12px; color:#94a3b8;">Rate: ${(orb.time/1000).toFixed(1)}s</div><div class="progress-bg" style="margin-top:10px;"><div class="progress-fill" id="unique-bar-${orb.id}"></div></div>`;
                     grid.appendChild(div);
                 });
                 container.appendChild(grid);
@@ -1352,12 +1293,10 @@
             setTimeout(() => { div.style.opacity = '1'; div.style.transform = 'translateY(0)'; }, index * 40);
         });
 
-        // Split Unique Orbs into Gifts vs Self-Found
         const allUnique = userData.uniqueOrbs || [];
         const giftedOrbs = allUnique.filter(o => o.giftedBy);
         const selfOrbs = allUnique.filter(o => !o.giftedBy && (!searchFilter || o.name.toLowerCase().includes(searchFilter)));
 
-        // Render Gifts
         if (giftGrid) {
             giftGrid.innerHTML = '';
             if (giftedOrbs.length > 0) {
@@ -1379,7 +1318,6 @@
             }
         }
 
-        // Render Chest/Self Orbs
         if(chestGrid) {
             chestGrid.innerHTML = '';
             selfOrbs.forEach((orb) => {
@@ -1392,13 +1330,14 @@
                 }
                 const finalInc = Math.floor(orb.income * mult);
                 
-                // CHECK IF AUCTION ITEM
                 let auctionBadgeHTML = '';
                 if (orb.isAuction) {
                     auctionBadgeHTML = '<div class="auction-badge">AUCTION FIND</div>';
                 }
 
-                div.innerHTML = `${auctionBadgeHTML}<div class="orb-lvl-badge" style="background:#a855f7; border-color:#d8b4fe;">UNIQUE</div><div class="visual-container"><div class="unique-loot-visual" style="color:${orb.color};"></div></div><b>${orb.name}</b><p style="font-size:12px; color:#94a3b8;">${orb.tier.toUpperCase()}</p><div style="color:#10b981; font-weight:800; font-size:14px;">+$${finalInc.toLocaleString()}</div><div style="font-size:12px; color:#94a3b8;">Rate: ${(orb.time/1000).toFixed(1)}s</div>`;
+                let mythicClass = orb.tier === 'mythic' ? 'mythic-glow' : '';
+
+                div.innerHTML = `${auctionBadgeHTML}<div class="orb-lvl-badge" style="background:#a855f7; border-color:#d8b4fe;">UNIQUE</div><div class="visual-container"><div class="unique-loot-visual ${mythicClass}" style="color:${orb.color};"></div></div><b>${orb.name}</b><p style="font-size:12px; color:#94a3b8;">${orb.tier.toUpperCase()}</p><div style="color:#10b981; font-weight:800; font-size:14px;">+$${finalInc.toLocaleString()}</div><div style="font-size:12px; color:#94a3b8;">Rate: ${(orb.time/1000).toFixed(1)}s</div>`;
                 chestGrid.appendChild(div);
             });
         }
@@ -1415,8 +1354,6 @@
         const renderUpgrade = (u, container, index, list) => {
             const owned = userData.prestigeUpgrades?.includes(u.id);
             const canAfford = (userData.prestigePoints || 0) >= u.cost;
-            
-            // Check if previous upgrade in this category is owned
             const previousOwned = index === 0 || userData.prestigeUpgrades?.includes(list[index-1].id);
             
             const div = document.createElement('div');
@@ -1429,7 +1366,6 @@
                 <button onclick="buyPrestigeUpgrade('${u.id}', ${u.cost})" class="buy-btn ${owned ? 'hidden' : (canAfford && previousOwned ? 'btn-available' : 'btn-locked')}" style="padding:8px; font-size:12px;">${owned ? 'OWNED' : 'BUY'}</button>
             `;
 
-            // If locked (previous not owned), add blur effect
             if (!previousOwned) {
                  htmlContent += `<div class="blur-lock"><div class="lock-q">?</div></div>`;
             }
@@ -1459,9 +1395,6 @@
     window.buyPrestigeUpgrade = async (id, cost) => { 
         if(userData.prestigePoints < cost || userData.prestigeUpgrades?.includes(id)) return; 
         
-        // Find if user has previous upgrade (Validation)
-        // (Simplified for brevity, UI blocks it anyway)
-
         userData.prestigePoints -= cost;
         if(!userData.prestigeUpgrades) userData.prestigeUpgrades = [];
         userData.prestigeUpgrades.push(id);
@@ -1479,9 +1412,6 @@
             pointsToAdd = 10000000 - currentPoints;
             if (pointsToAdd < 0) pointsToAdd = 0;
         }
-        // RESET BUT KEEP ACHIEVEMENTS and PRESTIGE DATA
-        // Note: totalClicks and totalMails are also kept in Firestore generally unless explicitly reset. 
-        // We only reset balance, orbs, research.
         await updateDoc(doc(db, "users", myUid), { 
             balance: 0, 
             clickLevel: 1, 
@@ -1489,7 +1419,6 @@
             uniqueOrbs: [], 
             research: {}, 
             prestigePoints: increment(pointsToAdd) 
-            // Achievements are in unlockedAchievements array which we DO NOT reset here.
         });
         location.reload();
     };
@@ -1501,8 +1430,7 @@
         const deltaTime = now - lastTime;
         lastTime = now;
         
-        checkAchievements(); // Check for new achievements constantly
-
+        checkAchievements(); 
         renderDailyChest();
         ORB_DATA.forEach(orb => {
             const owned = userData.orbs?.[orb.id] || 0;
@@ -1538,7 +1466,6 @@
             });
         }
         
-        // --- BUTTON STATE HIGH FREQUENCY UPDATE (FIX FOR DELAY) ---
         const totalBal = userData.balance + localBalanceAccumulator;
         const buyBtns = document.querySelectorAll('.buy-btn');
         buyBtns.forEach(btn => {
@@ -1586,49 +1513,51 @@
 
         if (tabId === 'prestige') { renderPrestige(); }
         if (tabId === 'achievements') { renderAchievements(); }
-
         if (tabId === 'marketv2') { renderMarketV2(); }
 
+        // --- NEW MULTI-SELECT MAIL LOGIC ---
         if (tabId === 'message') {
-            const selector = document.getElementById('msgOrbSelector');
-            selector.innerHTML = '<option value="">-- Select an Item to Send --</option>';
+            const container = document.getElementById('multiOrbSelector');
+            container.innerHTML = '';
             
-            const standardGroup = document.createElement('optgroup');
-            standardGroup.label = "Standard Orbs (Will convert to Gift)";
-            let hasStandard = false;
+            let hasAny = false;
+
+            // Add Standard Orbs
             ORB_DATA.forEach(orb => {
                 if (userData.orbs && userData.orbs[orb.id] > 0) {
-                    const opt = document.createElement('option');
-                    opt.value = orb.id; 
-                    // Calculate income for display
+                    hasAny = true;
+                    const div = document.createElement('div');
+                    div.className = 'orb-option';
+                    // We need unique IDs for checkboxes even if they reference same orb type
+                    // Actually, for bulk selection, we just say "Send 1 of X".
+                    // To keep it simple in "Hardcore" mode, we list available *types*.
+                    // Checking the box means "Send 1 of these".
                     const inc = calcIncome(orb, 1) / (orb.time/1000);
-                    opt.innerText = `${orb.name} (Owned: ${userData.orbs[orb.id]}) - [+$${inc.toFixed(0)}/s]`;
-                    standardGroup.appendChild(opt);
-                    hasStandard = true;
+                    div.innerHTML = `
+                        <input type="checkbox" class="orb-checkbox" value="${orb.id}" id="chk_${orb.id}">
+                        <label for="chk_${orb.id}">${orb.name} (Owned: ${userData.orbs[orb.id]}) <span style="color:#34d399">[+$${inc.toFixed(0)}/s]</span></label>
+                    `;
+                    container.appendChild(div);
                 }
             });
-            if (hasStandard) selector.appendChild(standardGroup);
 
-            const artifactGroup = document.createElement('optgroup');
-            artifactGroup.label = "Unique Artifacts";
-            let hasArtifacts = false;
+            // Add Unique Artifacts
             if (userData.uniqueOrbs && userData.uniqueOrbs.length > 0) {
                 userData.uniqueOrbs.forEach(orb => {
-                    const opt = document.createElement('option');
-                    opt.value = orb.id; 
+                    hasAny = true;
+                    const div = document.createElement('div');
+                    div.className = 'orb-option';
                     const pps = (orb.income / (orb.time/1000)).toFixed(0);
-                    opt.innerText = `${orb.name} (Tier: ${orb.tier.toUpperCase()}) - [+$${pps}/s]`;
-                    artifactGroup.appendChild(opt);
-                    hasArtifacts = true;
+                    div.innerHTML = `
+                        <input type="checkbox" class="orb-checkbox" value="${orb.id}" id="chk_${orb.id}">
+                        <label for="chk_${orb.id}">${orb.name} (Tier: ${orb.tier.toUpperCase()}) <span style="color:#a855f7">[+$${pps}/s]</span></label>
+                    `;
+                    container.appendChild(div);
                 });
             }
-            if (hasArtifacts) selector.appendChild(artifactGroup);
-            
-            if (!hasStandard && !hasArtifacts) {
-                 const opt = document.createElement('option');
-                 opt.text = "No Items to send!";
-                 opt.disabled = true;
-                 selector.appendChild(opt);
+
+            if (!hasAny) {
+                container.innerHTML = '<div style="padding:10px; color:#64748b; text-align:center;">No items available to send.</div>';
             }
         }
 
@@ -1636,7 +1565,6 @@
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         document.getElementById(tabId + 'View').classList.remove('hidden');
         const tabBtn = document.getElementById('t' + tabId.charAt(0).toUpperCase() + tabId.slice(1, 3)); if(tabBtn) tabBtn.classList.add('active');
-        // Handle "Player Market" ID manually since slice logic is tricky
         if (tabId === 'marketv2') document.getElementById('tMkt2').classList.add('active');
         
         if (tabId === 'marketplace') { renderUniqueLoot(); renderDailyChest(); }
@@ -1698,11 +1626,13 @@
                     bodyText = bodyText.replace(/\[Sent \$[\d,]+\]/, '').trim();
                 }
 
-                const orbMatch = bodyText.match(/\[Attached Orb: (.+)\]/);
+                // Handle Multiple Orbs in Body Text
+                // We look for the section we generated "[Attached: X, Y, Z]"
+                const orbMatch = bodyText.match(/\[Attached: (.+)\]/);
                 if (orbMatch) {
-                    const orbName = orbMatch[1];
-                    footerHtml += `<div class="orb-highlight">🔮 ATTACHED: ${orbName}</div>`;
-                    bodyText = bodyText.replace(/\[Attached Orb: .+\]/, '').trim();
+                    const orbNames = orbMatch[1].split(', ');
+                    footerHtml += `<div class="orb-highlight" style="text-align:left;">📦 ITEMS RECEIVED:<br>${orbNames.map(n => `• ${n}`).join('<br>')}</div>`;
+                    bodyText = bodyText.replace(/\[Attached: .+\]/, '').trim();
                 }
 
                 if (!bodyText && footerHtml) {
@@ -1736,7 +1666,10 @@
         const to = document.getElementById('msgTo').value.trim().toLowerCase().replace('@', '');
         const body = document.getElementById('msgBody').value;
         const amt = parseInt(document.getElementById('payAmt').value) || 0;
-        const orbIdToSend = document.getElementById('msgOrbSelector').value;
+
+        // Get Checkboxes
+        const selectedCheckboxes = document.querySelectorAll('.orb-checkbox:checked');
+        const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
 
         if (amt > userData.balance) { 
             btn.disabled = false; btn.innerText = "SEND MAIL";
@@ -1754,24 +1687,33 @@
         let finalBody = body;
         if (amt > 0) finalBody += ` [Sent $${amt.toLocaleString()}]`;
 
-        let orbDataToSend = null;
-        let isStandardTransfer = false;
+        // Logic for multiple items
+        let objectsToSend = [];
+        let standardOrbsToDec = {}; 
+        let uniqueOrbsToRemove = [];
+        let itemNames = [];
 
-        if (orbIdToSend) {
-            if (orbIdToSend.startsWith('u_')) {
-                const idx = userData.uniqueOrbs.findIndex(o => o.id === orbIdToSend);
+        for (let orbId of selectedIds) {
+            if (orbId.startsWith('u_')) {
+                const idx = userData.uniqueOrbs.findIndex(o => o.id === orbId);
                 if (idx > -1) {
-                    orbDataToSend = JSON.parse(JSON.stringify(userData.uniqueOrbs[idx]));
-                    orbDataToSend.giftedBy = userData.username; 
-                    finalBody += ` [Attached Orb: ${orbDataToSend.name}]`;
+                    const oData = JSON.parse(JSON.stringify(userData.uniqueOrbs[idx]));
+                    oData.giftedBy = userData.username;
+                    objectsToSend.push(oData);
+                    uniqueOrbsToRemove.push(orbId); // Store ID to filter out later
+                    itemNames.push(oData.name);
                 }
-            }
-            else if (orbIdToSend.startsWith('orb')) {
-                if (userData.orbs[orbIdToSend] > 0) {
-                    isStandardTransfer = true;
-                    const refOrb = ORB_DATA.find(o => o.id === orbIdToSend);
-                    orbDataToSend = {
-                        id: 'u_gift_' + Date.now() + '_' + Math.floor(Math.random()*100),
+            } else if (orbId.startsWith('orb')) {
+                if (userData.orbs[orbId] > 0) {
+                     // Decrement local check
+                     // In a real bulk scenario we'd check if user has enough for multiple selections of same type
+                     // But UI is checkboxes, so max 1 per type per send
+                     if (!standardOrbsToDec[orbId]) standardOrbsToDec[orbId] = 0;
+                     standardOrbsToDec[orbId]++;
+                     
+                     const refOrb = ORB_DATA.find(o => o.id === orbId);
+                     const giftOrb = {
+                        id: 'u_gift_' + Date.now() + '_' + Math.floor(Math.random()*10000),
                         name: refOrb.name,
                         color: refOrb.color,
                         income: refOrb.baseInc,
@@ -1779,10 +1721,15 @@
                         tier: 'gift',
                         giftedBy: userData.username,
                         acquiredAt: Date.now()
-                    };
-                    finalBody += ` [Attached Orb: ${refOrb.name}]`;
+                     };
+                     objectsToSend.push(giftOrb);
+                     itemNames.push(refOrb.name);
                 }
             }
+        }
+
+        if (itemNames.length > 0) {
+            finalBody += ` [Attached: ${itemNames.join(', ')}]`;
         }
 
         try {
@@ -1793,23 +1740,34 @@
                 await updateDoc(doc(db, "users", targetUid), { balance: increment(amt) }); 
             }
 
-            if (orbDataToSend) {
-                 if (isStandardTransfer) {
-                     const updatePayload = {};
-                     updatePayload[`orbs.${orbIdToSend}`] = increment(-1);
-                     await updateDoc(doc(db, "users", myUid), updatePayload);
-                 } else {
-                     const newSenderOrbs = userData.uniqueOrbs.filter(o => o.id !== orbIdToSend);
-                     await updateDoc(doc(db, "users", myUid), { uniqueOrbs: newSenderOrbs });
-                 }
-                 await updateDoc(doc(db, "users", targetUid), { uniqueOrbs: arrayUnion(orbDataToSend) });
+            if (objectsToSend.length > 0) {
+                // Update Sender
+                const senderUpdate = {};
+                // Handle standard decrements
+                for (const [sid, count] of Object.entries(standardOrbsToDec)) {
+                    senderUpdate[`orbs.${sid}`] = increment(-count);
+                }
+                // Handle unique removals
+                if (uniqueOrbsToRemove.length > 0) {
+                    const newUniqueList = userData.uniqueOrbs.filter(o => !uniqueOrbsToRemove.includes(o.id));
+                    senderUpdate['uniqueOrbs'] = newUniqueList;
+                }
+                
+                await updateDoc(doc(db, "users", myUid), senderUpdate);
+
+                // Update Recipient (Array Union for all objects)
+                // Firestore arrayUnion accepts variable args, need spread... but strictly it's one op.
+                // We'll update the recipient by adding them to uniqueOrbs
+                // Note: arrayUnion ensures uniqueness, IDs are unique timestamps so it's fine.
+                await updateDoc(doc(db, "users", targetUid), { uniqueOrbs: arrayUnion(...objectsToSend) });
             }
             
             await updateDoc(doc(db, "users", myUid), { totalMails: increment(1) });
             
             document.getElementById('msgBody').value = '';
             document.getElementById('payAmt').value = '';
-            document.getElementById('msgOrbSelector').value = '';
+            // Refresh checklist
+            showTab('message');
             alert("Mail & Items Sent Successfully!");
 
         } catch (e) {
@@ -1820,154 +1778,6 @@
         btn.disabled = false;
         btn.innerText = "SEND MAIL";
     };
-// Helper to get random number between min and max (inclusive)
-function getRandom(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-function openChest(type) {
-    const roll = Math.random(); // 0.0 to 1.0
-    const mythicRoll = Math.floor(Math.random() * 10000) + 1; // 1 to 10000
-    
-    let reward = 0;
-    let cooldownTime = 0; // In milliseconds
-    let isMythic = false;
-
-    // --- 1. CHECK FOR MYTHIC DROP (1 in 10,000) ---
-    if (mythicRoll === 1) {
-        reward = 1000000;
-        cooldownTime = 10 * 60 * 1000; // 10 Minutes cooldown if you hit Mythic
-        isMythic = true;
-        alert("MYTHIC DROP! YOU FOUND $1,000,000!");
-    } 
-    
-    // --- 2. STANDARD DROPS (If not Mythic) ---
-    else if (type === 'free') {
-        // 85% $1-10, 15% $10-15 | CD: 8-10s
-        if (roll < 0.85) reward = getRandom(1, 10);
-        else reward = getRandom(10, 15);
-        
-        cooldownTime = getRandom(8000, 10000);
-    } 
-    else if (type === 'bronze') {
-        // 85% $10-15, 15% $15-20 | CD: 5-10s
-        if (roll < 0.85) reward = getRandom(10, 15);
-        else reward = getRandom(15, 20);
-
-        cooldownTime = getRandom(5000, 10000);
-    } 
-    else if (type === 'silver') {
-        // 85% $10-30, 15% $50-60 | CD: 3-6s
-        if (roll < 0.85) reward = getRandom(10, 30);
-        else reward = getRandom(50, 60);
-
-        cooldownTime = getRandom(3000, 6000);
-    } 
-    else if (type === 'gold') {
-        // 85% $500-950, 15% $1000-2000 | CD: 1-5s
-        if (roll < 0.85) reward = getRandom(500, 950);
-        else reward = getRandom(1000, 2000);
-
-        cooldownTime = getRandom(1000, 5000);
-    } 
-    else if (type === 'champion') {
-        // Champion has logic where cooldown depends on the reward tier
-        if (roll < 0.50) {
-            // 50%: $10k-50k | CD: 10-12s
-            reward = getRandom(10000, 50000);
-            cooldownTime = getRandom(10000, 12000);
-        } else if (roll < 0.75) {
-            // 25%: $50k-75k | CD: 8-12s
-            reward = getRandom(50000, 75000);
-            cooldownTime = getRandom(8000, 12000);
-        } else {
-            // 25%: $75k-100k | CD: 9-15s
-            reward = getRandom(75000, 100000);
-            cooldownTime = getRandom(9000, 15000);
-        }
-    }
-
-    // --- APPLY REWARDS ---
-    userBalance += reward;
-    updateBalanceDisplay(); // Your function to update UI
-    
-    // Trigger Cooldown for this specific chest button
-    startChestCooldown(type, cooldownTime); 
-}
-    function renderMarket() {
-    const marketContainer = document.getElementById('market-container');
-    marketContainer.innerHTML = '';
-
-    marketListings.forEach(listing => {
-        const card = document.createElement('div');
-        card.className = 'market-card';
-        
-        // Even if I am the seller, I can buy it (effectively taking it off market back to inventory)
-        const buyBtn = `<button onclick="buyOrb(${listing.id})">Buy for $${listing.price}</button>`;
-
-        card.innerHTML = `
-            <h3>${listing.orbName}</h3>
-            <p>Seller: ${listing.seller}</p>
-            <p>Price: $${listing.price}</p>
-            ${buyBtn} 
-        `;
-        marketContainer.appendChild(card);
-    });
-}
-function renderInventory() {
-    const container = document.getElementById('inventory-container');
-    container.innerHTML = '';
-
-    // Add a master "Send Selected" button at the top of inventory
-    const bulkSendBtn = document.createElement('button');
-    bulkSendBtn.innerText = "Send Selected Orbs";
-    bulkSendBtn.onclick = openBulkSendModal; // Function defined below
-    bulkSendBtn.style.marginBottom = "10px";
-    container.appendChild(bulkSendBtn);
-
-    myOrbs.forEach(orb => {
-        const div = document.createElement('div');
-        div.className = 'orb-item';
-        div.innerHTML = `
-            <input type="checkbox" class="orb-select-box" value="${orb.id}">
-            <span>${orb.name} (Rarity: ${orb.rarity})</span>
-        `;
-        container.appendChild(div);
-    });
-}
-function openBulkSendModal() {
-    // 1. Get all checked boxes
-    const checkboxes = document.querySelectorAll('.orb-select-box:checked');
-    if (checkboxes.length === 0) {
-        alert("Please select at least one orb to send.");
-        return;
-    }
-
-    // 2. Ask for username
-    const recipient = prompt(`Enter username to send ${checkboxes.length} orb(s) to:`);
-    if (!recipient || recipient === currentUser) {
-        alert("Invalid user.");
-        return;
-    }
-
-    // 3. Process the transfer
-    let idsToSend = [];
-    checkboxes.forEach(box => idsToSend.push(parseInt(box.value)));
-
-    // Filter myOrbs to remove sent ones, and push them to the other user
-    // (This logic depends on your database/storage method. Here is array logic:)
-    
-    // Remove from my inventory
-    myOrbs = myOrbs.filter(orb => !idsToSend.includes(orb.id));
-    
-    // Determine user object (Mock logic)
-    // In a real app, you would send a POST request to server here
-    console.log(`Sent orbs IDs: ${idsToSend.join(', ')} to ${recipient}`);
-
-    alert(`Successfully sent ${idsToSend.length} orbs to ${recipient}!`);
-    
-    renderInventory(); // Refresh view
-}
 </script>
 </body>
 </html>
