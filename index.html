@@ -110,8 +110,11 @@
         .clicker-btn:active { transform: scale(0.95); }
         .popup-anim { position: absolute; color: #34d399; font-weight: 900; animation: floatUp 0.4s ease-out forwards; pointer-events: none; z-index: 10000; font-size: 24px; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
         @keyframes floatUp { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-40px); opacity: 0; } }
-        .notif-banner { position: fixed; top: 25px; left: -400px; width: 320px; background: #6366f1; color: white; padding: 20px; border-radius: 16px; z-index: 99999; display: flex; align-items: center; gap: 15px; transition: left 0.5s; border: 2px solid #818cf8; }
-        .notif-banner.active { left: 25px; }
+        
+        /* NEW NOTIFICATION STYLE: TOP RIGHT */
+        .notif-banner { position: fixed; top: 25px; right: -400px; left: auto; width: 320px; background: #1e293b; color: white; padding: 15px; border-radius: 12px; z-index: 99999; display: flex; align-items: center; gap: 15px; transition: right 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 2px solid #6366f1; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .notif-banner.active { right: 25px; }
+        
         .prestige-card { min-width: 200px; background: #1e293b; border: 2px solid #475569; padding: 15px; border-radius: 12px; text-align: center; position: relative; }
         .prestige-card.owned { border-color: #10b981; opacity: 0.7; }
         .prestige-row { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 25px; }
@@ -505,7 +508,8 @@
         {id:'ach28',name:'Legendary',desc:'Unlock all achievements.',icon:'👑'}
     ];
 
-const PRESTIGE_UPGRADES = {
+    // UPDATED COSTS: MULTIPLIED BY 4 AS REQUESTED
+    const PRESTIGE_UPGRADES = {
         clicks: [
             { id: 'p_click_1', name: 'Iron Clicks', mult: 1.5, cost: 20 }, 
             { id: 'p_click_2', name: 'Golden Finger', mult: 2.5, cost: 100 }, 
@@ -549,11 +553,31 @@ const PRESTIGE_UPGRADES = {
     const getRandomColor = () => { const l = '0123456789ABCDEF'; let c = '#'; for (let i = 0; i < 6; i++) { c += l[Math.floor(Math.random() * 16)]; } return c; };
     const getRandomName = () => `${NAME_PREFIXES[Math.floor(Math.random() * NAME_PREFIXES.length)]} ${NAME_SUFFIXES[Math.floor(Math.random() * NAME_SUFFIXES.length)]}`;
 
-    window.showNotification = (msg) => {
+    // --- REPLACED SHOW NOTIFICATION ---
+    window.showNotification = (msg, type = 'success') => {
         const b = document.getElementById('notifBanner');
-        document.getElementById('notifText').innerText = msg;
+        const t = document.getElementById('notifText');
+        const icon = b.querySelector('div');
+        
+        t.innerText = msg;
+        
+        if (type === 'error') {
+            b.style.borderColor = '#ef4444';
+            icon.style.background = '#ef4444';
+        } else {
+            b.style.borderColor = '#6366f1';
+            icon.style.background = '#10b981';
+        }
+
         b.classList.add('active');
-        setTimeout(() => b.classList.remove('active'), 3000);
+        
+        // Clear previous timeout if multiple notifications come fast
+        if (window.notifTimeout) clearTimeout(window.notifTimeout);
+        
+        // Auto hide after 5 seconds
+        window.notifTimeout = setTimeout(() => {
+            b.classList.remove('active');
+        }, 5000);
     };
 
     window.closeResearchTutorial = () => {
@@ -917,7 +941,7 @@ const PRESTIGE_UPGRADES = {
 
     window.confirmListing = async () => {
         const price = parseInt(document.getElementById('sellPriceInput').value);
-        if (!price || price <= 0) return alert("Please enter a valid price.");
+        if (!price || price <= 0) return showNotification("Please enter a valid price.", 'error');
         if (!selectedOrbForSale) return;
 
         // Optimistic UI
@@ -939,22 +963,22 @@ const PRESTIGE_UPGRADES = {
             await updateDoc(doc(db, "users", myUid), {
                 uniqueOrbs: newList
             });
-            alert("Item Listed!");
+            showNotification("Item Listed Successfully!");
         } catch (e) {
             console.error(e);
-            alert("Error listing item.");
+            showNotification("Error listing item.", 'error');
         }
     };
 
     window.buyMarketItem = async (listingId, price) => {
-        if (userData.balance < price) return alert("Insufficient Funds");
+        if (userData.balance < price) return showNotification("Insufficient Funds", 'error');
         
         try {
             const listDoc = await getDocs(query(collection(db, "market_listings"))); 
             let actualDoc = null;
             listDoc.forEach(d => { if(d.id === listingId) actualDoc = d.data(); });
 
-            if (!actualDoc) return alert("Item already sold!");
+            if (!actualDoc) return showNotification("Item already sold!", 'error');
 
             // Tag orb
             const boughtOrb = JSON.parse(JSON.stringify(actualDoc.orb));
@@ -977,11 +1001,11 @@ const PRESTIGE_UPGRADES = {
             await deleteDoc(doc(db, "market_listings", listingId));
 
             updateUI();
-            alert("Purchase Successful!");
+            showNotification("Purchase Successful!");
 
         } catch (e) {
             console.error(e);
-            alert("Transaction failed.");
+            showNotification("Transaction failed.", 'error');
         }
     };
 
@@ -1185,7 +1209,7 @@ const PRESTIGE_UPGRADES = {
     }
 
     window.buyChest = async (tier, cost) => {
-        if (userData.balance < cost) return alert("Insufficient Funds!");
+        if (userData.balance < cost) return showNotification("Insufficient Funds!", 'error');
         
         const newOrb = generateChestReward(tier);
 
@@ -1208,7 +1232,7 @@ const PRESTIGE_UPGRADES = {
     window.claimDailyChest = async () => {
         const now = Date.now();
         const last = userData.lastDailyClaim || 0;
-        if (now - last < 86400000) return alert("Come back later!");
+        if (now - last < 86400000) return showNotification("Come back later!", 'error');
         
         const newOrb = generateChestReward('daily');
         
@@ -1528,7 +1552,7 @@ const PRESTIGE_UPGRADES = {
         const restrictedTabs = ['research', 'marketplace', 'marketv2']; 
         if (restrictedTabs.includes(tabId)) {
             if (!userData.orbs || !userData.orbs['orb5'] || userData.orbs['orb5'] <= 0) {
-                window.showNotification("🔒 Unlock 'Void Eye' first to access!");
+                window.showNotification("🔒 Unlock 'Void Eye' first to access!", 'error');
                 return;
             }
         }
@@ -1612,7 +1636,7 @@ const PRESTIGE_UPGRADES = {
         const u = document.getElementById('loginUser').value.trim().toLowerCase();
         const p = document.getElementById('authPass').value;
         const e = document.getElementById('regEmail').value;
-        if (!u || !p || (isReg && !e)) return alert("Please fill all fields");
+        if (!u || !p || (isReg && !e)) return showNotification("Please fill all fields", 'error');
         try {
             if(isReg) {
                 const res = await createUserWithEmailAndPassword(auth, e, p);
@@ -1620,10 +1644,10 @@ const PRESTIGE_UPGRADES = {
             } else {
                 const q = query(collection(db, "users"), where("username", "==", u));
                 const s = await getDocs(q);
-                if(s.empty) return alert("User not found");
+                if(s.empty) return showNotification("User not found", 'error');
                 await signInWithEmailAndPassword(auth, s.docs[0].data().email, p);
             }
-        } catch(err) { alert(err.message); }
+        } catch(err) { showNotification(err.message, 'error'); }
     };
 
     document.getElementById('authBtn').onclick = handleAuth;
@@ -1703,14 +1727,14 @@ const PRESTIGE_UPGRADES = {
 
         if (amt > userData.balance) { 
             btn.disabled = false; btn.innerText = "SEND MAIL";
-            return alert("Insufficient funds!"); 
+            return showNotification("Insufficient funds!", 'error'); 
         }
         
         const q = query(collection(db, "users"), where("username", "==", to));
         const snap = await getDocs(q);
         if (snap.empty) { 
             btn.disabled = false; btn.innerText = "SEND MAIL";
-            return alert("Recipient not found!"); 
+            return showNotification("Recipient not found!", 'error'); 
         }
         const targetUid = snap.docs[0].id;
         
@@ -1798,11 +1822,11 @@ const PRESTIGE_UPGRADES = {
             document.getElementById('payAmt').value = '';
             // Refresh checklist
             showTab('message');
-            alert("Mail & Items Sent Successfully!");
+            showNotification("Mail & Items Sent Successfully!");
 
         } catch (e) {
             console.error(e);
-            alert("Error sending mail.");
+            showNotification("Error sending mail.", 'error');
         }
 
         btn.disabled = false;
