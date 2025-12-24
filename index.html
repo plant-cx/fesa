@@ -96,7 +96,14 @@
         .progress-fill { height: 100%; background: #6366f1; width: 0%; transition: width 0.1s linear; }
         .search-bar { padding: 10px 15px; font-size: 14px; width: 200px; margin: 0; height: 45px; }
         .research-layout { display: grid; grid-template-columns: 300px 1fr; gap: 20px; align-items: start; }
+        
+        /* UPDATED SCROLLBAR FOR RESEARCH LIST */
         .research-list { max-height: 500px; overflow-y: auto; background: #0f172a; border-radius: 12px; padding: 10px; border: 1px solid #334155; }
+        .research-list::-webkit-scrollbar { width: 8px; }
+        .research-list::-webkit-scrollbar-track { background: #0f172a; border-radius: 4px; }
+        .research-list::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; border: 1px solid #0f172a; }
+        .research-list::-webkit-scrollbar-thumb:hover { background: #475569; }
+
         .research-item { padding: 12px; margin-bottom: 8px; background: #1e293b; border-radius: 8px; cursor: pointer; border: 1px solid transparent; transition: 0.2s; display: flex; justify-content: space-between; align-items: center; }
         .research-item:hover, .research-item.active { border-color: #6366f1; background: #334155; }
         .research-panel { background: #0f172a; border-radius: 16px; border: 1px solid #334155; padding: 25px; position:relative; }
@@ -106,12 +113,17 @@
         .chest-card { background: #1e293b; padding: 20px; border-radius: 20px; text-align: center; border: 2px solid #334155; transition: 0.2s; }
         .chest-card:hover { transform: translateY(-3px); border-color: #6366f1; }
         .chest-icon { font-size: 40px; margin-bottom: 10px; }
-        .clicker-btn { width: 160px; height: 160px; border-radius: 50%; background: radial-gradient(circle, #6366f1, #4338ca); border: 10px solid #312e81; font-size: 55px; margin: 0 auto 15px; display: block; cursor: pointer; transition: transform 0.1s; box-shadow: 0 0 40px rgba(99, 102, 241, 0.5); }
+        
+        /* NEW CLICKER STYLE WITH IMAGE */
+        .clicker-btn { width: 160px; height: 160px; border-radius: 50%; background: radial-gradient(circle, #6366f1, #4338ca); border: 10px solid #312e81; margin: 0 auto 15px; display: block; cursor: pointer; transition: transform 0.1s; box-shadow: 0 0 40px rgba(99, 102, 241, 0.5); 
+            background-image: url('https://static.vecteezy.com/system/resources/thumbnails/055/608/060/small_2x/cursor-icon-pointer-cursor-finger-pointer-clicking-mouse-cursor-png.png');
+            background-size: 55%; background-position: center; background-repeat: no-repeat;
+        }
         .clicker-btn:active { transform: scale(0.95); }
+        
         .popup-anim { position: absolute; color: #34d399; font-weight: 900; animation: floatUp 0.4s ease-out forwards; pointer-events: none; z-index: 10000; font-size: 24px; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
         @keyframes floatUp { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-40px); opacity: 0; } }
         
-        /* NEW NOTIFICATION STYLE: TOP RIGHT */
         .notif-banner { position: fixed; top: 25px; right: -400px; left: auto; width: 320px; background: #1e293b; color: white; padding: 15px; border-radius: 12px; z-index: 99999; display: flex; align-items: center; gap: 15px; transition: right 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 2px solid #6366f1; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .notif-banner.active { right: 25px; }
         
@@ -240,14 +252,14 @@
             <div id="tRes" class="tab" onclick="showTab('research')">RESEARCH</div>
             <div id="tCol" class="tab" onclick="showTab('collection')">COLLECTION</div>
             <div id="tAch" class="tab" onclick="showTab('achievements')">ACHIEVEMENTS</div>
-            <div id="tMkt" class="tab" onclick="showTab('marketplace')">MARKET</div>
+            <div id="tChests" class="tab" onclick="showTab('marketplace')">CHESTS</div>
             <div id="tMkt2" class="tab" onclick="showTab('marketv2')">PLAYER MARKET</div>
             <div id="tMsg" class="tab" onclick="showTab('message')">SEND</div>
         </div>
 
         <div id="earnView" class="tab-view">
             <div style="text-align:center; max-width: 650px; margin: 0 auto;">
-                <button class="clicker-btn" id="mainClicker">👆</button>
+                <button class="clicker-btn" id="mainClicker"></button>
                 <div class="card" style="margin-top: 20px; padding: 20px; background: #0f172a; border: 2px solid #334155;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <div style="text-align: left;">
@@ -597,6 +609,10 @@
                     userData = d.data();
                     if(!userData.research) userData.research = {};
                     if(!userData.unlockedAchievements) userData.unlockedAchievements = [];
+                    // Ensure tracking fields exist
+                    if (!userData.lastMsgDate) userData.lastMsgDate = 0;
+                    if (!userData.dailyMsgCount) userData.dailyMsgCount = 0;
+
                     updateUI(); 
                     renderDailyChest(); 
                      
@@ -785,7 +801,8 @@
 
         const hasVoidEye = (userData.orbs && userData.orbs['orb5'] > 0);
         document.getElementById('tRes').innerText = hasVoidEye ? "RESEARCH" : "🔒 RESEARCH";
-        document.getElementById('tMkt').innerText = hasVoidEye ? "MARKET" : "🔒 MARKET";
+        document.getElementById('tMkt2').innerText = hasVoidEye ? "PLAYER MARKET" : "🔒 PLAYER MARKET";
+        document.getElementById('tChests').innerText = hasVoidEye ? "CHESTS" : "🔒 CHESTS";
     };
 
     const getPower = (lvl) => {
@@ -1009,23 +1026,26 @@
         }
     };
 
-    // --- ACHIEVEMENTS SYSTEM ---
+    // --- ACHIEVEMENTS SYSTEM FIXED ---
     function checkAchievements() {
         if (!userData) return;
         const currentUnlocked = userData.unlockedAchievements || [];
         const newUnlocks = [];
+        
+        // Use total balance from local accumulator + db for checks
+        const currentBal = (userData.balance || 0) + localBalanceAccumulator;
 
         ACHIEVEMENTS.forEach(ach => {
             if (currentUnlocked.includes(ach.id)) return; 
 
             let unlocked = false;
             // Balance Goals
-            if (ach.id === 'ach2' && userData.balance >= 1000) unlocked = true;
-            if (ach.id === 'ach3' && userData.balance >= 100000) unlocked = true;
-            if (ach.id === 'ach4' && userData.balance >= 1000000) unlocked = true;
-            if (ach.id === 'ach_bill' && userData.balance >= 1000000000) unlocked = true;
-            if (ach.id === 'ach_trill' && userData.balance >= 1000000000000) unlocked = true;
-            if (ach.id === 'ach_quad' && userData.balance >= 1000000000000000) unlocked = true;
+            if (ach.id === 'ach2' && currentBal >= 1000) unlocked = true;
+            if (ach.id === 'ach3' && currentBal >= 100000) unlocked = true;
+            if (ach.id === 'ach4' && currentBal >= 1000000) unlocked = true;
+            if (ach.id === 'ach_bill' && currentBal >= 1000000000) unlocked = true;
+            if (ach.id === 'ach_trill' && currentBal >= 1000000000000) unlocked = true;
+            if (ach.id === 'ach_quad' && currentBal >= 1000000000000000) unlocked = true;
 
             // Chests
             if (ach.id === 'ach5' && (userData.chestCount || 0) >= 10) unlocked = true;
@@ -1098,13 +1118,26 @@
     }
 
     window.buyOrb = async (id, cost, currentOwned) => {
-        if (userData.balance >= cost && currentOwned < 80) {
-            userData.balance -= cost;
+        const totalBal = (userData.balance || 0) + localBalanceAccumulator;
+        
+        if (totalBal >= cost && currentOwned < 80) {
+            // Optimistic Update: Deduct from local first if possible
+            if (localBalanceAccumulator >= cost) {
+                localBalanceAccumulator -= cost;
+            } else {
+                const remainingCost = cost - localBalanceAccumulator;
+                localBalanceAccumulator = 0;
+                userData.balance -= remainingCost;
+            }
+
             if(!userData.orbs[id]) userData.orbs[id] = 0;
             userData.orbs[id]++;
+            
             updateUI();
             renderOrbs('orbGrid', ORB_DATA); 
-            const update = { balance: increment(-cost) }; update[`orbs.${id}`] = increment(1);
+            
+            const update = { balance: userData.balance }; 
+            update[`orbs.${id}`] = increment(1);
             await updateDoc(doc(db, "users", myUid), update);
         }
     };
@@ -1209,8 +1242,18 @@
     }
 
     window.buyChest = async (tier, cost) => {
-        if (userData.balance < cost) return showNotification("Insufficient Funds!", 'error');
+        const totalBal = (userData.balance || 0) + localBalanceAccumulator;
+        if (totalBal < cost) return showNotification("Insufficient Funds!", 'error');
         
+        // Optimistic Deduct
+        if (localBalanceAccumulator >= cost) {
+            localBalanceAccumulator -= cost;
+        } else {
+            const remainder = cost - localBalanceAccumulator;
+            localBalanceAccumulator = 0;
+            userData.balance -= remainder;
+        }
+
         const newOrb = generateChestReward(tier);
 
         const popup = document.getElementById('lootPopup');
@@ -1222,11 +1265,13 @@
         content.innerHTML = `<h2 style="color:#facc15; margin-bottom:15px;">CHEST OPENED!</h2><h3 style="font-size:28px; margin-bottom:10px; color:${newOrb.color}">${newOrb.name}</h3><div style="margin: 20px auto; transform: scale(1.5); width:100px; height:100px; display:flex; justify-content:center; align-items:center;"><div class="${visualClass}" style="color:${newOrb.color};"></div></div><p style="color:#94a3b8; font-size:16px; margin-bottom:25px;">Tier: ${newOrb.tier.toUpperCase()}<br><span style="color:#10b981; font-weight:800;">+$${newOrb.income.toLocaleString()}</span> / ${(newOrb.time/1000).toFixed(1)}s</p><button onclick="document.getElementById('lootPopup').classList.add('hidden')">COLLECT</button>`;
         popup.classList.remove('hidden');
 
-        userData.balance -= cost;
         if(!userData.uniqueOrbs) userData.uniqueOrbs = [];
         userData.uniqueOrbs.push(newOrb);
+        if(!userData.chestCount) userData.chestCount = 0;
+        userData.chestCount++; // Increment immediately for achievements
+
         updateUI();
-        await updateDoc(doc(db, "users", myUid), { balance: increment(-cost), uniqueOrbs: arrayUnion(newOrb), chestCount: increment(1) });
+        await updateDoc(doc(db, "users", myUid), { balance: userData.balance, uniqueOrbs: arrayUnion(newOrb), chestCount: increment(1) });
     };
 
     window.claimDailyChest = async () => {
@@ -1247,6 +1292,9 @@
         if(!userData.uniqueOrbs) userData.uniqueOrbs = [];
         userData.uniqueOrbs.push(newOrb);
         userData.lastDailyClaim = now;
+        if(!userData.chestCount) userData.chestCount = 0;
+        userData.chestCount++;
+
         renderDailyChest();
         updateUI();
         await updateDoc(doc(db, "users", myUid), { uniqueOrbs: arrayUnion(newOrb), lastDailyClaim: now, chestCount: increment(1) });
@@ -1438,11 +1486,21 @@
     window.upgradeClicker = async () => {
         const currentLevel = userData.clickLevel || 1;
         const cost = Math.floor(100 * Math.pow(1.5, currentLevel - 1));
-        if (userData.balance >= cost && currentLevel < 100) {
-            userData.balance -= cost;
+        const totalBal = (userData.balance || 0) + localBalanceAccumulator;
+
+        if (totalBal >= cost && currentLevel < 100) {
+            // Optimistic Deduct
+            if (localBalanceAccumulator >= cost) {
+                localBalanceAccumulator -= cost;
+            } else {
+                const remainingCost = cost - localBalanceAccumulator;
+                localBalanceAccumulator = 0;
+                userData.balance -= remainingCost;
+            }
+
             userData.clickLevel = (userData.clickLevel || 1) + 1;
             updateUI();
-            await updateDoc(doc(db, "users", myUid), { balance: increment(-cost), clickLevel: increment(1) });
+            await updateDoc(doc(db, "users", myUid), { balance: userData.balance, clickLevel: increment(1) });
         }
     };
 
@@ -1520,7 +1578,7 @@
             });
         }
         
-        const totalBal = userData.balance + localBalanceAccumulator;
+        const totalBal = (userData.balance || 0) + localBalanceAccumulator;
         const buyBtns = document.querySelectorAll('.buy-btn');
         buyBtns.forEach(btn => {
             if (btn.classList.contains('maxed')) return; 
@@ -1549,6 +1607,7 @@
     }, 5000);
 
     window.showTab = (tabId) => {
+        // Updated restricted tabs to include 'marketplace' (now CHESTS) and 'marketv2'
         const restrictedTabs = ['research', 'marketplace', 'marketv2']; 
         if (restrictedTabs.includes(tabId)) {
             if (!userData.orbs || !userData.orbs['orb5'] || userData.orbs['orb5'] <= 0) {
@@ -1617,9 +1676,19 @@
 
         document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.getElementById(tabId + 'View').classList.remove('hidden');
-        const tabBtn = document.getElementById('t' + tabId.charAt(0).toUpperCase() + tabId.slice(1, 3)); if(tabBtn) tabBtn.classList.add('active');
-        if (tabId === 'marketv2') document.getElementById('tMkt2').classList.add('active');
+        
+        // Handle chest view name mapping
+        const viewId = (tabId === 'marketplace') ? 'marketplace' : tabId;
+        document.getElementById(viewId + 'View').classList.remove('hidden');
+        
+        // Handle tab highlight mapping
+        let tabBtnId;
+        if (tabId === 'marketplace') tabBtnId = 'tChests';
+        else if (tabId === 'marketv2') tabBtnId = 'tMkt2';
+        else tabBtnId = 't' + tabId.charAt(0).toUpperCase() + tabId.slice(1, 3);
+        
+        const tabBtn = document.getElementById(tabBtnId); 
+        if(tabBtn) tabBtn.classList.add('active');
         
         if (tabId === 'marketplace') { renderUniqueLoot(); renderDailyChest(); }
         if (tabId === 'collection') renderCollection();
@@ -1629,6 +1698,10 @@
         const power = getPower(userData.clickLevel || 1); localBalanceAccumulator += power;
         const pop = document.createElement('div'); pop.className = 'popup-anim'; pop.innerText = `+$${power}`; pop.style.left = e.pageX + "px"; pop.style.top = e.pageY + "px";
         document.body.appendChild(pop); setTimeout(() => pop.remove(), 400);
+        
+        // Immediate local increment for achievements
+        userData.totalClicks = (userData.totalClicks || 0) + 1;
+        
         updateDoc(doc(db, "users", myUid), { totalClicks: increment(1) });
     };
 
@@ -1640,7 +1713,7 @@
         try {
             if(isReg) {
                 const res = await createUserWithEmailAndPassword(auth, e, p);
-                await setDoc(doc(db, "users", res.user.uid), { username: u, email: e, balance: 25, orbs: {}, uniqueOrbs: [], research: {}, clickLevel: 1, prestigePoints: 0, prestigeUpgrades: [], totalClicks: 0, totalMails: 0, chestCount: 0, unlockedAchievements: [] });
+                await setDoc(doc(db, "users", res.user.uid), { username: u, email: e, balance: 25, orbs: {}, uniqueOrbs: [], research: {}, clickLevel: 1, prestigePoints: 0, prestigeUpgrades: [], totalClicks: 0, totalMails: 0, chestCount: 0, unlockedAchievements: [], dailyMsgCount: 0, lastMsgDate: 0 });
             } else {
                 const q = query(collection(db, "users"), where("username", "==", u));
                 const s = await getDocs(q);
@@ -1717,6 +1790,18 @@
         btn.disabled = true;
         btn.innerText = "SENDING...";
 
+        // --- MESSAGE CAP LOGIC ---
+        const now = Date.now();
+        const oneDay = 86400000;
+        const lastDate = userData.lastMsgDate || 0;
+        const isSameDay = (new Date(now).setHours(0,0,0,0) === new Date(lastDate).setHours(0,0,0,0));
+        let dailyCount = isSameDay ? (userData.dailyMsgCount || 0) : 0;
+
+        if (dailyCount >= 5) {
+            btn.disabled = false; btn.innerText = "SEND MAIL";
+            return showNotification("Daily message limit reached (5/5). Try tomorrow.", 'error');
+        }
+
         const to = document.getElementById('msgTo').value.trim().toLowerCase().replace('@', '');
         const body = document.getElementById('msgBody').value;
         const amt = parseInt(document.getElementById('payAmt').value) || 0;
@@ -1725,7 +1810,7 @@
         const selectedCheckboxes = document.querySelectorAll('.orb-checkbox:checked');
         const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
 
-        if (amt > userData.balance) { 
+        if (amt > (userData.balance + localBalanceAccumulator)) { 
             btn.disabled = false; btn.innerText = "SEND MAIL";
             return showNotification("Insufficient funds!", 'error'); 
         }
@@ -1759,9 +1844,6 @@
                 }
             } else if (orbId.startsWith('orb')) {
                 if (userData.orbs[orbId] > 0) {
-                     // Decrement local check
-                     // In a real bulk scenario we'd check if user has enough for multiple selections of same type
-                     // But UI is checkboxes, so max 1 per type per send
                      if (!standardOrbsToDec[orbId]) standardOrbsToDec[orbId] = 0;
                      standardOrbsToDec[orbId]++;
                      
@@ -1790,6 +1872,14 @@
             await addDoc(collection(db, "messages"), { to: to, from: userData.username, body: finalBody, date: Date.now() });
             
             if (amt > 0) { 
+                // Optimistic deduct if accumulator has enough
+                if (localBalanceAccumulator >= amt) localBalanceAccumulator -= amt;
+                else {
+                    const rem = amt - localBalanceAccumulator;
+                    localBalanceAccumulator = 0;
+                    userData.balance -= rem;
+                }
+                updateUI();
                 await updateDoc(doc(db, "users", myUid), { balance: increment(-amt) }); 
                 await updateDoc(doc(db, "users", targetUid), { balance: increment(amt) }); 
             }
@@ -1809,14 +1899,20 @@
                 
                 await updateDoc(doc(db, "users", myUid), senderUpdate);
 
-                // Update Recipient (Array Union for all objects)
-                // Firestore arrayUnion accepts variable args, need spread... but strictly it's one op.
-                // We'll update the recipient by adding them to uniqueOrbs
-                // Note: arrayUnion ensures uniqueness, IDs are unique timestamps so it's fine.
                 await updateDoc(doc(db, "users", targetUid), { uniqueOrbs: arrayUnion(...objectsToSend) });
             }
             
-            await updateDoc(doc(db, "users", myUid), { totalMails: increment(1) });
+            // Update Message Counts locally and DB
+            dailyCount++;
+            userData.dailyMsgCount = dailyCount;
+            userData.lastMsgDate = now;
+            userData.totalMails = (userData.totalMails || 0) + 1;
+
+            await updateDoc(doc(db, "users", myUid), { 
+                totalMails: increment(1),
+                dailyMsgCount: dailyCount,
+                lastMsgDate: now
+            });
             
             document.getElementById('msgBody').value = '';
             document.getElementById('payAmt').value = '';
