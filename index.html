@@ -252,6 +252,53 @@ input::placeholder { color:var(--muted); }
 .chip-gold { background:rgba(255,184,0,.12);color:var(--gold);border:1px solid rgba(255,184,0,.3); }
 .chip-purple { background:rgba(139,92,246,.12);color:var(--purple);border:1px solid rgba(139,92,246,.3); }
 
+/* ── Detail Overlay ── */
+.detail-overlay{position:fixed;inset:0;background:var(--bg);z-index:3000;overflow-y:auto;animation:sdIn .22s ease-out;}
+@keyframes sdIn{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:translateX(0)}}
+.detail-header{position:sticky;top:0;background:rgba(5,9,18,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;gap:14px;z-index:10;flex-wrap:wrap;}
+.back-btn{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-weight:700;cursor:pointer;padding:8px 14px;border-radius:var(--r2);border:1px solid var(--border2);background:transparent;font-family:var(--sans);font-size:13px;transition:.2s;flex-shrink:0;}
+.back-btn:hover{color:var(--text);background:var(--card2);}
+.detail-body{max-width:1300px;margin:0 auto;padding:28px 24px;}
+.chart-controls{display:flex;gap:6px;margin-bottom:14px;}
+.range-btn{padding:7px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--muted);transition:.2s;font-family:var(--sans);}
+.range-btn.active,.range-btn:hover{background:var(--card2);color:var(--text);border-color:var(--blue);}
+/* Stock news */
+.news-item{padding:16px 18px;background:var(--surface);border-radius:var(--r2);margin-bottom:10px;border-left:3px solid var(--blue);transition:.2s;}
+.news-item:hover{background:var(--card2);}
+.news-item.up{border-left-color:var(--green);}
+.news-item.down{border-left-color:var(--red);}
+.news-item.gold{border-left-color:var(--gold);}
+.news-tag{font-size:10px;font-weight:800;letter-spacing:1.5px;padding:2px 8px;border-radius:4px;background:rgba(45,126,248,.15);color:var(--blue);display:inline-block;margin-right:6px;}
+.news-tag.green-tag{background:rgba(0,229,160,.12);color:var(--green);}
+.news-tag.red-tag{background:rgba(255,58,92,.12);color:var(--red);}
+.news-tag.gold-tag{background:rgba(255,184,0,.12);color:var(--gold);}
+.news-age{font-size:11px;color:var(--muted);}
+.news-title{font-weight:700;font-size:15px;margin:6px 0 4px;}
+.news-body{font-size:13px;color:var(--muted);line-height:1.65;}
+/* Stat mini */
+.stat-mini-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
+.stat-mini{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:12px 14px;}
+.stat-mini-label{font-size:10px;text-transform:uppercase;letter-spacing:.9px;color:var(--muted);margin-bottom:4px;}
+.stat-mini-val{font-family:var(--mono);font-size:15px;font-weight:700;}
+/* Gallery */
+.gallery-main-img{width:100%;height:380px;object-fit:cover;border-radius:var(--r);background:var(--surface);display:block;transition:opacity .3s;}
+.gallery-thumbs{display:flex;gap:8px;margin-top:10px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;}
+.gallery-thumbs::-webkit-scrollbar{display:none;}
+.gallery-thumb{width:72px;height:54px;border-radius:8px;object-fit:cover;cursor:pointer;border:2px solid transparent;flex-shrink:0;transition:.2s;opacity:.65;}
+.gallery-thumb:hover{opacity:1;}
+.gallery-thumb.active{border-color:var(--blue);opacity:1;}
+/* Property history */
+.timeline{position:relative;padding-left:22px;}
+.timeline::before{content:'';position:absolute;left:7px;top:6px;bottom:6px;width:2px;background:var(--border);}
+.tl-item{position:relative;margin-bottom:18px;}
+.tl-item::before{content:'';position:absolute;left:-18px;top:5px;width:10px;height:10px;border-radius:50%;background:var(--blue);border:2px solid var(--bg);}
+.tl-year{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--blue);margin-bottom:3px;letter-spacing:.5px;}
+.tl-text{font-size:13px;color:var(--muted);line-height:1.6;}
+/* Responsive overlays */
+@media(max-width:900px){
+  .sd-grid,.pd-grid{grid-template-columns:1fr !important;}
+  .sd-side-panel{position:static !important;}
+}
 /* ── Responsive ── */
 @media(max-width:768px){
   .grid-3,.grid-4{grid-template-columns:1fr 1fr;}
@@ -261,6 +308,7 @@ input::placeholder { color:var(--muted); }
 @media(max-width:500px){
   .grid-2,.grid-3,.grid-4{grid-template-columns:1fr;}
   .stock-grid{grid-template-columns:1fr;}
+  .detail-header{padding:10px 14px;}
 }
 </style>
 </head>
@@ -534,6 +582,98 @@ input::placeholder { color:var(--muted); }
   </div><!-- /appScreen -->
 </div><!-- /wrap -->
 
+<!-- ══ STOCK DETAIL OVERLAY ══ -->
+<div id="stockDetailOverlay" class="detail-overlay hidden">
+  <div class="detail-header">
+    <button class="back-btn" onclick="closeStockDetail()">← BACK</button>
+    <div id="sdLogo" style="width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;"></div>
+    <div>
+      <div id="sdName" style="font-weight:800;font-size:17px;line-height:1.2;"></div>
+      <div id="sdTicker" style="font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:1.5px;font-weight:700;"></div>
+    </div>
+    <div style="margin-left:auto;text-align:right;flex-shrink:0;">
+      <div id="sdPrice" style="font-family:var(--mono);font-size:26px;font-weight:700;line-height:1;"></div>
+      <div id="sdChange" style="font-family:var(--mono);font-size:13px;font-weight:600;margin-top:3px;"></div>
+    </div>
+  </div>
+  <div class="detail-body">
+    <div class="sd-grid" style="display:grid;grid-template-columns:1fr 300px;gap:24px;align-items:start;">
+      <div>
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+          <div class="chart-controls">
+            <button class="range-btn active" onclick="setStockRange('1W',this)">1W</button>
+            <button class="range-btn" onclick="setStockRange('1M',this)">1M</button>
+            <button class="range-btn" onclick="setStockRange('3M',this)">3M</button>
+            <button class="range-btn" onclick="setStockRange('ALL',this)">ALL</button>
+          </div>
+          <div id="sdPriceHint" style="font-family:var(--mono);font-size:12px;color:var(--muted);"></div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px 14px 10px;margin-bottom:18px;">
+          <canvas id="sdCanvas"></canvas>
+        </div>
+        <div class="stat-mini-row" id="sdStatRow" style="grid-template-columns:repeat(4,1fr);"></div>
+        <div class="section-title" style="margin-top:16px;">NEWS &amp; MARKET ANALYSIS</div>
+        <div id="sdNewsContainer"></div>
+      </div>
+      <div class="sd-side-panel" style="position:sticky;top:72px;">
+        <div class="card">
+          <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:14px;">TRADE <span id="sdPanelTicker" style="color:var(--text);"></span></div>
+          <div style="margin-bottom:12px;">
+            <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">QUANTITY</div>
+            <input type="number" id="sdQtyInput" value="1" min="1" oninput="updateSdCostEst()">
+          </div>
+          <div style="background:var(--surface);border-radius:var(--r2);padding:12px 14px;margin-bottom:14px;border:1px solid var(--border);">
+            <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px;"><span style="color:var(--muted);">Estimated Cost</span><span class="mono" id="sdCostEst" style="font-weight:700;"></span></div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px;"><span style="color:var(--muted);">Shares Owned</span><span class="mono" id="sdSharesOwned" style="font-weight:700;"></span></div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;"><span style="color:var(--muted);">Avg Buy Price</span><span class="mono" id="sdAvgCost" style="font-weight:700;"></span></div>
+          </div>
+          <button class="btn btn-green btn-block" style="margin-bottom:8px;" onclick="buyStockFromDetail()">📈 BUY SHARES</button>
+          <button class="btn btn-red btn-block" id="sdSellBtn" onclick="sellFromDetail()">📉 SELL SHARES</button>
+          <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--border);">
+            <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;">YOUR POSITION</div>
+            <div id="sdPositionPanel"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PROPERTY DETAIL OVERLAY ══ -->
+<div id="propDetailOverlay" class="detail-overlay hidden">
+  <div class="detail-header">
+    <button class="back-btn" onclick="closePropDetail()">← BACK</button>
+    <div id="pdIcon" style="font-size:28px;flex-shrink:0;"></div>
+    <div>
+      <div id="pdHeaderName" style="font-weight:800;font-size:17px;line-height:1.2;"></div>
+      <div id="pdHeaderDesc" style="font-size:12px;color:var(--muted);margin-top:2px;"></div>
+    </div>
+    <div style="margin-left:auto;flex-shrink:0;">
+      <button id="pdHeaderBuyBtn" class="btn btn-primary btn-lg" onclick="buyFromPropDetail()">BUY</button>
+    </div>
+  </div>
+  <div class="detail-body">
+    <div class="pd-grid" style="display:grid;grid-template-columns:1fr 320px;gap:28px;align-items:start;">
+      <div>
+        <img id="pdMainImg" class="gallery-main-img" src="" alt="">
+        <div class="gallery-thumbs" id="pdThumbs"></div>
+        <div class="section-title" style="margin-top:24px;">PROPERTY HISTORY</div>
+        <div class="timeline" id="pdTimeline"></div>
+      </div>
+      <div style="position:sticky;top:72px;">
+        <div class="card" style="margin-bottom:16px;border-color:rgba(0,229,160,.2);background:rgba(0,229,160,.04);">
+          <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:14px;">INVESTMENT OVERVIEW</div>
+          <div id="pdInvestStats"></div>
+        </div>
+        <div class="card">
+          <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;">ABOUT THIS PROPERTY</div>
+          <div id="pdLongDesc" style="font-size:14px;color:var(--muted);line-height:1.75;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Net Worth Button & Graph -->
 <button id="nwBtn" class="hidden" onclick="toggleNW()">
   <div class="nw-dot"></div>
@@ -795,7 +935,9 @@ window.renderStockGrid = () => {
     const pnlPct = avgCost > 0 ? ((price - avgCost) / avgCost * 100) : 0;
     const card = document.createElement('div');
     card.className = 'stock-card';
+    card.style.cursor = 'pointer';
     card.style.setProperty('--stock-color', s.color);
+    card.onclick = (e) => { if(!e.target.closest('button') && !e.target.closest('input')) openStockDetail(s.id); };
     const totalBal = (userData.balance || 0) + localBal;
     const canBuy = totalBal >= price;
     const canSell = owned > 0;
@@ -919,6 +1061,8 @@ window.renderPropertyGrid = () => {
 
     const card = document.createElement('div');
     card.className = 'property-card';
+    card.style.cursor = 'pointer';
+    card.onclick = (e) => { if(!e.target.closest('button')) openPropDetail(p.id); };
     if (owned > 0) {
       card.innerHTML += `<div class="owned-badge">×${owned} owned</div>`;
     }
@@ -1505,6 +1649,336 @@ window.handleAuth = async () => {
     }
   } catch(err) { notify(err.message, true); }
 };
+
+// ═══════════ SEEDED HISTORICAL + DETAIL FEATURES ═══════════
+function seededRng(seed){let s=(seed>>>0);return()=>{s=Math.imul(s,1664525)+1013904223|0;return(s>>>0)/4294967296;};}
+function strHash(str){let h=2166136261>>>0;for(let i=0;i<str.length;i++)h=Math.imul(h^str.charCodeAt(i),16777619);return h>>>0;}
+
+const HISTORICAL={};
+STOCKS.forEach(s=>{
+  const rng=seededRng(strHash(s.id+'hist9'));
+  let p=s.basePrice*0.72; const arr=[p];
+  for(let i=1;i<90;i++){const r=(rng()+rng()+rng()-1.5)/1.5; p=Math.max(p*(1+r*s.vol*0.65+0.0003),s.basePrice*0.08); arr.push(p);}
+  const scale=s.basePrice/arr[arr.length-1];
+  HISTORICAL[s.id]=arr.map(v=>v*scale);
+});
+
+const STOCK_NEWS={
+  AAPL:[
+    {cls:'green-tag',tag:'EARNINGS',age:'2 days ago',title:'Apple Q4 Services Revenue Hits Record $26.3B',body:"Apple's services segment — covering the App Store, Apple TV+, and iCloud — posted its highest-ever quarterly revenue. Analysts cite recurring subscription growth as a key long-term driver of margin expansion."},
+    {cls:'',tag:'ANALYST',age:'5 days ago',title:'Morgan Stanley Raises Price Target to $225',body:"Morgan Stanley upgraded the 12-month target, citing accelerating adoption of Apple Intelligence features in iPhone 16 Pro models and a strong upgrade cycle expected to drive double-digit earnings growth through 2026."},
+    {cls:'gold-tag',tag:'PRODUCT',age:'1 week ago',title:'Vision Pro Ecosystem Reaches 2,000 Native Apps',body:"Apple's spatial computing platform has quietly grown to over 2,000 app titles. Enterprise adoption is growing faster than anticipated, mirroring early iPad trends from 2012."},
+  ],
+  MSFT:[
+    {cls:'green-tag',tag:'CLOUD',age:'1 day ago',title:'Azure Revenue Grows 31% YoY, Beats Estimates',body:"Microsoft's Azure cloud platform reported 31% year-over-year revenue growth, powered by generative AI workloads via the OpenAI partnership. Azure now commands the second-largest cloud market share globally."},
+    {cls:'',tag:'ANALYST',age:'4 days ago',title:'Goldman Sachs Initiates with Strong Buy — Target $500',body:"Goldman cites the Copilot AI rollout across Microsoft 365 as a monetisation catalyst, estimating $10B in incremental ARR by FY2026. Enterprise customers are converting trials to paid seats rapidly."},
+    {cls:'gold-tag',tag:'DEAL',age:'9 days ago',title:'Microsoft Expands OpenAI Collaboration to $13B Total',body:"The expanded multi-year investment deepens Microsoft's exclusive cloud partnership and guarantees first access to GPT-5 series models for Azure customers."},
+  ],
+  GOOGL:[
+    {cls:'green-tag',tag:'AI',age:'3 days ago',title:'Gemini Ultra Surpasses Rivals in Key Benchmarks',body:"Google DeepMind's latest flagship model outperformed rivals on MMLU and HumanEval. Integration into Search and Workspace products is expected to drive meaningful monetisation throughout 2025."},
+    {cls:'red-tag',tag:'REGULATORY',age:'6 days ago',title:'EU Opens Antitrust Probe Into Search Advertising',body:"European regulators announced a formal investigation into Google's market dominance. Potential fines could reach €10B. The stock dipped briefly on the news before recovering ground."},
+    {cls:'',tag:'EARNINGS',age:'2 weeks ago',title:'YouTube Shorts Monetisation Drives 15% Ad Revenue Growth',body:"YouTube's Shorts crossed 100 billion daily views, with ad revenue per view catching up to long-form content faster than expected. Google Cloud also beat expectations for the third consecutive quarter."},
+  ],
+  AMZN:[
+    {cls:'green-tag',tag:'AWS',age:'2 days ago',title:'AWS Signs Record Batch of Enterprise AI Contracts',body:"Amazon Web Services signed its largest-ever batch of enterprise AI deals in Q3, spanning healthcare, logistics and financial services. The Bedrock AI platform now has over 10,000 customers."},
+    {cls:'',tag:'RETAIL',age:'5 days ago',title:'Same-Day Delivery Expands to 120 US Cities',body:"Amazon expanded ultra-fast delivery to 120 metropolitan areas. The logistics investment pressures margins short-term but is driving Prime renewal rates to all-time highs."},
+    {cls:'gold-tag',tag:'ANALYST',age:'1 week ago',title:'JP Morgan Sets $230 Target — "Best Positioned Mega-Cap"',body:"JP Morgan argues Amazon's triple exposure to AI infrastructure, advertising, and retail automation gives it the widest moat in tech, with an accelerating free cash flow trajectory."},
+  ],
+  TSLA:[
+    {cls:'red-tag',tag:'DELIVERIES',age:'1 day ago',title:'Q3 Deliveries Miss Wall Street Estimates by 4%',body:"Tesla delivered 435,000 vehicles in Q3, falling short of the 453,000 consensus. Management cited supply constraints for the Model 3 Highland refresh and a planned Fremont factory retool."},
+    {cls:'green-tag',tag:'ENERGY',age:'4 days ago',title:'Megapack Backlog Reaches All-Time High of $12B',body:"Tesla's stationary battery storage division is growing faster than its automotive segment. The Megapack product has a $12B order backlog following grid storage contracts across the US, UK and Australia."},
+    {cls:'',tag:'ANALYST',age:'8 days ago',title:'Target Range $120–$380 Signals Deep Market Uncertainty',body:"Tesla remains the most divisive stock in the S&P 500. Bulls cite full-self-driving and Robotaxi revenue; bears focus on intensifying EV competition from Chinese manufacturers like BYD and NIO."},
+  ],
+  META:[
+    {cls:'green-tag',tag:'AD REVENUE',age:'2 days ago',title:'Meta Reports 22% Ad Revenue Growth, Raises Full-Year Guidance',body:"Meta's advertising business continues its strong recovery, with AI-driven targeting delivering 22% growth. The Advantage+ automated ad suite now accounts for over 30% of total ad revenue."},
+    {cls:'',tag:'VR/AR',age:'5 days ago',title:'Quest 3S Sells Out in First Weekend at $299',body:"Meta's affordable mixed-reality headset sold out across major retailers within 72 hours. Horizon Worlds daily active users grew 40% in the quarter, showing early signs of platform stickiness."},
+    {cls:'gold-tag',tag:'AI',age:'1 week ago',title:'Llama 3 Becomes the Most Downloaded Open-Source AI Model',body:"Meta's Llama 3 surpassed all competitors in downloads, cementing Meta AI as a major ecosystem player and driving developer talent attraction that may pay long-term dividends."},
+  ],
+  NFLX:[
+    {cls:'green-tag',tag:'SUBSCRIBERS',age:'3 days ago',title:'Netflix Adds 9.8M Subscribers — Password Crackdown Delivers',body:"Netflix exceeded expectations with 9.8M net new subscribers, largely from converted shared-account users. The ad-supported tier now accounts for 35% of new sign-ups in available markets."},
+    {cls:'',tag:'CONTENT',age:'6 days ago',title:"Stranger Things S5 Sets Opening Weekend Record at 142M Hours",body:"The final season attracted 142 million viewing hours in its opening weekend, setting a new record. The franchise conclusion is expected to drive low churn and strong pricing power in Q4."},
+    {cls:'gold-tag',tag:'ANALYST',age:'10 days ago',title:'Oppenheimer Upgrades to Outperform — Ad Tier Undervalued',body:"Oppenheimer analysts argue the market significantly undervalues Netflix's ad revenue potential, modelling $8B by 2027. The platform's growing pricing power and low churn are key thesis supports."},
+  ],
+  NVDA:[
+    {cls:'green-tag',tag:'CHIPS',age:'1 day ago',title:'Blackwell GPUs Sold Out Through 2025 — Demand "Simply Insane"',body:"Nvidia CEO Jensen Huang confirmed Blackwell GPU allocation is fully committed through 2025, with hyperscalers Microsoft, Google and Amazon each ordering tens of thousands of units per quarter."},
+    {cls:'',tag:'EARNINGS',age:'4 days ago',title:'Data Centre Revenue Up 112% YoY to $22.6B',body:"Nvidia's data centre segment, selling AI training and inference chips, grew 112% year-over-year. The H100 and H200 GPU families dominate with an estimated 80%+ share of global AI training workloads."},
+    {cls:'gold-tag',tag:'ANALYST',age:'1 week ago',title:'Wall Street Consensus: 40% More Upside, $190 Average Target',body:"Wall Street maintains an unusually bullish consensus. Key risks include AMD's MI300X gaining traction and potential US government export restrictions on advanced semiconductors to China."},
+  ],
+  JPM:[
+    {cls:'green-tag',tag:'EARNINGS',age:'2 days ago',title:'JPMorgan Q3 Net Income Rises 35% on Record Interest Income',body:"JPMorgan Chase reported net income of $13.2B, boosted by the high-interest-rate environment. Net interest income — the spread between loan earnings and deposit costs — hit an all-time quarterly record."},
+    {cls:'',tag:'EXPANSION',age:'7 days ago',title:'Chase UK Digital Bank Reaches 3 Million Customers in 2 Years',body:"JPMorgan's Chase digital bank in the UK has scaled to 3 million customers, outpacing traditional high-street banks. International digital expansion is a central pillar of the five-year growth plan."},
+    {cls:'gold-tag',tag:'DIVIDEND',age:'2 weeks ago',title:'JPM Raises Quarterly Dividend 19% to $1.25 Per Share',body:"JPMorgan's board approved a significant dividend increase reflecting sustained earnings confidence. The $30B share buyback programme was also expanded, signalling strong capital generation ahead."},
+  ],
+  BRK:[
+    {cls:'green-tag',tag:'CASH',age:'3 days ago',title:"Berkshire's Cash Pile Hits Record $189B — Buffett Stays Patient",body:"Warren Buffett's conglomerate has accumulated a record $189B cash position. Management indicated it finds most large-cap equities 'priced for perfection', suggesting M&A rather than stock purchases ahead."},
+    {cls:'',tag:'PORTFOLIO',age:'1 week ago',title:'Berkshire Builds 6% Stake in Occidental Petroleum via SEC Filings',body:"Filings revealed Berkshire increased its Occidental position to 6.2% of the company, adding to one of its largest recent investments. The portfolio's energy weighting is now at a decade high."},
+    {cls:'gold-tag',tag:'ANALYST',age:'2 weeks ago',title:'"Fortress Balance Sheet" — TD Cowen Names BRK.B as Top Pick',body:"Analysts argue Berkshire's combination of insurance float, railroads, energy and consumer brands makes it the ultimate defensive compounder — the ideal core holding through market uncertainty."},
+  ],
+};
+
+const PROPERTY_DETAILS={
+  studio:{
+    images:['https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=900&q=80','https://images.unsplash.com/photo-1554995207-c18c203602cb?auto=format&fit=crop&w=900&q=80','https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&w=900&q=80'],
+    longDesc:"A beautifully appointed studio on the 14th floor of a pre-war building in Manhattan's Hell's Kitchen. Floor-to-ceiling windows flood the space with natural light. Features engineered oak flooring, a Miele kitchen, and custom joinery throughout. The building offers a 24-hour doorman, rooftop terrace, and co-working lounge.",
+    timeline:[{year:'1962',text:"Building constructed as part of the Lincoln Center urban renewal project. Original units were modest walk-ups."},{year:'1988',text:"Converted to residential condominiums following extensive renovation by Rockefeller Properties."},{year:'2004',text:"Unit completely redesigned by award-winning architect Petra Voss. Original pre-war details retained."},{year:'2016',text:"Smart home systems installed — Nest thermostats, Lutron lighting, and integrated AV throughout."},{year:'2023',text:"Listed for sale. Passed all building inspections. Certificate of occupancy current and fully transferrable."}]
+  },
+  house:{
+    images:['https://images.unsplash.com/photo-1560185127-6ed189bf02f4?auto=format&fit=crop&w=900&q=80','https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=900&q=80','https://images.unsplash.com/photo-1484101403633-562f891dc89a?auto=format&fit=crop&w=900&q=80'],
+    longDesc:"A classic four-bedroom colonial-style home set on a 0.4-acre lot in Westchester County, New York. Features include a gourmet kitchen with Sub-Zero refrigerator, double-height entrance hall, and a landscaped garden with a heated swimming pool. Located in a top-rated school district. Three-car garage and solar panels installed 2021.",
+    timeline:[{year:'1958',text:"Home built by Hartwell Construction Co. as part of post-war suburban development. Original price: $28,000."},{year:'1979',text:"First major extension added a rear family room and master en-suite by the Kowalski family."},{year:'2001',text:"Complete kitchen and bathroom renovation. All new plumbing and electrical systems installed."},{year:'2018',text:"Swimming pool, landscaping ($85,000), and solar panel system added to south-facing roof."},{year:'2024',text:"New HVAC system and smart security installed. Property freshly revalued and listed."}]
+  },
+  penthouse:{
+    images:['https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=900&q=80','https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=900&q=80','https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=900&q=80'],
+    longDesc:"The crown jewel of 432 Park Avenue — a full-floor penthouse on the 82nd storey spanning 6,240 sq ft. Features 360-degree views of Manhattan and Central Park, 12-foot ceilings, a private elevator, wraparound infinity plunge pool terrace, and a 3,000-bottle wine cellar. Redesigned by Yabu Pushelberg in 2022 for $12M.",
+    timeline:[{year:'2015',text:"Building completed. Penthouse sold at launch to an anonymous sovereign wealth fund for $87M."},{year:'2018',text:"Interior redesign by Yabu Pushelberg, Toronto — 14 months and $12M in work."},{year:'2020',text:"Unit fully maintained through the pandemic. On-site staff of four continued year-round."},{year:'2022',text:"Second renovation: Crestron home automation, gallery lighting, private cinema added."},{year:'2024',text:"Listed at $2.5M. Comes with dedicated building staff and a reserved helicopter pad slot."}]
+  },
+  office:{
+    images:['https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=900&q=80','https://images.unsplash.com/photo-1497366754035-f200581374d3?auto=format&fit=crop&w=900&q=80','https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=900&q=80'],
+    longDesc:"A 22-storey Class-A office tower in Midtown Manhattan, currently 94% occupied with two Fortune 500 anchor tenants. LEED Platinum certified. Features a ground-floor retail arcade, two levels of underground parking, and a dual-fibre redundant data centre floor. Currently generating $2.1M per month in rent.",
+    timeline:[{year:'1987',text:"Tower developed by Silverstein Properties as part of the Midtown East rezoning initiative. Cost: $340M."},{year:'1999',text:"Major HVAC and elevator modernisation. Class-A certification awarded by BOMA International."},{year:'2008',text:"Anchor tenant Goldman Sachs vacated during the financial crisis. Rapid re-leasing by Cushman and Wakefield."},{year:'2017',text:"$45M green retrofit achieved LEED Platinum status. New glazing reduced energy consumption by 38%."},{year:'2023',text:"Sold to a REIT consortium. 94% occupancy. Tenant leases locked in through 2031."}]
+  },
+  mall:{
+    images:['https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?auto=format&fit=crop&w=900&q=80','https://images.unsplash.com/photo-1567958451986-2de427a4a0be?auto=format&fit=crop&w=900&q=80','https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=900&q=80'],
+    longDesc:"One of the top-10 performing retail centres in the US by sales per square foot. The 1.4M sq ft mall hosts 120 stores including flagship Apple, Louis Vuitton, and Zara, plus eight restaurants and a 14-screen IMAX cinema. Annual footfall exceeds 28 million visitors. Adjacent to a major commuter rail hub.",
+    timeline:[{year:'1974',text:"Ground broken on a 50-acre greenfield site. Mall opened in 1976 to 80,000 visitors on day one."},{year:'1995',text:"First major expansion added a luxury wing and food hall. Nordstrom anchor store opened."},{year:'2010',text:"$220M redevelopment transformed the centre into a premium luxury destination."},{year:'2019',text:"Experiential retail push: escape rooms, a climbing wall, and augmented reality showrooms added."},{year:'2024',text:"Available at $200M — a 6.2x EBITDA multiple. New anchor tenant contract signed under NDA."}]
+  },
+  tower:{
+    images:['https://images.unsplash.com/photo-1486325212027-8081e485255e?auto=format&fit=crop&w=900&q=80','https://images.unsplash.com/photo-1541746972996-4e0b0f43e02a?auto=format&fit=crop&w=900&q=80','https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=900&q=80'],
+    longDesc:"The WealthSim Tower — a 100-floor mixed-use skyscraper at Hudson Yards, New York. Floors 1–12: retail and hospitality including a Michelin 3-star restaurant. Floors 13–80: Grade-A offices leased to global investment banks. Floors 81–100: ultra-luxury residential. The observation deck on floor 98 receives 1.2M tourists annually.",
+    timeline:[{year:'2009',text:"Site acquired from the MTA for $1.05B as part of the Hudson Yards master plan. Designed by Renzo Piano Workshop."},{year:'2014',text:"Construction began. Steel frame topped out at 1,368 feet in 2016. 4,000 workers on site at peak."},{year:'2018',text:"Grand opening attended by the Mayor of New York. Named 'Building of the Year' by Architectural Digest."},{year:'2021',text:"Residential floors sold from $12M to $185M for the penthouse. Observation deck broke all attendance records."},{year:'2024',text:"Listed at $2B. Includes full building and adjacent development plot air rights."}]
+  },
+  island:{
+    images:['https://images.unsplash.com/photo-1559128010-7c1ad6e1b6a5?auto=format&fit=crop&w=900&q=80','https://images.unsplash.com/photo-1501854140801-50d01698950b?auto=format&fit=crop&w=900&q=80','https://images.unsplash.com/photo-1566438480900-0609be27a4be?auto=format&fit=crop&w=900&q=80'],
+    longDesc:"A privately owned 340-acre island in the British Virgin Islands featuring a 12-bedroom main villa, three guest cottages, a private marina for vessels up to 200ft, a freshwater desalination plant, and a 600m private jet airstrip. On-site staff of 22. Currently generating $8.4M per year in ultra-premium charter rentals.",
+    timeline:[{year:'1888',text:"First charted by the British Admiralty. Used as a Royal Navy provisioning stop for Caribbean patrols."},{year:'1952',text:"Purchased by the Rothbury estate for £40,000. The main villa was constructed over a three-year period."},{year:'1983',text:"Sold to Swedish industrialist Karl-Henrik Westerberg for $12M. Major infrastructure investment throughout the decade."},{year:'2007',text:"Acquired by a Luxembourg holding company for $62M. Staff expanded; yacht charter programme launched."},{year:'2024',text:"Available at $100B. Freehold title including all vessels, chattels, and existing staff employment contracts."}]
+  },
+  station:{
+    images:['https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=900&q=80','https://images.unsplash.com/photo-1454789548928-9efd52dc4031?auto=format&fit=crop&w=900&q=80','https://images.unsplash.com/photo-1581822261290-991b38693d1b?auto=format&fit=crop&w=900&q=80'],
+    longDesc:"The Apex-1 commercial space station at 415km low Earth orbit. Seven pressurised modules totalling 2,400m³ of usable volume, leased by three national space agencies for microgravity research and operated as a 5-star space hotel for six commercial guests per 12-day rotation at $85M per person.",
+    timeline:[{year:'2028',text:"First module launched aboard Starship Heavy. Orbital insertion achieved on the first attempt."},{year:'2030',text:"Station fully assembled across six launches. First 90-day research crew in residence."},{year:'2031',text:"First commercial tourist completed an 8-day stay. Live broadcast attracted 2.1 billion viewers worldwide."},{year:'2033',text:"Pharmaceutical microgravity synthesis module added. First commercial drug compound produced in orbit."},{year:'2035',text:"Listed at $5T. Transfer includes operator agreements, crew training facilities, and existing launch contracts."}]
+  },
+};
+
+// ─── STOCK DETAIL STATE ───
+let currentDetailTicker=null, currentDetailRange='1W', detailRefreshInterval=null;
+
+window.openStockDetail=(ticker)=>{
+  const s=STOCKS.find(st=>st.id===ticker); if(!s) return;
+  currentDetailTicker=ticker; currentDetailRange='1W';
+  const price=stockPrices[ticker], pct=((price-stockSession[ticker])/stockSession[ticker])*100, up=pct>=0;
+  document.getElementById('sdLogo').innerHTML=s.logo;
+  document.getElementById('sdLogo').style.cssText=`background:${s.color}22;color:${s.color};width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;`;
+  document.getElementById('sdName').innerText=s.name;
+  document.getElementById('sdTicker').innerText=s.id+' · '+s.sector;
+  document.getElementById('sdPrice').innerText='$'+price.toFixed(2);
+  document.getElementById('sdPrice').style.color=up?'var(--green)':'var(--red)';
+  document.getElementById('sdChange').innerText=(up?'▲':'▼')+' '+fmtP(pct)+' today';
+  document.getElementById('sdChange').style.color=up?'var(--green)':'var(--red)';
+  document.getElementById('sdPanelTicker').innerText=s.id;
+  document.querySelectorAll('.range-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelector('.range-btn').classList.add('active');
+  updateSdPanel(ticker); renderSdStats(ticker); renderSdNews(ticker); drawSdChart(ticker,'1W');
+  document.getElementById('stockDetailOverlay').classList.remove('hidden');
+  document.getElementById('stockDetailOverlay').scrollTop=0;
+  clearInterval(detailRefreshInterval);
+  detailRefreshInterval=setInterval(()=>{
+    if(!currentDetailTicker) return;
+    const p2=stockPrices[currentDetailTicker], p2c=((p2-stockSession[currentDetailTicker])/stockSession[currentDetailTicker])*100, u2=p2c>=0;
+    document.getElementById('sdPrice').innerText='$'+p2.toFixed(2);
+    document.getElementById('sdPrice').style.color=u2?'var(--green)':'var(--red)';
+    document.getElementById('sdChange').innerText=(u2?'▲':'▼')+' '+fmtP(p2c)+' today';
+    document.getElementById('sdChange').style.color=u2?'var(--green)':'var(--red)';
+    updateSdPanel(currentDetailTicker);
+    drawSdChart(currentDetailTicker,currentDetailRange);
+  },3000);
+};
+
+window.closeStockDetail=()=>{ document.getElementById('stockDetailOverlay').classList.add('hidden'); clearInterval(detailRefreshInterval); currentDetailTicker=null; };
+
+window.setStockRange=(range,btn)=>{
+  currentDetailRange=range;
+  document.querySelectorAll('.range-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(currentDetailTicker) drawSdChart(currentDetailTicker,range);
+};
+
+function getChartData(ticker,range){
+  const hist=HISTORICAL[ticker]||[], live=stockHistory[ticker]||[];
+  const hs=range==='1W'?hist.slice(-7):range==='1M'?hist.slice(-30):hist;
+  return [...hs,...live];
+}
+
+function drawSdChart(ticker,range){
+  const canvas=document.getElementById('sdCanvas'); if(!canvas) return;
+  const data=getChartData(ticker,range); if(data.length<2) return;
+  const container=canvas.parentElement;
+  const dpr=window.devicePixelRatio||1, W=Math.max(container.clientWidth-28,300), H=260;
+  canvas.width=W*dpr; canvas.height=H*dpr; canvas.style.width=W+'px'; canvas.style.height=H+'px';
+  const ctx=canvas.getContext('2d'); ctx.scale(dpr,dpr);
+  const pad={t:16,r:72,b:28,l:10}, iW=W-pad.l-pad.r, iH=H-pad.t-pad.b;
+  const minV=Math.min(...data), maxV=Math.max(...data), vR=maxV-minV||1;
+  const last=data[data.length-1], first=data[0], up=last>=first;
+  const lc=up?'#00e5a0':'#ff3a5c', gc=up?'rgba(0,229,160,':'rgba(255,58,92,';
+  const toX=i=>pad.l+(i/(data.length-1))*iW, toY=v=>pad.t+iH-((v-minV)/vR)*iH;
+  ctx.clearRect(0,0,W,H);
+  ctx.font="600 10px 'JetBrains Mono',monospace"; ctx.textAlign='left';
+  for(let i=0;i<=4;i++){
+    const y=pad.t+(iH/4)*i;
+    ctx.strokeStyle='rgba(255,255,255,.04)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(W-pad.r,y); ctx.stroke();
+    const val=maxV-(vR/4)*i;
+    ctx.fillStyle='rgba(74,101,133,.8)';
+    ctx.fillText('$'+(val>=100?val.toFixed(0):val.toFixed(2)), W-pad.r+8, y+4);
+  }
+  const grad=ctx.createLinearGradient(0,pad.t,0,pad.t+iH);
+  grad.addColorStop(0,gc+'0.22)'); grad.addColorStop(0.6,gc+'0.07)'); grad.addColorStop(1,gc+'0)');
+  ctx.beginPath(); ctx.moveTo(toX(0),toY(data[0]));
+  for(let i=1;i<data.length;i++){const cx=(toX(i-1)+toX(i))/2; ctx.bezierCurveTo(cx,toY(data[i-1]),cx,toY(data[i]),toX(i),toY(data[i]));}
+  ctx.lineTo(toX(data.length-1),pad.t+iH); ctx.lineTo(toX(0),pad.t+iH); ctx.closePath();
+  ctx.fillStyle=grad; ctx.fill();
+  ctx.beginPath(); ctx.moveTo(toX(0),toY(data[0]));
+  for(let i=1;i<data.length;i++){const cx=(toX(i-1)+toX(i))/2; ctx.bezierCurveTo(cx,toY(data[i-1]),cx,toY(data[i]),toX(i),toY(data[i]));}
+  ctx.strokeStyle=lc; ctx.lineWidth=2; ctx.shadowColor=lc; ctx.shadowBlur=8; ctx.stroke(); ctx.shadowBlur=0;
+  ctx.setLineDash([4,4]); ctx.strokeStyle='rgba(255,255,255,.12)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(pad.l,toY(last)); ctx.lineTo(W-pad.r,toY(last)); ctx.stroke(); ctx.setLineDash([]);
+  ctx.beginPath(); ctx.arc(toX(data.length-1),toY(last),5,0,Math.PI*2);
+  ctx.fillStyle=lc; ctx.shadowColor=lc; ctx.shadowBlur=14; ctx.fill(); ctx.shadowBlur=0;
+  ctx.fillStyle='rgba(74,101,133,.7)'; ctx.textAlign='center'; ctx.font="600 10px 'JetBrains Mono',monospace";
+  const xl=range==='1W'?['−7d','−5d','−3d','−1d','now']:['−90d','−67d','−45d','−22d','now'];
+  xl.forEach((lbl,i)=>{ctx.fillText(lbl, pad.l+(i/(xl.length-1))*iW, H-5);});
+  const cp=((last-first)/first)*100;
+  const hint=document.getElementById('sdPriceHint');
+  if(hint){hint.innerText='$'+last.toFixed(2)+'  '+(cp>=0?'+':'')+cp.toFixed(2)+'% ('+range+')'; hint.style.color=cp>=0?'var(--green)':'var(--red)';}
+}
+
+function renderSdStats(ticker){
+  const price=stockPrices[ticker], hist=HISTORICAL[ticker]||[];
+  const all=[...hist,...stockHistory[ticker]||[]];
+  const h52=Math.max(price,...all), l52=Math.min(price,...all);
+  const h=strHash(ticker);
+  const mcap=price*((h%500+500)*1e6);
+  const vol=Math.floor(h%200+20);
+  const el=document.getElementById('sdStatRow'); if(!el) return;
+  el.innerHTML=[{l:'Market Cap',v:'$'+fmt(mcap)},{l:'Avg Volume',v:vol+'M'},{l:'52W High',v:'$'+h52.toFixed(2)},{l:'52W Low',v:'$'+l52.toFixed(2)}]
+    .map(x=>'<div class="stat-mini"><div class="stat-mini-label">'+x.l+'</div><div class="stat-mini-val">'+x.v+'</div></div>').join('');
+}
+
+function renderSdNews(ticker){
+  const container=document.getElementById('sdNewsContainer'); if(!container) return;
+  const items=STOCK_NEWS[ticker]||[];
+  const price=stockPrices[ticker], pct=((price-stockSession[ticker])/stockSession[ticker])*100, up=pct>=0;
+  const rsi=Math.floor((up?55:45)+pct*2);
+  const tech={cls:up?'green-tag':'red-tag',tag:'TECHNICAL',age:'Live',
+    title:up?`Bullish Momentum — ${ticker} Up ${fmtP(pct)} Today`:`Bearish Pressure — ${ticker} Down ${Math.abs(pct).toFixed(2)}% Today`,
+    body:up?`${ticker} is showing positive momentum, trading above its session open. Volume patterns suggest institutional accumulation. RSI (14) is at ${rsi} — approaching but not yet overbought. Short-term moving averages have crossed bullish.`
+        :`${ticker} faces selling pressure, trading below its opening print. Testing support at the 20-day moving average. RSI (14) has fallen to ${rsi} — approaching oversold conditions which historically present mean-reversion buying opportunities.`
+  };
+  const cls2color={'green-tag':'up','red-tag':'down','gold-tag':'gold','':''}
+  container.innerHTML=[tech,...items].map(item=>`
+    <div class="news-item ${cls2color[item.cls]||''}">
+      <span class="news-tag ${item.cls}">${item.tag}</span><span class="news-age">${item.age}</span>
+      <div class="news-title">${item.title}</div>
+      <div class="news-body">${item.body}</div>
+    </div>`).join('');
+}
+
+function updateSdPanel(ticker){
+  if(!userData) return;
+  const price=stockPrices[ticker], qty=Math.max(1,parseInt(document.getElementById('sdQtyInput')?.value)||1);
+  const owned=userData.stocks?.[ticker]||0, avg=userData.stockAvgCost?.[ticker]||0;
+  const ce=document.getElementById('sdCostEst'); if(ce) ce.innerText='$'+fmt(price*qty);
+  const so=document.getElementById('sdSharesOwned'); if(so) so.innerText=owned.toLocaleString()+' shares';
+  const ac=document.getElementById('sdAvgCost'); if(ac) ac.innerText=avg>0?'$'+avg.toFixed(2):'—';
+  const sb=document.getElementById('sdSellBtn'); if(sb) sb.disabled=owned<=0;
+  const pos=document.getElementById('sdPositionPanel');
+  if(pos){
+    if(owned>0){
+      const val=owned*price, pnl=(price-avg)*owned, pp=avg>0?(price-avg)/avg*100:0, u=pnl>=0;
+      pos.innerHTML=`<div style="font-size:13px;margin-bottom:8px;display:flex;justify-content:space-between;"><span class="muted">Position Value</span><span class="mono" style="font-weight:700">$${fmt(val)}</span></div><div style="font-size:13px;margin-bottom:8px;display:flex;justify-content:space-between;"><span class="muted">Unrealised P&amp;L</span><span class="mono" style="font-weight:700;color:${u?'var(--green)':'var(--red)'}">${u?'+':''}$${fmt(pnl)} (${fmtP(pp)})</span></div><div style="font-size:13px;display:flex;justify-content:space-between;"><span class="muted">Shares</span><span class="mono" style="font-weight:700">${owned.toLocaleString()}</span></div>`;
+    }else{pos.innerHTML='<p style="color:var(--muted);font-size:13px;text-align:center;padding:8px 0;">No position in '+ticker+'.</p>';}
+  }
+}
+
+window.updateSdCostEst=()=>{ if(currentDetailTicker) updateSdPanel(currentDetailTicker); };
+
+window.buyStockFromDetail=async()=>{
+  if(!currentDetailTicker) return;
+  const qty=Math.max(1,parseInt(document.getElementById('sdQtyInput')?.value)||1);
+  const price=stockPrices[currentDetailTicker], cost=price*qty, totalBal=(userData.balance||0)+localBal;
+  if(totalBal<cost) return notify('Insufficient funds!',true);
+  if(localBal>=cost) localBal-=cost; else{const r=cost-localBal;localBal=0;userData.balance-=r;}
+  if(!userData.stocks) userData.stocks={};
+  if(!userData.stockAvgCost) userData.stockAvgCost={};
+  const prev=userData.stocks[currentDetailTicker]||0, prevA=userData.stockAvgCost[currentDetailTicker]||0;
+  const ns=prev+qty, na=(prevA*prev+price*qty)/ns;
+  userData.stocks[currentDetailTicker]=ns; userData.stockAvgCost[currentDetailTicker]=na;
+  updateUI(); updateSdPanel(currentDetailTicker);
+  notify('Bought '+qty+' share'+(qty>1?'s':'')+' of '+currentDetailTicker+' @ $'+price.toFixed(2));
+  await updateDoc(doc(db,'users',myUid),{balance:userData.balance,[`stocks.${currentDetailTicker}`]:increment(qty),[`stockAvgCost.${currentDetailTicker}`]:na});
+};
+
+window.sellFromDetail=()=>{
+  if(!currentDetailTicker) return;
+  const qty=Math.min(Math.max(1,parseInt(document.getElementById('sdQtyInput')?.value)||1),userData.stocks?.[currentDetailTicker]||0);
+  if(qty<=0) return notify('No shares to sell!',true);
+  const proceeds=stockPrices[currentDetailTicker]*qty;
+  document.getElementById('scQty').innerText=qty;
+  document.getElementById('scTicker').innerText=currentDetailTicker;
+  document.getElementById('scProceeds').innerText='$'+fmt(proceeds);
+  pendingSell={ticker:currentDetailTicker,qty,proceeds};
+  document.getElementById('sellConfirmOverlay').classList.remove('hidden');
+};
+
+// ─── PROPERTY DETAIL STATE ───
+let currentDetailPropId=null;
+
+window.openPropDetail=(propId)=>{
+  const p=PROPERTIES.find(pr=>pr.id===propId), pd=PROPERTY_DETAILS[propId];
+  if(!p||!pd) return;
+  currentDetailPropId=propId;
+  const owned=userData?.properties?.[propId]||0, propMult=getArtMult();
+  const totalBal=(userData.balance||0)+localBal, canBuy=totalBal>=p.price;
+  document.getElementById('pdIcon').innerText=p.icon;
+  document.getElementById('pdHeaderName').innerText=p.name;
+  document.getElementById('pdHeaderDesc').innerText=p.desc;
+  const bb=document.getElementById('pdHeaderBuyBtn');
+  bb.innerText=canBuy?'BUY — $'+fmt(p.price):'Need $'+fmt(p.price); bb.disabled=!canBuy;
+  document.getElementById('pdMainImg').src=pd.images[0];
+  document.getElementById('pdThumbs').innerHTML=pd.images.map((src,i)=>
+    `<img src="${src}" class="gallery-thumb ${i===0?'active':''}" onclick="selectPropImg(${i})" onerror="this.style.opacity='.2'">`
+  ).join('');
+  document.getElementById('pdTimeline').innerHTML=pd.timeline.map(t=>
+    `<div class="tl-item"><div class="tl-year">${t.year}</div><div class="tl-text">${t.text}</div></div>`
+  ).join('');
+  const hrInc=p.price*0.10*propMult, secInc=hrInc/3600, payback=(p.price/hrInc/24).toFixed(1);
+  const rows=[
+    {l:'Purchase Price',v:'$'+fmt(p.price),c:''},
+    {l:'Return Rate',v:'10% / hour',c:'var(--green)'},
+    {l:'Income / Hour',v:'$'+fmt(hrInc),c:'var(--green)'},
+    {l:'Income / Second',v:'$'+fmt(secInc),c:'var(--teal)'},
+    {l:'Payback Period',v:payback+' days',c:'var(--gold)'},
+    owned>0?{l:'You Own (×'+owned+')',v:'$'+fmt(hrInc*owned)+'/hr',c:'var(--green)'}:{l:'You Own',v:'None yet',c:'var(--muted)'},
+  ];
+  document.getElementById('pdInvestStats').innerHTML=rows.map(x=>`<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--muted2);"><span style="color:var(--muted);">${x.l}</span><span style="font-family:var(--mono);font-weight:700;color:${x.c||'var(--text)'}">${x.v}</span></div>`).join('');
+  document.getElementById('pdLongDesc').innerText=pd.longDesc;
+  document.getElementById('propDetailOverlay').classList.remove('hidden');
+  document.getElementById('propDetailOverlay').scrollTop=0;
+};
+
+window.closePropDetail=()=>{ document.getElementById('propDetailOverlay').classList.add('hidden'); currentDetailPropId=null; };
+
+window.selectPropImg=(idx)=>{
+  const pd=PROPERTY_DETAILS[currentDetailPropId]; if(!pd) return;
+  document.getElementById('pdMainImg').src=pd.images[idx];
+  document.querySelectorAll('.gallery-thumb').forEach((t,i)=>t.classList.toggle('active',i===idx));
+};
+
+window.buyFromPropDetail=async()=>{
+  if(!currentDetailPropId) return;
+  await buyProperty(currentDetailPropId);
+  openPropDetail(currentDetailPropId);
+};
+
 
 // ═══════════ AUTH LISTENER ═══════════
 onAuthStateChanged(auth, u => {
